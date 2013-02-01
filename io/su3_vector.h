@@ -25,14 +25,13 @@
 #include <io/selector.h>
 #include <io/utils.h>
 
-//int read_su3_vector(su3_vector * const s, su3_vector * const r, char * filename, const int position);
-//int read_binary_su3_vector_data(su3_vector * const s, su3_vector * const r, READER * reader, DML_Checksum * checksum);
-//int read_binary_su3_vector_data_l(su3_vector * const s, READER * reader, DML_Checksum * checksum);
+int read_su3_vector(su3_vector * const s, char * filename, const int position, const int t0);
+int read_binary_su3_vector_data(su3_vector * const s, READER * reader, DML_Checksum * checksum, const int t0);
 
-//int write_su3_vector(WRITER * writer, su3_vector ** const s, su3_vector ** const r, const int flavours, const int prec);
-int write_binary_su3_vector_data(su3_vector * const s, su3_vector * const r, WRITER * writer, DML_Checksum *checksum, int const prec, const int t0);
+int write_su3_vector(WRITER * writer, double const eigenvalue, su3_vector * const s, const int prec, const int t0);
+int write_binary_su3_vector_data(su3_vector * const s, WRITER * writer, DML_Checksum *checksum, int const prec, const int t0);
 
-//void write_su3_vector_info(WRITER * writer, const int write_prop_format_flag, paramsInverterInfo * InverterInfo, int append);
+void write_su3_vector_info(WRITER * writer, int append);
 //void write_su3_vector_format(WRITER *writer, paramsPropagatorFormat const *format);
 //void write_su3_vector_type(WRITER *writer, const int type);
 

@@ -33,6 +33,7 @@ LIBRARIES = libio
 
 libio_TARGETS = utils_engineering \
 		utils_parse_checksum_xml \
+		utils_parse_eigenvalue_xml \
 		utils_write_message \
 		utils_read_message \
 		gauge_write_binary \
@@ -68,6 +69,12 @@ libio_TARGETS = utils_engineering \
 		spinor_write_source_format \
 		spinor_write_propagator_format \
 		spinor_write_propagator_type \
+		spinor_write \
+		su3_vector_read \
+		su3_vector_write_binary \
+		su3_vector_read_binary \
+		su3_vector_write_info \
+		su3_vector_write \
 		utils DML_crc32 dml \
 		eospinor_write \
 		eospinor_read \

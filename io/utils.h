@@ -74,6 +74,8 @@ void close_writer_record(WRITER *writer);
 void engineering(char *result, double value, char const *units);
 int parse_checksum_xml(char *message, DML_Checksum *checksum);
 
+int parse_eigenvalue_xml(char *message, double *eigenvalue, int *timeslice);
+
 int big_endian();
 int write_ildg_format_xml(char *filename, LimeWriter * limewriter, const int precision);
 void single2double_cm(spinor * const R, float * const S);
