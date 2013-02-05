@@ -75,6 +75,10 @@ void engineering(char *result, double value, char const *units);
 int parse_checksum_xml(char *message, DML_Checksum *checksum);
 
 int parse_eigenvalue_xml(char *message, double *eigenvalue, int *timeslice);
+void write_eigenvalue_xml(WRITER * writer, double const eigenvalue, int const t0);
+
+void write_ranlux_xml(WRITER * writer);
+int parse_ranlux_xml(char *message, int *seed, int *level);
 
 int big_endian();
 int write_ildg_format_xml(char *filename, LimeWriter * limewriter, const int precision);

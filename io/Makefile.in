@@ -34,6 +34,7 @@ LIBRARIES = libio
 libio_TARGETS = utils_engineering \
 		utils_parse_checksum_xml \
 		utils_parse_eigenvalue_xml \
+		utils_parse_ranlux_xml \
 		utils_write_message \
 		utils_read_message \
 		gauge_write_binary \
@@ -45,6 +46,8 @@ libio_TARGETS = utils_engineering \
 		utils_write_ildg_format \
 		utils_write_header \
 		utils_write_checksum \
+		utils_write_eigenvalue \
+		utils_write_ranlux \
 		utils_write_inverter_info \
 		utils_kill_with_error \
 		utils_construct_reader \
@@ -75,6 +78,10 @@ libio_TARGETS = utils_engineering \
 		su3_vector_read_binary \
 		su3_vector_write_info \
 		su3_vector_write \
+		ranlux_read \
+		ranlux_read_binary \
+		ranlux_write \
+		ranlux_write_binary \
 		utils DML_crc32 dml \
 		eospinor_write \
 		eospinor_read \

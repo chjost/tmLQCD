@@ -18,29 +18,24 @@
  ***********************************************************************/
 
 
-#include "su3_vector.ih"
+#include "ranlux.ih"
 
-int write_su3_vector(WRITER * writer, double const eigenvalue, su3_vector * const s, const int prec, const int t0)
+int write_ranlux(WRITER * writer)
 {
 	DML_Checksum checksum;
 	uint64_t bytes;
-	int status = 0;
-	char *message;
-	message = (char*)malloc(512);
-	if (message == (char*)NULL) {
-		kill_with_error(writer->fp, g_cart_id, "Memory allocation error in write_su3_vector. Aborting\n");
-	}
-//	general information about the configuration
-	write_su3_vector_info(writer, 0);
+	int status = 0, size = rlxd_size(), size_total = rlxd_size() + rlxs_size(), *state = NULL;
 
-//	eigenvalue
-	write_eigenvalue_xml(writer, eigenvalue, t0);
+	write_ranlux_xml(writer);
+
+	state = (int*) calloc(size_total, sizeof(int));
+	rlxd_get((&state[0]));
+	rlxs_get((&state[size]));
+	bytes = (uint64_t) size_total * sizeof(int);
 
 // data
-	bytes = (n_uint64_t)LX * g_nproc_x * LY * g_nproc_y * LZ * g_nproc_z * (n_uint64_t)(sizeof(su3_vector) * prec / 64);
-
-	write_header(writer, 0, 0, "scidac-binary-data", bytes);
-	status  = write_binary_su3_vector_data(s, writer, &checksum, prec, t0);
+	write_header(writer, 0, 0, "ranlux-data", bytes);
+	status  = write_binary_ranlux_data(state, writer, &checksum, size_total);
 	write_checksum(writer, &checksum, NULL);
 
 	return status;

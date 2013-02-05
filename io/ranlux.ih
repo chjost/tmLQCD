@@ -17,26 +17,24 @@
 * along with tmLQCD.  If not, see <http://www.gnu.org/licenses/>.
 ***********************************************************************/
 
-#include "utils.ih"
+#include <lime.h>
+#ifdef HAVE_CONFIG_H
+# include<config.h>
+#endif
 
-int parse_checksum_xml(char *message, double *eigenvalue, double *timeslice)
-{
-  int  read_value = 0, read_timeslice = 0;
-  char *pos = strtok(message, "<> \n\t");
+#include <stdlib.h>
+#include <stdio.h>
+#include <string.h>
+#include <time.h>
+#include <sys/time.h>
+#include <sys/types.h>
+#ifdef MPI
+# include <mpi.h>
+#endif
+#include <unistd.h>
+#include <math.h>
+#include <errno.h>
 
-  while (pos)
-  {
-    if (!strncmp(pos, "value", 4)) {
-      pos = strtok(0, "<> \n\t");
-      sscanf(pos, "%f", eigenvalue);
-      read_value = 1;
-    }
-    if (!strncmp(pos, "timeslice", 4)) {
-      pos = strtok(0, "<> \n\t");
-      sscanf(pos, "%d", timeslice);
-      read_timeslice = 1;
-    }
-    pos = strtok(0, "<> \n\t");
-  }
-  return (read_value && read_timeslice);
-}
+#include <global.h>
+
+#include <io/ranlux.h>

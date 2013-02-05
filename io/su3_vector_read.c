@@ -30,30 +30,7 @@ int read_su3_vector(su3_vector * const s, char * filename, const int position_, 
 	char *buffer = NULL;
 	double eigenvalue = 0.0;
 	construct_reader(&reader, filename);
-	/* determine the propagator type */
-	//	prop_type = parse_propagator_type(reader);
-	//
-	//	switch (prop_type) {
-	//	case 1:
-	//		/* strictly speaking the following depends on whether we read a source or a propagator */
-	//		position = 2 * position_ +1;
-	//		break;
-	//	case 2:
-	//	case 3:
-	//		return(-2);
-	//	case 11:
-	//	case 12:
-	//	case 13:
-	//		return(-3);
-	//	case -1:
-	//	case 4:
-	//		prop_type = 0;
-	//		break;
-	//	}
 
-	/* seek back to beginning of file*/
-	//	destruct_reader(reader);
-	//	construct_reader(&reader, filename);
 	position_checksum = position;
 	position_eigenvalue = position;
 
@@ -67,7 +44,7 @@ int read_su3_vector(su3_vector * const s, char * filename, const int position_, 
 		}
 		header_type = ReaderType(reader);
 
-		if(strcmp("eigenvalue", header_type) == 0 && read_eigenvalue == 0) {
+		if(strcmp("eigenvalue-info", header_type) == 0 && read_eigenvalue == 0) {
 			if(position_eigenvalue == getpos_eigenvalue) {
 				status_eigenvalue = read_message(reader, &buffer);
 				if(status_eigenvalue != LIME_SUCCESS) {
@@ -85,6 +62,7 @@ int read_su3_vector(su3_vector * const s, char * filename, const int position_, 
 				}
 				read_eigenvalue++;
 			}
+			getpos_eigenvalue++;
 		}
 
 		if (strcmp("scidac-binary-data", header_type) == 0 && read_data == 0) {

@@ -263,14 +263,15 @@ void dilution() {
  * create perambulators and solve
  */
 int calculate() {
-	double *random_numbers = NULL;
-	_Complex double *eigenvector = NULL, *solution = NULL;
-	int *state_ranlux = NULL;
-	random_numbers = (double*) calloc(no_eigenvalues, sizeof(double));
-	state_ranlux = (int*) calloc(rlxd_size(), sizeof(int));
-	rlxs_get(state_ranlux);
-	ranlxd(random_numbers, no_eigenvalues);
 
+	char filename[100];
+	sprintf(filename, "rng.lime");
+	WRITER * writer;
+	construct_writer(writer, filename, 0);
+	write_ranlux(writer);
+//random_seed;
+//rlxd_level;
+	read_ranlux("rng.lime", 0);
 
 
 	return(0);
