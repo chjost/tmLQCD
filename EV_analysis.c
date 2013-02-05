@@ -54,8 +54,6 @@
   (r).c1 = 1.;		\
   (r).c2 = 1.;
 
-int read_matrix(char* filename, float *m, int length, const int prec);
-int write_matrix(char* filename, float* m, int length, const int prec);
 int generate_eigensystem();
 int eigensystem_gsl();
 int calculate();
@@ -257,9 +255,25 @@ int generate_eigensystem() {
 	return(0);
 }
 
-int calculate() {
-	return(0);
+void dilution() {
 
+}
+
+/*
+ * create perambulators and solve
+ */
+int calculate() {
+	double *random_numbers = NULL;
+	_Complex double *eigenvector = NULL, *solution = NULL;
+	int *state_ranlux = NULL;
+	random_numbers = (double*) calloc(no_eigenvalues, sizeof(double));
+	state_ranlux = (int*) calloc(rlxd_size(), sizeof(int));
+	rlxs_get(state_ranlux);
+	ranlxd(random_numbers, no_eigenvalues);
+
+
+
+	return(0);
 }
 
 int eigensystem_gsl() {
@@ -389,72 +403,3 @@ int eigensystem_gsl() {
 	gsl_matrix_complex_free(matrix_op);
 	return 0;
 }
-
-int read_matrix(char* filename, float *m, int length, const int prec) {
-	int status = 0;
-	int matrix_read_flag = 0;
-	int matrix_binary_status = 0;
-	char *header_type = NULL;
-	uint64_t bytes = 0, bytes_read = 0;
-	READER *reader = NULL;
-	construct_reader(&reader, filename);
-	while ((status = ReaderNextRecord(reader)) != LIME_EOF) {
-		if (status != LIME_SUCCESS) {
-			fprintf(stderr, "ReaderNextRecord returned status %d.\n", status);
-			break;
-		}
-		header_type = ReaderType(reader);
-
-		if(g_cart_id == 0 && g_debug_level > 1) {
-			fprintf(stdout, "found header %s, will now read the message\n", header_type);
-		}
-
-		if (strcmp("test-matrix", header_type) == 0) {
-			bytes = ReaderBytes(reader);
-			/*if( (sizeof(m) * prec / 16) < bytes) {
-				fprintf(stderr, "Not enough space to read in data in function read_matrix\n", filename);
-				fprintf(stderr, "Aborting...\n");
-				return(-1);
-			}*/
-			if (matrix_read_flag && !g_disable_IO_checks) { /* a previous ildg-binary-data record has already been read from this file */
-				fprintf(stderr, "In matrix file %s, multiple LIME records with name: \"test-matrix\" found.\n", filename);
-				fprintf(stderr, "Unable to verify integrity of the matrix data.\n");
-				return(-1);
-			}
-			matrix_binary_status = ReaderReadData(m, &bytes, reader);
-			//			matrix_binary_status = read_binary_gauge_data(reader, &checksum_calc, ildgformat_input);
-			if (matrix_binary_status) {
-				fprintf(stderr, "matrix file reading failed at binary part, unable to proceed.\n");
-				return(-1);
-			}
-			fprintf(stderr, "Read %llu from %llu bytes of data (status = %i).\n", bytes_read, bytes, matrix_binary_status);
-			matrix_read_flag = 1;
-		}
-	}
-
-	close_reader_record(reader);
-	return status;
-}
-
-int write_matrix(char* filename, float* m, int length, const int prec) {
-	WRITER* writer = NULL;
-	int status = 0;
-	uint64_t bytes = (uint64_t) length*sizeof(float)*prec/16;
-	construct_writer(&writer, filename, 0);
-
-	//	ildg = construct_paramsIldgFormat(prec);
-	//	write_ildg_format(writer, ildg);
-	//	free(ildg);
-
-	write_header(writer, 0, 0, "test-matrix", bytes);
-	status = WriteRecordData(m, &bytes, writer);
-	//	status = write_binary_gauge_data(writer, prec, &checksum);
-	//	status = limeWriteRecordData((void*)m, &bytes, writer);
-	//	write_checksum(writer, &checksum, NULL);
-
-	destruct_writer(writer);
-	return status;
-
-	return status;
-}
-
