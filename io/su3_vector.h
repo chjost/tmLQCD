@@ -25,11 +25,11 @@
 #include <io/selector.h>
 #include <io/utils.h>
 
-int read_su3_vector(su3_vector * const s, char * filename, const int position, const int t0);
-int read_binary_su3_vector_data(su3_vector * const s, READER * reader, DML_Checksum * checksum, const int t0);
+int read_su3_vector(su3_vector * const s, char * filename, const int position, const int t0, int const nsets);
+int read_binary_su3_vector_data(su3_vector * const s, READER * reader, DML_Checksum * checksum, const int t0, int const nsets);
 
-int write_su3_vector(WRITER * writer, double const eigenvalue, su3_vector * const s, const int prec, const int t0);
-int write_binary_su3_vector_data(su3_vector * const s, WRITER * writer, DML_Checksum *checksum, int const prec, const int t0);
+int write_su3_vector(WRITER * writer, double const *eigenvalue, su3_vector * const s, const int prec, const int t0, int const nsets);
+int write_binary_su3_vector_data(su3_vector * const s, WRITER * writer, DML_Checksum *checksum, int const prec, const int t0, int const nsets);
 
 void write_su3_vector_info(WRITER * writer, int append);
 //void write_su3_vector_format(WRITER *writer, paramsPropagatorFormat const *format);

@@ -29,7 +29,7 @@
 int read_ranlux(char * filename, const int position);
 int read_binary_ranlux_data(int * const state, READER * reader, DML_Checksum * checksum, int const length_total);
 
-int write_ranlux(WRITER * writer);
+int write_ranlux(char * filename, const int append);
 int write_binary_ranlux_data(int * const state, WRITER * writer, DML_Checksum *checksum, int const length_total);
 
 #endif

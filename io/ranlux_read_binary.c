@@ -120,7 +120,8 @@ int read_binary_ranlux_data(int * const state, READER * reader,
 	if (g_cart_id == 0) {
 		for (i = 0; i < length_total; i++) {
 			status = limeReaderReadData((int*) &tmp, &bytes, reader);
-			DML_checksum_accum(checksum, (uint32_t) i, (char*) &tmp,sizeof(int));
+			DML_checksum_accum(checksum, (uint32_t) i, (char*) &tmp,
+					sizeof(int));
 			state[i] = tmp;
 			if (status < 0 && status != LIME_EOR) {
 				fprintf(stderr,

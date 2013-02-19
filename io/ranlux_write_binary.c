@@ -118,7 +118,7 @@ int write_binary_ranlux_data(int * const state, LimeWriter * limewriter,
 			tmp = state[i];
 			DML_checksum_accum(checksum, (uint32_t) i, (char*) &tmp,
 					sizeof(int));
-			status = limeWriteRecordData((int *) tmp, &bytes, limewriter);
+			status = limeWriteRecordData((int *) &tmp, &bytes, limewriter);
 			if (status < 0) {
 				fprintf(stderr,
 						"LIME write error occurred with status = %d, while in write_binary_ranlux_data (ranlux_write_binary.c)!\n",
@@ -131,6 +131,6 @@ int write_binary_ranlux_data(int * const state, LimeWriter * limewriter,
 			}
 		}
 	}
-	return(0);
+	return (0);
 }
 #endif /* HAVE_LIBLEMON */

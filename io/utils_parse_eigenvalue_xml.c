@@ -19,23 +19,29 @@
 
 #include "utils.ih"
 
-int parse_eigenvalue_xml(char *message, double *eigenvalue, int *timeslice)
+int parse_eigenvalue_xml(char *message, double *eigenvalue, int *timeslice, int *nsets)
 {
   int  read_value = 0, read_timeslice = 0;
   char *pos = strtok(message, "<> \n\t");
 
   while (pos)
   {
-    if (!strncmp(pos, "value", 4)) {
+    if (!strncmp(pos, "nsets", 4)) {
       pos = strtok(0, "<> \n\t");
-      sscanf(pos, "%f", eigenvalue);
+      sscanf(pos, "%d", nsets);
       read_value = 1;
     }
     if (!strncmp(pos, "timeslice", 4)) {
       pos = strtok(0, "<> \n\t");
       sscanf(pos, "%d", timeslice);
       read_timeslice = 1;
+    } 
+    if (!strncmp(pos, "value", 4)) {
+      pos = strtok(0, "<> \n\t");
+      sscanf(pos, "%f", eigenvalue);
+      read_value = 1;
     }
+ 
     pos = strtok(0, "<> \n\t");
   }
   return (read_value && read_timeslice);

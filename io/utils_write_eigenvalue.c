@@ -19,7 +19,7 @@
 
 #include "utils.ih"
 
-void write_eigenvalue_xml(WRITER * writer, double const eigenvalue, int const t0) {
+void write_eigenvalue_xml(WRITER * writer, double const *eigenvalue, int const t0, int const nsets) {
 	char *message;
 	uint64_t bytes;
 
@@ -30,9 +30,10 @@ void write_eigenvalue_xml(WRITER * writer, double const eigenvalue, int const t0
 
 	sprintf(message, "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
 			"<eigenvalue>\n"
-			"  <value>%f</value>\n"
+                        "  <nsets>%d</nsets>\n"
 			"  <timeslice>%d</timeslice>\n"
-			"</eigenvalue>", eigenvalue, t0);
+			"  <value>%f</value>\n"
+			"</eigenvalue>", nsets, t0, eigenvalue[0]);
 	bytes = strlen(message);
 
 	write_header(writer, 1, 0, "eigenvalue-info", bytes);

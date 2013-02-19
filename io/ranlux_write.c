@@ -20,11 +20,13 @@
 
 #include "ranlux.ih"
 
-int write_ranlux(WRITER * writer)
+int write_ranlux(char * filename, const int append)
 {
 	DML_Checksum checksum;
 	uint64_t bytes;
 	int status = 0, size = rlxd_size(), size_total = rlxd_size() + rlxs_size(), *state = NULL;
+	WRITER * writer;
+	construct_writer(&writer,filename, append);
 
 	write_ranlux_xml(writer);
 
@@ -38,5 +40,6 @@ int write_ranlux(WRITER * writer)
 	status  = write_binary_ranlux_data(state, writer, &checksum, size_total);
 	write_checksum(writer, &checksum, NULL);
 
+	destruct_writer(writer);
 	return status;
 }

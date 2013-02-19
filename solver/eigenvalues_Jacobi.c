@@ -84,11 +84,11 @@ double eigenvalues_Jacobi(int * nr_of_eigenvalues, const int max_iterations,
 	FILE *efp;
 	double atime, etime;
 
+	WRITER *writer;
 #ifdef MPI
 	MPI_File fp;
 	MPI_Offset siteSize=3*2*sizeof(double);
 #else
-	WRITER *writer;
 	int siteSize=3*2*sizeof(double);
 	FILE *fp;
 #endif
@@ -201,7 +201,7 @@ double eigenvalues_Jacobi(int * nr_of_eigenvalues, const int max_iterations,
 		s=(su3_vector*)&eigenvectors_su3v[v0dim*N2];
 
 		construct_writer(&writer, filename, 0);
-		status = write_su3_vector(writer, (eigenvls_su3v[v0dim]), s, 64, tslice);
+		status = write_su3_vector(writer, (&eigenvls_su3v[v0dim]), s, 64, tslice, 1);
 		destruct_writer(writer);
 
 		sqnorm=square_norm_su3vect(s,SPACEVOLUME,1);
@@ -209,6 +209,12 @@ double eigenvalues_Jacobi(int * nr_of_eigenvalues, const int max_iterations,
 			printf("wrote eigenvector | |^2 = %e \n",sqnorm);
 		}
 	}
+
+        sprintf(filename, "eigenvector.all.%.3d.%.4d", tslice, nstore);
+        construct_writer(&writer, filename, 0);
+        s=(su3_vector*)&eigenvectors_su3v[0];
+        status = write_su3_vector(writer, &eigenvls_su3v[0], s, 64, tslice, (*nr_of_eigenvalues));
+        destruct_writer(writer);
 
 	returnvalue=eigenvls_su3v[0];
 	free(max_eigenvector_);

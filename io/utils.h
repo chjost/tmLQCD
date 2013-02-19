@@ -74,8 +74,8 @@ void close_writer_record(WRITER *writer);
 void engineering(char *result, double value, char const *units);
 int parse_checksum_xml(char *message, DML_Checksum *checksum);
 
-int parse_eigenvalue_xml(char *message, double *eigenvalue, int *timeslice);
-void write_eigenvalue_xml(WRITER * writer, double const eigenvalue, int const t0);
+int parse_eigenvalue_xml(char *message, double *eigenvalue, int *timeslice, int *nsets);
+void write_eigenvalue_xml(WRITER * writer, double const *eigenvalue, int const t0, int const nsets);
 
 void write_ranlux_xml(WRITER * writer);
 int parse_ranlux_xml(char *message, int *seed, int *level);
