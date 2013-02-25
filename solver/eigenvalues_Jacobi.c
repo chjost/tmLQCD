@@ -205,7 +205,7 @@ double eigenvalues_Jacobi(int * nr_of_eigenvalues, const int max_iterations,
 		destruct_writer(writer);
 
 		sqnorm=square_norm_su3vect(s,SPACEVOLUME,1);
-		if(g_proc_id == 0) {
+		if(g_proc_id == 0 && g_debug_level > 0) {
 			printf("wrote eigenvector | |^2 = %e \n",sqnorm);
 		}
 	}

@@ -89,7 +89,7 @@ int read_spinor(spinor * const s, spinor * const r, char * filename, const int p
     }
   }
 
-  if (g_cart_id == 0 && g_debug_level >= 0) {
+  if (g_cart_id == 0 && g_debug_level > 0) {
     printf("# %s precision read (%d bits).\n", (prec == 64 ? "Double" : "Single") ,prec);
   }
 
@@ -106,7 +106,7 @@ int read_spinor(spinor * const s, spinor * const r, char * filename, const int p
     }
   }
 
-  if (g_cart_id == 0 && g_debug_level >= 0) {
+  if (g_cart_id == 0 && g_debug_level > 0) {
     printf("# Scidac checksums for DiracFermion field %s position %d:\n", filename, position);
     printf("#   Calculated            : A = %#x B = %#x.\n", checksum.suma, checksum.sumb);
     printf("# No Scidac checksum was read from headers, unable to check integrity of file.\n");

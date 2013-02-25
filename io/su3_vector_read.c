@@ -107,7 +107,7 @@ int read_su3_vector(su3_vector * const s, char * filename, const int position_,
           }
         }
 
-        if (g_cart_id == 0 && g_debug_level >= 0) {
+        if (g_cart_id == 0 && g_debug_level > 0) {
           printf("# %s precision read (%d bits).\n",
               (prec == 64 ? "Double" : "Single"), prec);
         }
