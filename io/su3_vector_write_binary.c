@@ -139,7 +139,8 @@ int write_binary_su3_vector_data(su3_vector * const s,
 
 	if(prec == 32) bytes = (n_uint64_t)sizeof(su3_vector)/2;
 	else bytes = (n_uint64_t)sizeof(su3_vector);
-	t = t0 - T*g_proc_coords[0];
+	t = T*g_proc_coords[0];
+//	t = t0 - T*g_proc_coords[0];
 	coords[0] = t0 / T;
         for(sets = 0; sets < nsets; sets++) {
           for(z = 0; z < LZ*g_nproc_z; z++) {

@@ -306,6 +306,7 @@ int create_invert_sources() {
   char call[150];
   int tslice = 0, vec = 0, point = 0, iter = 0, nop = 0, j = 0;
   int status = 0, t = 0, block = LX * LY * LZ;
+  int count = 0;
   su3_vector * eigenvector = NULL;
   spinor *tmp = NULL;
   spinor *even = NULL, *odd = NULL;
@@ -358,8 +359,23 @@ int create_invert_sources() {
 
   for (tslice = 0; tslice < T; tslice++) {
     for (vec = 0; vec < no_eigenvalues; vec++) {
-      sprintf(filename, "eigenvector.%03d.%.3d.%.4d", vec, tslice, nstore);
+      sprintf(filename, "./eigenvector.%03d.%03d.%04d", vec, tslice, nstore);
       read_su3_vector(eigenvector, filename, 0, tslice, 1);
+
+      sprintf(filename, "./b_eigenvector.%03d.%03d.%04d", vec, tslice, nstore);
+//      printf("writing eigenvector %s\n", filename);
+      if ((file = fopen(filename, "wb")) == NULL ) {
+        fprintf(stderr, "could not open eigenvector file %s.\nAborting...\n",
+            filename);
+        exit(-1);
+      }
+      count = fwrite(eigenvector, sizeof(su3_vector), block, file);
+      if (count != block) {
+        fprintf(stderr, "could not write all data to file %s.\n", filename);
+      }
+      fflush(file);
+      fclose(file);
+
       for (t = 0; t < T; t++) {
         for (point = 0; point < block; point++) {
           // Set the spinor to 0
@@ -415,6 +431,14 @@ int create_invert_sources() {
     }
   }
 
+//  free(eigenvector);
+//  free(dirac0);
+//  free(dirac1);
+//  free(dirac2);
+//  free(dirac3);
+//  free(even);
+//  free(odd);
+
   return (0);
 }
 
@@ -460,56 +484,46 @@ void create_perambulators() {
     return;
   }
   // iterate through the blocks of the perambulator
-  for (tsink = 0; tsink < T; tsink++) {
-    for (tsource = 0; tsource < T; tsource++) {
+  for (tsource = 0; tsource < T; tsource++) {
+    for (tsink = 0; tsink < T; tsink++) {
       // set the entries of the block to one
       for (i = 0; i < blocksize; i++) {
         block[0] = 0.0;
       }
 
       // iterate through the "propagator"
-      for (nvsink = 0; nvsink < no_eigenvalues; nvsink++) {
-        for (ndsink = 0; ndsink < 4; ndsink++) {
-          sprintf(invertedfile, "source%d.%04d.%02d.%02d.inverted", ndsink,
-              nstore, tsink, nvsink);
+      for (nvsource = 0; nvsource < no_eigenvalues; nvsource++) {
+        for (ndsource = 0; ndsource < 4; ndsource++) {
+          sprintf(invertedfile, "source%d.%04d.%02d.%02d.inverted", ndsource,
+              nstore, tsource, nvsource);
+//          printf("reading spinor %s\n", invertedfile);
           read_spinor(even, odd, invertedfile, 0);
           convert_eo_to_lexic(inverted, even, odd);
 
           // iterate through the eigenvectors
-          for (nvsource = 0; nvsource < no_eigenvalues; nvsource++) {
-            sprintf(eigenvectorfile, "eigenvector.%03d.%03d.%04d", nvsource,
-                tsource, nstore);
-            read_su3_vector(eigenvector, eigenvectorfile, 0, tsource, 1);
+          for (nvsink = 0; nvsink < no_eigenvalues; nvsink++) {
+            sprintf(eigenvectorfile, "eigenvector.%03d.%03d.%04d", nvsink,
+                tsink, nstore);
+//            printf("reading   eigenvector %s\n", eigenvectorfile);
+            read_su3_vector(eigenvector, eigenvectorfile, 0, tsink, 1);
             for (point1 = 0; point1 < timeblock; point1++) {
               spinor_times_su3vec(
-                  &(block[blocklength * (nvsink * 4 + ndsink) + nvsource * 4]),
+                  &(block[blocklength * (nvsource * 4 + ndsource) + nvsink * 4]),
                   inverted[point1], eigenvector[point1]);
             }
-            sprintf(perambulatorfile, "b_eigenvector.%03d.%03d.%04d", nvsource,
-                tsource, nstore);
-            if ((file = fopen(perambulatorfile, "wb")) == NULL ) {
-              fprintf(stderr,
-                  "could not open eigenvector file %s.\nAborting...\n",
-                  perambulatorfile);
-              exit(-1);
-            }
-            count = fwrite(eigenvector, sizeof(su3_vector), timeblock, file);
-            if (count != timeblock) {
-              fprintf(stderr, "could not write all data to file %s.\n",
-                  perambulatorfile);
-            }
-            fflush(file);
-            fclose(file);
+
           } // iterate through the eigenvectors
         }
       } // iterate through the "propagator"
-      sprintf(perambulatorfile, "perambulator.%02d.%02d", tsource, tsink);
+      sprintf(perambulatorfile, "perambulator.%03d.%03d.%04d", tsource, tsink,
+          nstore);
+//      printf("writing perambulator %s\n", perambulatorfile);
       if ((file = fopen(perambulatorfile, "wb")) == NULL ) {
         fprintf(stderr, "could not open perambulator file %s.\nAborting...\n",
             perambulatorfile);
         exit(-1);
       }
-      printf("writing file %s\n", perambulatorfile);
+//      printf("writing file %s\n", perambulatorfile);
       count = fwrite(block, sizeof(_Complex double), blocksize, file);
       if (count != blocksize) {
         fprintf(stderr, "could not write all data to file %s.\n",

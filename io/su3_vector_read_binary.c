@@ -141,7 +141,8 @@ int read_binary_su3_vector_data(su3_vector * const s, READER * reader,
       return (-3);
     }
   }
-  t = t0 - T * g_proc_coords[0];
+  t =  T * g_proc_coords[0];
+//  t = t0 - T * g_proc_coords[0];
   for (sets = 0; sets < nsets; sets++) {
 
     for (z = 0; z < LZ; z++) {
