@@ -59,11 +59,15 @@
 
 #define DEBUG 1
 #define INVERTER "./invert"
-#define REMOVESOURCES 1 // remove all output except for the perambulators
+#define REMOVESOURCES 0 // remove all output except for the perambulators
 #define _vector_one(r) \
-  (r).c0 = 1.;		\
-  (r).c1 = 1.;		\
+  (r).c0 = 1.;\
+  (r).c1 = 1.;\
   (r).c2 = 1.;
+#define _vector_I_one(r) \
+  (r).c0 = 1.*I;\
+  (r).c1 = 1.*I;\
+  (r).c2 = 1.*I;
 
 void usage() {
   fprintf(stdout, "Program for investigating stochastical LapH smearing\n");
@@ -77,16 +81,16 @@ void usage() {
   exit(0);
 }
 
-inline void spinor_times_su3vec(_Complex double *result, spinor factor1,
-    su3_vector factor2) {
-  result[0] += factor1.s0.c0 * factor2.c0 + factor1.s0.c1 * factor2.c1
-      + factor1.s0.c2 * factor2.c2;
-  result[1] += factor1.s1.c0 * factor2.c0 + factor1.s1.c1 * factor2.c1
-      + factor1.s1.c2 * factor2.c2;
-  result[2] += factor1.s2.c0 * factor2.c0 + factor1.s2.c1 * factor2.c1
-      + factor1.s2.c2 * factor2.c2;
-  result[3] += factor1.s3.c0 * factor2.c0 + factor1.s3.c1 * factor2.c1
-      + factor1.s3.c2 * factor2.c2;
+inline void spinor_times_su3vec(_Complex double *result, spinor const factor1,
+    su3_vector const factor2, int const blocklength) {
+  result[0 * blocklength] += factor1.s0.c0 * conj(factor2.c0)
+      + factor1.s0.c1 * conj(factor2.c1) + factor1.s0.c2 * conj(factor2.c2);
+  result[1 * blocklength] += factor1.s1.c0 * conj(factor2.c0)
+      + factor1.s1.c1 * conj(factor2.c1) + factor1.s1.c2 * conj(factor2.c2);
+  result[2 * blocklength] += factor1.s2.c0 * conj(factor2.c0)
+      + factor1.s2.c1 * conj(factor2.c1) + factor1.s2.c2 * conj(factor2.c2);
+  result[3 * blocklength] += factor1.s3.c0 * conj(factor2.c0)
+      + factor1.s3.c1 * conj(factor2.c1) + factor1.s3.c2 * conj(factor2.c2);
 }
 
 int generate_eigensystem();
@@ -94,6 +98,7 @@ int generate_eigensystem();
 int create_invert_sources();
 void create_input_files(int const dirac, int const timeslice);
 void create_perambulators();
+void test_system();
 
 int main(int argc, char* argv[]) {
   int status = 0, c, j;
@@ -203,6 +208,8 @@ int main(int argc, char* argv[]) {
   generate_eigensystem();
   printf("# generating sources\n");
   create_invert_sources();
+//  printf("# creating test eigenvectors and sources\n");
+//  test_system();
   printf("# constructing perambulators\n");
   create_perambulators();
 
@@ -317,7 +324,8 @@ int create_invert_sources() {
   FILE * file = NULL;
   WRITER* writer = NULL;
 
-  eigenvector = (su3_vector*) calloc(block, sizeof(su3_vector));
+  eigenvector = (su3_vector*) calloc(block * no_eigenvalues,
+      sizeof(su3_vector));
 
 //  allocate all spinor fields
   tmp = (spinor*) calloc(VOLUMEPLUSRAND + 1, sizeof(spinor));
@@ -363,7 +371,6 @@ int create_invert_sources() {
       read_su3_vector(eigenvector, filename, 0, tslice, 1);
 
       sprintf(filename, "./b_eigenvector.%03d.%03d.%04d", vec, tslice, nstore);
-//      printf("writing eigenvector %s\n", filename);
       if ((file = fopen(filename, "wb")) == NULL ) {
         fprintf(stderr, "could not open eigenvector file %s.\nAborting...\n",
             filename);
@@ -373,7 +380,6 @@ int create_invert_sources() {
       if (count != block) {
         fprintf(stderr, "could not write all data to file %s.\n", filename);
       }
-      fflush(file);
       fclose(file);
 
       for (t = 0; t < T; t++) {
@@ -406,13 +412,13 @@ int create_invert_sources() {
       construct_writer(&writer, filename, 0);
       status = write_spinor(writer, &even, &odd, 1, 64);
       destruct_writer(writer);
-      //      write spinor field with entries at dirac 2
+//      write spinor field with entries at dirac 2
       convert_lexic_to_eo(even, odd, dirac2);
       sprintf(filename, "%s.%04d.%02d.%02d", "source2", nstore, tslice, vec);
       construct_writer(&writer, filename, 0);
       status = write_spinor(writer, &even, &odd, 1, 64);
       destruct_writer(writer);
-      //      write spinor field with entries at dirac 3
+//      write spinor field with entries at dirac 3
       convert_lexic_to_eo(even, odd, dirac3);
       sprintf(filename, "%s.%04d.%02d.%02d", "source3", nstore, tslice, vec);
       construct_writer(&writer, filename, 0);
@@ -431,13 +437,38 @@ int create_invert_sources() {
     }
   }
 
-//  free(eigenvector);
-//  free(dirac0);
-//  free(dirac1);
-//  free(dirac2);
-//  free(dirac3);
-//  free(even);
-//  free(odd);
+  // test the inverted spinor
+//  sprintf(filename, "%s.%04d.%02d.%02d.inverted", "source3", nstore, 0, 0);
+//  read_spinor(even, odd, filename, 0);
+//  convert_eo_to_lexic(dirac0, even, odd);
+//  for (int t = 0; t < T; t++) {
+//    for (int i = 0; i < block; i++) {
+//      printf("(%.3e, %.3e) (%.3e, %.3e) (%.3e, %.3e)\n", creal(dirac0[t*block+i].s0.c0),
+//          cimag(dirac0[t*block+i].s0.c0), creal(dirac0[t*block+i].s0.c1),
+//          cimag(dirac0[t*block+i].s0.c1), creal(dirac0[t*block+i].s0.c2),
+//          cimag(dirac0[t*block+i].s0.c2));
+//      printf("   (%.3e, %.3e) (%.3e, %.3e) (%.3e, %.3e)\n", creal(dirac0[t*block+i].s1.c0),
+//          cimag(dirac0[t*block+i].s1.c0), creal(dirac0[t*block+i].s1.c1),
+//          cimag(dirac0[t*block+i].s1.c1), creal(dirac0[t*block+i].s1.c2),
+//          cimag(dirac0[t*block+i].s1.c2));
+//      printf("   (%.3e, %.3e) (%.3e, %.3e) (%.3e, %.3e)\n", creal(dirac0[t*block+i].s2.c0),
+//          cimag(dirac0[t*block+i].s2.c0), creal(dirac0[t*block+i].s2.c1),
+//          cimag(dirac0[t*block+i].s2.c1), creal(dirac0[t*block+i].s2.c2),
+//          cimag(dirac0[t*block+i].s2.c2));
+//      printf("   (%.3e, %.3e) (%.3e, %.3e) (%.3e, %.3e)\n", creal(dirac0[t*block+i].s3.c0),
+//          cimag(dirac0[t*block+i].s3.c0), creal(dirac0[t*block+i].s3.c1),
+//          cimag(dirac0[t*block+i].s3.c1), creal(dirac0[t*block+i].s3.c2),
+//          cimag(dirac0[t*block+i].s3.c2));
+//    }
+//    printf("\n\n");
+//  }
+  free(eigenvector);
+  free(dirac0);
+  free(dirac1);
+  free(dirac2);
+  free(dirac3);
+  free(even);
+  free(odd);
 
   return (0);
 }
@@ -496,7 +527,6 @@ void create_perambulators() {
         for (ndsource = 0; ndsource < 4; ndsource++) {
           sprintf(invertedfile, "source%d.%04d.%02d.%02d.inverted", ndsource,
               nstore, tsource, nvsource);
-//          printf("reading spinor %s\n", invertedfile);
           read_spinor(even, odd, invertedfile, 0);
           convert_eo_to_lexic(inverted, even, odd);
 
@@ -504,26 +534,27 @@ void create_perambulators() {
           for (nvsink = 0; nvsink < no_eigenvalues; nvsink++) {
             sprintf(eigenvectorfile, "eigenvector.%03d.%03d.%04d", nvsink,
                 tsink, nstore);
-//            printf("reading   eigenvector %s\n", eigenvectorfile);
             read_su3_vector(eigenvector, eigenvectorfile, 0, tsink, 1);
             for (point1 = 0; point1 < timeblock; point1++) {
+//              block[blocklength * (nvsink * 4) + nvsource * 4 + ndsource + 0*blocklength] += 1.0;
+//              block[blocklength * (nvsink * 4) + nvsource * 4 + ndsource + 1*blocklength] += 1.0;
+//              block[blocklength * (nvsink * 4) + nvsource * 4 + ndsource + 2*blocklength] += 1.0;
+//              block[blocklength * (nvsink * 4) + nvsource * 4 + ndsource + 3*blocklength] += 1.0;
               spinor_times_su3vec(
-                  &(block[blocklength * (nvsource * 4 + ndsource) + nvsink * 4]),
-                  inverted[point1], eigenvector[point1]);
+                  &(block[blocklength * (nvsink * 4) + nvsource * 4 + ndsource]),
+                  inverted[timeblock * tsink + point1], eigenvector[point1],
+                  blocklength);
             }
-
           } // iterate through the eigenvectors
         }
       } // iterate through the "propagator"
       sprintf(perambulatorfile, "perambulator.%03d.%03d.%04d", tsource, tsink,
           nstore);
-//      printf("writing perambulator %s\n", perambulatorfile);
       if ((file = fopen(perambulatorfile, "wb")) == NULL ) {
         fprintf(stderr, "could not open perambulator file %s.\nAborting...\n",
             perambulatorfile);
         exit(-1);
       }
-//      printf("writing file %s\n", perambulatorfile);
       count = fwrite(block, sizeof(_Complex double), blocksize, file);
       if (count != blocksize) {
         fprintf(stderr, "could not write all data to file %s.\n",
@@ -533,10 +564,40 @@ void create_perambulators() {
       fclose(file);
     } // iteration through the blocks of the perambulator
   }
+
+  // test the perambulator
+//  sprintf(perambulatorfile, "perambulator.%03d.%03d.%04d", 0, 0, nstore);
+//  if ((file = fopen(perambulatorfile, "rb")) == NULL ) {
+//    fprintf(stderr, "could not open perambulator file %s.\nAborting...\n",
+//        perambulatorfile);
+//    exit(-1);
+//  }
+//  fread(block, sizeof(_Complex double), blocksize, file);
+//
+//  for (int nvec1 = 0; nvec1 < no_eigenvalues; nvec1++) {
+//    for (int dir1 = 0; dir1 < 4; dir1++) {
+//      for (int vec2 = 0; vec2 < no_eigenvalues; vec2++) {
+//        for (int dir2 = 0; dir2 < 4; dir2++) {
+//          printf("(%.3e, %.3e) ",
+//              creal(block[blocklength * (nvec1 * 4 + dir1) + vec2 * 4 + dir2]),
+//              cimag(block[blocklength * (nvec1 * 4 + dir1) + vec2 * 4 + dir2]));
+//        }
+//        printf("\n");
+//      }
+//      printf("\n\n");
+//    }
+//    printf("\n\n\n");
+//  }
+
   if (REMOVESOURCES) {
-    printf("removing sources\n");
-    system("rm source* eigenv* dirac*.input");
+    printf("# removing sources\n");
+    system("rm source* eigenv* dirac*.input output.para");
   }
+
+  free(even);
+  free(odd);
+  free(inverted);
+  free(eigenvector);
 
   return;
 }
@@ -795,5 +856,75 @@ void create_input_files(int const dirac, int const timeslice) {
     fflush(file);
     fclose(file);
   }
+  return;
+}
+
+void test_system() {
+  char filename[150];
+  spinor *inverted;
+  spinor *even;
+  spinor *odd;
+  spinor *tmp;
+  su3_vector *eigenvector;
+  int vol = LX * LY * LZ;
+  WRITER *writer;
+  double one = 1.0;
+
+  tmp = (spinor*) calloc(VOLUMEPLUSRAND + 1, sizeof(spinor));
+#if (defined SSE || defined SSE2 || defined SSE3)
+  inverted = (spinor*) (((unsigned long int) (tmp) + ALIGN_BASE) & ~ALIGN_BASE);
+#else
+  inverted = tmp;
+#endif
+  tmp = (spinor*) calloc(VOLUMEPLUSRAND + 1, sizeof(spinor));
+#if (defined SSE || defined SSE2 || defined SSE3)
+  even = (spinor*) (((unsigned long int) (tmp) + ALIGN_BASE) & ~ALIGN_BASE);
+#else
+  even = tmp;
+#endif
+  tmp = (spinor*) calloc(VOLUMEPLUSRAND + 1, sizeof(spinor));
+#if (defined SSE || defined SSE2 || defined SSE3)
+  odd = (spinor*) (((unsigned long int) (tmp) + ALIGN_BASE) & ~ALIGN_BASE);
+#else
+  odd = tmp;
+#endif
+
+  eigenvector = (su3_vector*) calloc(vol, sizeof(su3_vector));
+
+  for (int i = 0; i < vol; i++) {
+    _vector_I_one(eigenvector[i]);
+  }
+  for (int vec = 0; vec < no_eigenvalues; vec++) {
+    for (int t = 0; t < T; t++) {
+      sprintf(filename, "eigenvector.%03d.%03d.%04d", vec, t, nstore);
+      construct_writer(&writer, filename, 0);
+      write_su3_vector(writer, &one, eigenvector, 64, t, 1);
+      destruct_writer(writer);
+    }
+  }
+
+  for (int i = 0; i < vol * T; i++) {
+    _vector_I_one(inverted[i].s0);
+    _vector_I_one(inverted[i].s1);
+    _vector_I_one(inverted[i].s2);
+    _vector_I_one(inverted[i].s3);
+  }
+  convert_lexic_to_eo(even, odd, inverted);
+  for (int dir = 0; dir < 4; dir++) {
+    for (int t = 0; t < T; t++) {
+      for (int vec = 0; vec < no_eigenvalues; vec++) {
+        sprintf(filename, "source%d.%04d.%02d.%02d.inverted", dir, nstore, t,
+            vec);
+        construct_writer(&writer, filename, 0);
+        write_spinor(writer, &even, &odd, 1, 64);
+        destruct_writer(writer);
+      }
+    }
+  }
+
+  free(inverted);
+  free(even);
+  free(odd);
+  free(eigenvector);
   return;
 }
