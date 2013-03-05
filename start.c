@@ -485,7 +485,7 @@ void random_gauge_field(const int repro, su3 ** const gf) {
   else {
     for (ix = 0; ix < VOLUME; ix++) {
       for (mu = 0; mu < 4; mu++) {
-	random_su3(&gf[ix][mu]);
+	random_su3(&(gf[ix][mu]));
       }
     }
   }

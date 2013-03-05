@@ -42,9 +42,23 @@ void rnd_gauge_trafo(const int repro, su3 ** const gf){
     fprintf(stderr, "Could not allocate memory in rnd_gauge_trafo. Exiting!\n");
     exit(0);
   }
-  gauge_trafo = (su3*)(((unsigned long int)(gauge_trafo)+ALIGN_BASE)&~ALIGN_BASE);
+  gauge_trafo = (su3*)(((unsigned long int)(_gauge_trafo)+ALIGN_BASE)&~ALIGN_BASE);
 
-  random_gauge_field(repro, gauge_trafo);
+  //random_gauge_field(repro, gauge_trafo);
+for(int i=0; i<VOLUMEPLUSRAND; i++) {
+  random_su3(gauge_trafo + i);
+}
+
+FILE* file = NULL;
+if( (file = fopen("randomvector.dat", "wb")) == NULL ) {
+  fprintf(stderr, "Could not open file randomvector.dat\n");
+  exit(-1);
+}
+int status = fwrite(gauge_trafo, sizeof(su3), VOLUMEPLUSRAND, file);
+if(status != VOLUMEPLUSRAND) {
+  printf("Only wrote %d of %d objects\n", status, VOLUMEPLUSRAND);
+}
+fclose(file);
 
 #ifdef MPI
   xchange_gauge(gauge_trafo);
