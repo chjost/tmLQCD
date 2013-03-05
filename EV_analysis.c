@@ -56,10 +56,12 @@
 #include "su3.h"
 #include "su3spinor.h"
 #include "linalg/convert_eo_to_lexic.h"
+#include "rnd_gauge_trafo.h"
+
 
 #define DEBUG 1
 #define INVERTER "./invert"
-#define REMOVESOURCES 0 // remove all output except for the perambulators
+#define REMOVESOURCES 1 // remove all output except for the perambulators
 #define _vector_one(r) \
   (r).c0 = 1.;\
   (r).c1 = 1.;\
@@ -93,18 +95,15 @@ inline void spinor_times_su3vec(_Complex double *result, spinor const factor1,
       + factor1.s3.c1 * conj(factor2.c1) + factor1.s3.c2 * conj(factor2.c2);
 }
 
-int generate_eigensystem();
+int generate_eigensystem(int const conf);
 //int eigensystem_gsl();
-int create_invert_sources();
-void create_input_files(int const dirac, int const timeslice);
-void create_perambulators();
-void test_system();
+int create_invert_sources(int const conf);
+void create_input_files(int const dirac, int const timeslice, int const conf);
+void create_perambulators(int const conf);
+void test_system(int const conf);
 
 int main(int argc, char* argv[]) {
-  int status = 0, c, j;
-  char datafilename[50];
-  char parameterfilename[50];
-  char conf_filename[50];
+  int status = 0, c, j, conf;
   char * input_filename = NULL;
 
 #ifdef MPI
@@ -182,7 +181,7 @@ int main(int argc, char* argv[]) {
   init_gauge_field(VOLUMEPLUSRAND + g_dbw2rand, 0);
   init_geometry_indices(VOLUMEPLUSRAND + g_dbw2rand);
   geometry();
-  init_jacobi_field(SPACEVOLUME + SPACERAND, 3);
+  init_jacobi_field(SPACEVOLUME+SPACERAND,3);
   if (even_odd_flag) {
     j = init_spinor_field(VOLUMEPLUSRAND / 2, NO_OF_SPINORFIELDS);
   } else {
@@ -204,16 +203,20 @@ int main(int argc, char* argv[]) {
     if (!operator_list[j].even_odd_flag)
       even_odd_flag = 0;
 
-  printf("# Generating eigensystem\n");
-  generate_eigensystem();
-  printf("# generating sources\n");
-  create_invert_sources();
+  // main loop
+  for(conf = nstore; conf < nstore+Nmeas; conf+=Nsave) {
+//    printf("2KappaMu = %e", g_mu);
+    printf("# Generating eigensystem for conf %d\n", conf);
+    generate_eigensystem(conf);
+    printf("# generating sources\n");
+    create_invert_sources(conf);
 //  printf("# creating test eigenvectors and sources\n");
 //  test_system();
-  printf("# constructing perambulators\n");
-  create_perambulators();
+    printf("# constructing perambulators\n");
+    create_perambulators(conf);
+  }
 
-  printf("# program finished without problems\n# Clearing memory\n");
+  printf("\n# program finished without problems\n# Clearing memory\n");
 
 #ifdef MPI
   MPI_Finalize();
@@ -226,12 +229,12 @@ int main(int argc, char* argv[]) {
   return status;
 }
 
-int generate_eigensystem() {
+int generate_eigensystem(int const conf) {
   int tslice, j, k;
   char conf_filename[50];
 
   /* Read Gauge field */
-  sprintf(conf_filename, "%s.%.4d", gauge_input_filename, nstore);
+  sprintf(conf_filename, "%s.%.4d", gauge_input_filename, conf);
   if (g_cart_id == 0) {
     printf("#\n# Trying to read gauge field from file %s in %s precision.\n",
         conf_filename, (gauge_precision_read_flag == 32 ? "single" : "double"));
@@ -243,6 +246,8 @@ int generate_eigensystem() {
         conf_filename);
     exit(-2);
   }
+//  unit_g_gauge_field();
+  rnd_gauge_trafo(0, g_gauge_field);
 
   if (g_cart_id == 0) {
     printf("# Finished reading gauge field.\n");
@@ -273,13 +278,13 @@ int generate_eigensystem() {
 #endif
 
   for (k = 0; k < 3; k++)
-    random_jacobi_field(g_jacobi_field[k]);
+    random_jacobi_field(g_jacobi_field[k],SPACEVOLUME);
 
   /* Compute LapH Eigensystem */
 
   for (tslice = 0; tslice < T; tslice++) {
     eigenvalues_Jacobi(&no_eigenvalues, 5000, eigenvalue_precision, 0, tslice,
-        nstore);
+        conf);
   }
   return (0);
 }
@@ -307,11 +312,11 @@ int generate_eigensystem() {
 /*
  * create new sources
  */
-int create_invert_sources() {
+int create_invert_sources(int const conf) {
   // read in eigenvectors and save as blocks
   char filename[200];
   char call[150];
-  int tslice = 0, vec = 0, point = 0, iter = 0, nop = 0, j = 0;
+  int tslice = 0, vec = 0, point = 0, j = 0;
   int status = 0, t = 0, block = LX * LY * LZ;
   int count = 0;
   su3_vector * eigenvector = NULL;
@@ -367,10 +372,10 @@ int create_invert_sources() {
 
   for (tslice = 0; tslice < T; tslice++) {
     for (vec = 0; vec < no_eigenvalues; vec++) {
-      sprintf(filename, "./eigenvector.%03d.%03d.%04d", vec, tslice, nstore);
+      sprintf(filename, "./t_eigenvector.%03d.%03d.%04d", vec, tslice, conf);
       read_su3_vector(eigenvector, filename, 0, tslice, 1);
 
-      sprintf(filename, "./b_eigenvector.%03d.%03d.%04d", vec, tslice, nstore);
+      sprintf(filename, "./tb_eigenvector.%03d.%03d.%04d", vec, tslice, conf);
       if ((file = fopen(filename, "wb")) == NULL ) {
         fprintf(stderr, "could not open eigenvector file %s.\nAborting...\n",
             filename);
@@ -402,32 +407,32 @@ int create_invert_sources() {
 
 //      write spinor field with entries at dirac 0
       convert_lexic_to_eo(even, odd, dirac0);
-      sprintf(filename, "%s.%04d.%02d.%02d", "source0", nstore, tslice, vec);
+      sprintf(filename, "%s.%04d.%02d.%02d", "tsource0", conf, tslice, vec);
       construct_writer(&writer, filename, 0);
       status = write_spinor(writer, &even, &odd, 1, 64);
       destruct_writer(writer);
 //      write spinor field with entries at dirac 1
       convert_lexic_to_eo(even, odd, dirac1);
-      sprintf(filename, "%s.%04d.%02d.%02d", "source1", nstore, tslice, vec);
+      sprintf(filename, "%s.%04d.%02d.%02d", "tsource1", conf, tslice, vec);
       construct_writer(&writer, filename, 0);
       status = write_spinor(writer, &even, &odd, 1, 64);
       destruct_writer(writer);
 //      write spinor field with entries at dirac 2
       convert_lexic_to_eo(even, odd, dirac2);
-      sprintf(filename, "%s.%04d.%02d.%02d", "source2", nstore, tslice, vec);
+      sprintf(filename, "%s.%04d.%02d.%02d", "tsource2", conf, tslice, vec);
       construct_writer(&writer, filename, 0);
       status = write_spinor(writer, &even, &odd, 1, 64);
       destruct_writer(writer);
 //      write spinor field with entries at dirac 3
       convert_lexic_to_eo(even, odd, dirac3);
-      sprintf(filename, "%s.%04d.%02d.%02d", "source3", nstore, tslice, vec);
+      sprintf(filename, "%s.%04d.%02d.%02d", "tsource3", conf, tslice, vec);
       construct_writer(&writer, filename, 0);
       status = write_spinor(writer, &even, &odd, 1, 64);
       destruct_writer(writer);
       fflush(stdout);
 
     }
-    create_input_files(4, tslice);
+    create_input_files(4, tslice, conf);
     fflush(stdout);
     for (j = 0; j < 4; j++) {
       sprintf(call, "%s -f dirac%d-cg.input", INVERTER, j);
@@ -438,7 +443,7 @@ int create_invert_sources() {
   }
 
   // test the inverted spinor
-//  sprintf(filename, "%s.%04d.%02d.%02d.inverted", "source3", nstore, 0, 0);
+//  sprintf(filename, "%s.%04d.%02d.%02d.inverted", "source3", conf, 0, 0);
 //  read_spinor(even, odd, filename, 0);
 //  convert_eo_to_lexic(dirac0, even, odd);
 //  for (int t = 0; t < T; t++) {
@@ -476,17 +481,17 @@ int create_invert_sources() {
 /*
  * create the perambulators
  */
-void create_perambulators() {
-  int tsource, tsink, diracindex;
-  int nvsource, ndsource, nvsink, ndsink, i, point1, count;
+void create_perambulators(int const conf) {
+  int tsource, tsink;
+  int nvsource, ndsource, nvsink, i, point1, count;
   int blocklength = no_eigenvalues * 4, blocksize = blocklength * blocklength;
   int timeblock = LX * LY * LZ;
   spinor *inverted, *even, *odd, *tmp;
   su3_vector* eigenvector;
   char eigenvectorfile[200], invertedfile[200], perambulatorfile[200];
-  READER *reader;
   FILE *file = NULL;
   _Complex double *block;
+  char call[150];
 
   tmp = (spinor*) calloc(VOLUMEPLUSRAND + 1, sizeof(spinor));
 #if (defined SSE || defined SSE2 || defined SSE3)
@@ -525,15 +530,15 @@ void create_perambulators() {
       // iterate through the "propagator"
       for (nvsource = 0; nvsource < no_eigenvalues; nvsource++) {
         for (ndsource = 0; ndsource < 4; ndsource++) {
-          sprintf(invertedfile, "source%d.%04d.%02d.%02d.inverted", ndsource,
-              nstore, tsource, nvsource);
+          sprintf(invertedfile, "tsource%d.%04d.%02d.%02d.inverted", ndsource,
+              conf, tsource, nvsource);
           read_spinor(even, odd, invertedfile, 0);
           convert_eo_to_lexic(inverted, even, odd);
 
           // iterate through the eigenvectors
           for (nvsink = 0; nvsink < no_eigenvalues; nvsink++) {
-            sprintf(eigenvectorfile, "eigenvector.%03d.%03d.%04d", nvsink,
-                tsink, nstore);
+            sprintf(eigenvectorfile, "teigenvector.%03d.%03d.%04d", nvsink,
+                tsink, conf);
             read_su3_vector(eigenvector, eigenvectorfile, 0, tsink, 1);
             for (point1 = 0; point1 < timeblock; point1++) {
 //              block[blocklength * (nvsink * 4) + nvsource * 4 + ndsource + 0*blocklength] += 1.0;
@@ -548,8 +553,8 @@ void create_perambulators() {
           } // iterate through the eigenvectors
         }
       } // iterate through the "propagator"
-      sprintf(perambulatorfile, "perambulator.%03d.%03d.%04d", tsource, tsink,
-          nstore);
+      sprintf(perambulatorfile, "tperambulator.%03d.%03d.%04d", tsource, tsink,
+          conf);
       if ((file = fopen(perambulatorfile, "wb")) == NULL ) {
         fprintf(stderr, "could not open perambulator file %s.\nAborting...\n",
             perambulatorfile);
@@ -566,7 +571,7 @@ void create_perambulators() {
   }
 
   // test the perambulator
-//  sprintf(perambulatorfile, "perambulator.%03d.%03d.%04d", 0, 0, nstore);
+//  sprintf(perambulatorfile, "perambulator.%03d.%03d.%04d", 0, 0, conf);
 //  if ((file = fopen(perambulatorfile, "rb")) == NULL ) {
 //    fprintf(stderr, "could not open perambulator file %s.\nAborting...\n",
 //        perambulatorfile);
@@ -591,7 +596,8 @@ void create_perambulators() {
 
   if (REMOVESOURCES) {
     printf("# removing sources\n");
-    system("rm source* eigenv* dirac*.input output.para");
+    sprintf(call, "rm tsource?.%04d.* teigenv*.%04d", conf, conf);
+    system(call);
   }
 
   free(even);
@@ -745,7 +751,7 @@ void create_perambulators() {
 //  return 0;
 //}
 
-void create_input_files(int const dirac, int const timeslice) {
+void create_input_files(int const dirac, int const timeslice, int const conf) {
   char filename[150];
   FILE* file = NULL;
   int j = 0, n_op = 0;
@@ -761,17 +767,17 @@ void create_input_files(int const dirac, int const timeslice) {
     fprintf(file, "# automatic generated file for invert\n");
     fprintf(file, "L=%d\nT=%d\n\n", L, T);
     fprintf(file, "DebugLevel = 0\n");
-    fprintf(file, "InitialStoreCounter = %d\n", 1000);
-    fprintf(file, "Measurements = %d\n", Nmeas);
-    fprintf(file, "2kappamu = %6f\n", 0.177);
-    fprintf(file, "kappa = %6f\n", 0.177);
+    fprintf(file, "InitialStoreCounter = %d\n", conf);
+    fprintf(file, "Measurements = %d\n", 1);
+    fprintf(file, "2kappamu = %f\n", g_mu);
+    fprintf(file, "kappa = %f\n", g_kappa);
     fprintf(file, "BCAngleT = %f\n", 1.0);
-    fprintf(file, "GaugeConfigInputFile = conf\n");
+    fprintf(file, "GaugeConfigInputFile = %s\n", gauge_input_filename);
     fprintf(file, "UseEvenOdd = yes\n\n");
     fprintf(file, "SourceType = timeslice\n");
     fprintf(file, "ReadSource = yes\n");
     fprintf(file, "SourceTimeslice = %d\n", timeslice);
-    fprintf(file, "SourceFileName = source%d\n", j);
+    fprintf(file, "SourceFileName = tsource%d\n", j);
     fprintf(file, "NoSamples = %d\n", 1);
     fprintf(file, "Indices = 0-%d\n\n", no_eigenvalues - 1);
     for (n_op = 0; n_op < no_operators; n_op++) {
@@ -859,7 +865,7 @@ void create_input_files(int const dirac, int const timeslice) {
   return;
 }
 
-void test_system() {
+void test_system(int const conf) {
   char filename[150];
   spinor *inverted;
   spinor *even;
@@ -896,7 +902,7 @@ void test_system() {
   }
   for (int vec = 0; vec < no_eigenvalues; vec++) {
     for (int t = 0; t < T; t++) {
-      sprintf(filename, "eigenvector.%03d.%03d.%04d", vec, t, nstore);
+      sprintf(filename, "eigenvector.%03d.%03d.%04d", vec, t, conf);
       construct_writer(&writer, filename, 0);
       write_su3_vector(writer, &one, eigenvector, 64, t, 1);
       destruct_writer(writer);
@@ -913,7 +919,7 @@ void test_system() {
   for (int dir = 0; dir < 4; dir++) {
     for (int t = 0; t < T; t++) {
       for (int vec = 0; vec < no_eigenvalues; vec++) {
-        sprintf(filename, "source%d.%04d.%02d.%02d.inverted", dir, nstore, t,
+        sprintf(filename, "source%d.%04d.%02d.%02d.inverted", dir, conf, t,
             vec);
         construct_writer(&writer, filename, 0);
         write_spinor(writer, &even, &odd, 1, 64);
