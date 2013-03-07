@@ -61,7 +61,7 @@
 #define DEBUG 1
 #define INVERTER "./invert"
 #define max_no_dilution 10
-#define REMOVESOURCES 0 // remove all output except for the perambulators
+#define REMOVESOURCES 1 // remove all output except for the perambulators
 #define _vector_one(r) \
   (r).c0 = 1.;\
   (r).c1 = 1.;\
@@ -120,9 +120,9 @@ int main(int argc, char* argv[]) {
 
   for (j = 0; j < 2; j++) {
     dilution_list[j].type = 1;
-    dilution_list[j].t = 4 / (j + 1);
+    dilution_list[j].t = 8;
     dilution_list[j].d = 4;
-    dilution_list[j].l = 16 / (j + 1);
+    dilution_list[j].l = 8;
     dilution_list[j].seed = j * 111111;
     no_dilution++;
   }
@@ -230,25 +230,25 @@ int main(int argc, char* argv[]) {
     printf("# Generating eigensystem for conf %d\n", conf);
     fflush(stdout);
     generate_eigensystem(conf);
-
+    g_interlace = 1;
     for (j = 0; j < no_dilution; j++) {
       // check for interlace
-      g_interlace = 0;
-      if ((dilution_list[j].t != no_eigenvalues) || (dilution_list[j].d != 4)
-          || (dilution_list[j].l != T)) {
-        printf("interlacing activated\n");
-        g_interlace = 1;
-      }
+//      g_interlace = 0;
+//      if ((dilution_list[j].t != no_eigenvalues) || (dilution_list[j].d != 4)
+//          || (dilution_list[j].l != T)) {
+//        printf("interlacing activated\n");
+//        g_interlace = 1;
+//      }
       // restart the RNG
       start_ranlux(1, dilution_list[j].seed);
 
       //generate the sources
-      printf("# generating sources (%d of %d)\n", j+1, no_dilution);
+      printf("# generating sources (%d of %d)\n", j + 1, no_dilution);
       fflush(stdout);
       create_invert_sources(conf, j);
 
       // construct the perambulators
-      printf("# constructing perambulators (%d of %d)\n", j+1, no_dilution);
+      printf("# constructing perambulators (%d of %d)\n", j + 1, no_dilution);
       fflush(stdout);
       create_perambulators(conf, j);
 
@@ -260,6 +260,17 @@ int main(int argc, char* argv[]) {
         system(call);
       }
     }
+    sprintf(call,
+        "cp perambulator*.%04d /dsk/lattice02-0/jost/data/8times16_interlace/",
+        conf);
+    system(call);
+    sprintf(call,
+        "cp randomvector*.%04d /dsk/lattice02-0/jost/data/8times16_interlace/",
+        conf);
+    system(call);
+//    sprintf(call, "cp b_eigenvector*.%04d /dsk/lattice02-0/jost/data/8times16/_interlace",
+//        conf);
+//    system(call);
   }
 
   printf("\n# program finished without problems\n# Clearing memory\n");
@@ -543,7 +554,8 @@ void create_perambulators(int const conf, int const dilution) {
   int timeblock = LX * LY * LZ;
   spinor *inverted, *even, *odd, *tmp;
   su3_vector* eigenvector;
-  char eigenvectorfile[200], invertedfile[200], perambulatorfile[200], interlace[50];
+  char eigenvectorfile[200], invertedfile[200], perambulatorfile[200],
+      interlace[50];
   FILE *file = NULL;
   _Complex double *block;
 
@@ -595,20 +607,20 @@ void create_perambulators(int const conf, int const dilution) {
             sprintf(eigenvectorfile, "eigenvector.%03d.%03d.%04d", nvsink,
                 tsink, conf);
             read_su3_vector(eigenvector, eigenvectorfile, 0, tsink, 1);
-            sprintf(eigenvectorfile, "./b_eigenvector.%03d.%03d.%04d", nvsink,
-                tsink, conf);
-            if ((file = fopen(eigenvectorfile, "wb")) == NULL ) {
-              fprintf(stderr,
-                  "could not open eigenvector file %s.\nAborting...\n",
-                  eigenvectorfile);
-              exit(-1);
-            }
-            count = fwrite(eigenvector, sizeof(su3_vector), timeblock, file);
-            if (count != timeblock) {
-              fprintf(stderr, "could not write all data to file %s.\n",
-                  eigenvectorfile);
-            }
-            fclose(file);
+//            sprintf(eigenvectorfile, "./b_eigenvector.%03d.%03d.%04d", nvsink,
+//                tsink, conf);
+//            if ((file = fopen(eigenvectorfile, "wb")) == NULL ) {
+//              fprintf(stderr,
+//                  "could not open eigenvector file %s.\nAborting...\n",
+//                  eigenvectorfile);
+//              exit(-1);
+//            }
+//            count = fwrite(eigenvector, sizeof(su3_vector), timeblock, file);
+//            if (count != timeblock) {
+//              fprintf(stderr, "could not write all data to file %s.\n",
+//                  eigenvectorfile);
+//            }
+//            fclose(file);
 
             for (point1 = 0; point1 < timeblock; point1++) {
               spinor_times_su3vec(
@@ -622,10 +634,12 @@ void create_perambulators(int const conf, int const dilution) {
 
       // save the perambulator
       // naming convention: perambulator[_interlace].tsource.tsink.configuration
-      if(g_interlace) sprintf(interlace, "_i.%2d", dilution);
-      else sprintf(interlace, "");
-      sprintf(perambulatorfile, "perambulator%s.%03d.%03d.%04d",
-          interlace, tsource, tsink, conf);
+      if (g_interlace)
+        sprintf(interlace, "_i.%02d", dilution);
+      else
+        sprintf(interlace, "");
+      sprintf(perambulatorfile, "perambulator%s.%03d.%03d.%04d", interlace,
+          tsource, tsink, conf);
       if ((file = fopen(perambulatorfile, "wb")) == NULL ) {
         fprintf(stderr, "could not open perambulator file %s.\nAborting...\n",
             perambulatorfile);
