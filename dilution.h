@@ -26,7 +26,7 @@
  *
  *******************************************************************************/
 
-#define max_no_dilution 10
+#define max_no_dilution 15
 
 #define D_NONE 0
 #define D_FULL 1

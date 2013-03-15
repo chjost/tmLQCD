@@ -200,11 +200,30 @@ int main(int argc, char* argv[]) {
 //  for (j = 0; j < 1; j++) {
 //    add_dilution(D_INTER, D_FULL, D_INTER, 2, -1, 4, -(j + 1) * 111111);
 //  }
-  g_stochastical_run = 0;
-//  add_dilution(D_FULL, D_FULL, D_FULL, 0, 0, 0, 111111);
-//  add_dilution(D_NONE, D_FULL, D_FULL, 0, 0, 0, 222222);
-//  add_dilution(D_FULL, D_NONE, D_FULL, 0, 0, 0, 333333);
-//  add_dilution(D_FULL, D_FULL, D_NONE, 0, 0, 0, 444444);
+  g_stochastical_run = 1;
+  //getestet
+  add_dilution(D_FULL, D_FULL, D_FULL, 0, 0, 0, 111111);
+  add_dilution(D_NONE, D_FULL, D_FULL, 0, 0, 0, 222222);
+  add_dilution(D_FULL, D_NONE, D_FULL, 0, 0, 0, 333333);
+  add_dilution(D_FULL, D_FULL, D_NONE, 0, 0, 0, 444444);
+  add_dilution(D_NONE, D_NONE, D_FULL, 0, 0, 0, 555555);
+  add_dilution(D_FULL, D_NONE, D_NONE, 0, 0, 0, 666666);
+  add_dilution(D_NONE, D_FULL, D_NONE, 0, 0, 0, 777777);
+  add_dilution(D_NONE, D_NONE, D_NONE, 0, 0, 0, 888888);
+  add_dilution(D_INTER, D_FULL, D_FULL, 2, 0, 0, 999999);
+  add_dilution(D_FULL, D_FULL, D_INTER, 0, 0, 2, 1111110);
+  add_dilution(D_INTER, D_FULL, D_INTER, 2, 0, 2, 1222221);
+  add_dilution(D_INTER, D_NONE, D_FULL, 2, 0, 0, 1333332);
+  add_dilution(D_FULL, D_NONE, D_INTER, 0, 0, 2, 1444443);
+  add_dilution(D_INTER, D_NONE, D_INTER, 2, 0, 2, 1555554);
+
+//nicht getestet
+//  add_dilution(D_BLOCK, D_FULL, D_FULL, 0, 0, 0, 111111);
+//  add_dilution(D_FULL, D_FULL, D_BLOCK, 0, 0, 0, 111111);
+//  add_dilution(D_BLOCK, D_FULL, D_BLOCK, 0, 0, 0, 111111);
+//  add_dilution(D_BLOCK, D_NONE, D_FULL, 0, 0, 0, 111111);
+//  add_dilution(D_FULL, D_NONE, D_BLOCK, 0, 0, 0, 111111);
+//  add_dilution(D_BLOCK, D_NONE, D_BLOCK, 0, 0, 0, 111111);
 
   /* define the boundary conditions for the fermion fields */
   boundary(g_kappa);
@@ -267,16 +286,16 @@ int main(int argc, char* argv[]) {
         system(call);
       }
     }
-    sprintf(call,
-        "cp perambulator*.%04d /dsk/lattice02-0/jost/data/8times16_d/", conf);
-    system(call);
+//    sprintf(call,
+//        "cp perambulator*.%04d /dsk/lattice02-0/jost/data/8times16_d/", conf);
+//    system(call);
 //    sprintf(call,
 //        "cp randomvector*.%04d /dsk/lattice02-0/jost/data/8times16_interlace/",
 //        conf);
 //    system(call);
-    sprintf(call,
-        "cp b_eigenvector*.%04d /dsk/lattice02-0/jost/data/8times16_d", conf);
-    system(call);
+//    sprintf(call,
+//        "cp b_eigenvector*.%04d /dsk/lattice02-0/jost/data/8times16_d", conf);
+//    system(call);
   }
 
   printf("\n# program finished without problems\n# Clearing memory\n");
@@ -380,8 +399,8 @@ int create_invert_sources(int const conf, int const dilution) {
   // local variables
   char filename[200];
   char call[150];
-  int tslice = 0, dir = 0, vec = 0, point = 0, j = 0;
-  int status = 0, t = 0, d = 0, v = 0, block = LX * LY * LZ;
+  int tslice = 0, vec = 0, point = 0, j = 0;
+  int status = 0, t = 0, v = 0, block = LX * LY * LZ;
   int interlace_size, t_end = -1, t_step = -1, t_add = T;
   int l_end = -1, l_step = -1, l_add = no_eigenvalues;
   int d_end = -1;
@@ -420,7 +439,7 @@ int create_invert_sources(int const conf, int const dilution) {
     }
     // dilution in spin space
     if (dilution_list[dilution].type[1] == D_FULL) {
-      d_end = no_eigenvalues;
+      d_end = 4;
     } else if (dilution_list[dilution].type[1] == D_NONE) {
       d_end = 1;
     }
@@ -606,8 +625,7 @@ int create_invert_sources(int const conf, int const dilution) {
       create_input_files(d_end, tslice, conf, 0);
       for (j = 0; j < d_end; j++) {
         sprintf(call, "%s -f dirac%d-cg.input", INVERTER, j);
-        printf("\n\ntrying: %s for conf %4d, t %3d\n", call, conf,
-            tslice);
+        printf("\n\ntrying: %s for conf %4d, t %3d\n", call, conf, tslice);
         fflush(stdout);
         system(call);
       }
@@ -632,7 +650,7 @@ int create_invert_sources(int const conf, int const dilution) {
   free(dirac3);
   free(even);
   free(odd);
-  if(g_stochastical_run != 0) {
+  if (g_stochastical_run != 0) {
     free(rnd_vector);
   }
 
@@ -758,9 +776,9 @@ void create_perambulators(int const conf, int const dilution) {
 
             for (point1 = 0; point1 < timeblock; point1++) {
               spinor_times_su3vec(
-                  &(block[blockwidth * (nvsink * 4) + nvsource * 4 + ndsource]),
-                  inverted[timeblock * tsink + point1], eigenvector[point1],
-                  blockwidth);
+                  &(block[blockwidth * (nvsink * d_end) + nvsource * d_end
+                      + ndsource]), inverted[timeblock * tsink + point1],
+                  eigenvector[point1], blockwidth);
             }
           } // iterate through the eigenvectors
         }
@@ -975,8 +993,17 @@ void create_input_files(int const dirac, int const timeslice, int const conf,
     if (g_stochastical_run == 0) {
       fprintf(file, "Indices = 0-%d\n\n", no_eigenvalues - 1);
     } else {
-      fprintf(file, "Indices = 0-%d\n\n", dilution_list[dilution].size[2] - 1);
-//      fprintf(file, "Indices = 0-%d\n\n", no_eigenvalues - 1);
+      if (dilution_list[dilution].type[2] == D_FULL) {
+        fprintf(file, "Indices = 0-%d\n\n", no_eigenvalues - 1);
+      } else if (dilution_list[dilution].type[2] == D_NONE) {
+        fprintf(file, "Indices = 0\n\n");
+      } else if (dilution_list[dilution].type[2] == D_INTER) {
+        fprintf(file, "Indices = 0-%d\n\n",
+            dilution_list[dilution].size[2] - 1);
+      } else if (dilution_list[dilution].type[2] == D_BLOCK) {
+        fprintf(file, "Indices = 0-%d\n\n",
+            dilution_list[dilution].size[2] - 1);
+      }
     }
     for (n_op = 0; n_op < no_operators; n_op++) {
       switch (operator_list[n_op].type) {
