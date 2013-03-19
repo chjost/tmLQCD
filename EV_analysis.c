@@ -202,20 +202,65 @@ int main(int argc, char* argv[]) {
 //  }
   g_stochastical_run = 1;
   //getestet
-  add_dilution(D_FULL, D_FULL, D_FULL, 0, 0, 0, 111111);
-  add_dilution(D_NONE, D_FULL, D_FULL, 0, 0, 0, 222222);
-  add_dilution(D_FULL, D_NONE, D_FULL, 0, 0, 0, 333333);
-  add_dilution(D_FULL, D_FULL, D_NONE, 0, 0, 0, 444444);
-  add_dilution(D_NONE, D_NONE, D_FULL, 0, 0, 0, 555555);
-  add_dilution(D_FULL, D_NONE, D_NONE, 0, 0, 0, 666666);
-  add_dilution(D_NONE, D_FULL, D_NONE, 0, 0, 0, 777777);
-  add_dilution(D_NONE, D_NONE, D_NONE, 0, 0, 0, 888888);
-  add_dilution(D_INTER, D_FULL, D_FULL, 2, 0, 0, 999999);
-  add_dilution(D_FULL, D_FULL, D_INTER, 0, 0, 2, 1111110);
-  add_dilution(D_INTER, D_FULL, D_INTER, 2, 0, 2, 1222221);
-  add_dilution(D_INTER, D_NONE, D_FULL, 2, 0, 0, 1333332);
-  add_dilution(D_FULL, D_NONE, D_INTER, 0, 0, 2, 1444443);
-  add_dilution(D_INTER, D_NONE, D_INTER, 2, 0, 2, 1555554);
+  add_dilution(D_INTER, D_FULL, D_INTER, 8, 0, 8, 1227, D_UP, D_STOCH);
+  add_dilution(D_INTER, D_FULL, D_INTER, 8, 0, 8, 1337, D_UP, D_STOCH);
+  add_dilution(D_INTER, D_FULL, D_INTER, 8, 0, 8, 1447, D_DOWN, D_STOCH);
+  add_dilution(D_INTER, D_FULL, D_INTER, 8, 0, 8, 1557, D_DOWN, D_STOCH);
+//  add_dilution(D_NONE, D_FULL, D_FULL, 0, 0, 0, 222222, D_UP, D_STOCH);
+//  add_dilution(D_FULL, D_NONE, D_FULL, 0, 0, 0, 333333, D_UP, D_STOCH);
+//  add_dilution(D_FULL, D_FULL, D_NONE, 0, 0, 0, 444444, D_UP, D_STOCH);
+//  add_dilution(D_NONE, D_NONE, D_FULL, 0, 0, 0, 555555, D_UP, D_STOCH);
+//  add_dilution(D_FULL, D_NONE, D_NONE, 0, 0, 0, 666666, D_UP, D_STOCH);
+//  add_dilution(D_NONE, D_FULL, D_NONE, 0, 0, 0, 777777, D_UP, D_STOCH);
+//  add_dilution(D_NONE, D_NONE, D_NONE, 0, 0, 0, 888888, D_UP, D_STOCH);
+//  add_dilution(D_INTER, D_FULL, D_FULL, 2, 0, 0, 999999, D_UP, D_STOCH);
+//  add_dilution(D_FULL, D_FULL, D_INTER, 0, 0, 2, 1111110, D_UP, D_STOCH);
+//  add_dilution(D_INTER, D_FULL, D_INTER, 2, 0, 2, 1222221, D_UP, D_STOCH);
+//  add_dilution(D_INTER, D_NONE, D_FULL, 2, 0, 0, 1333332, D_UP, D_STOCH);
+//  add_dilution(D_FULL, D_NONE, D_INTER, 0, 0, 2, 1444443, D_UP, D_STOCH);
+//  add_dilution(D_INTER, D_NONE, D_INTER, 2, 0, 2, 1555554, D_UP, D_STOCH);
+//  add_dilution(D_FULL, D_FULL, D_FULL, 0, 0, 0, 111111, D_DOWN, D_STOCH);
+//  add_dilution(D_NONE, D_FULL, D_FULL, 0, 0, 0, 222222, D_DOWN, D_STOCH);
+//  add_dilution(D_FULL, D_NONE, D_FULL, 0, 0, 0, 333333, D_DOWN, D_STOCH);
+//  add_dilution(D_FULL, D_FULL, D_NONE, 0, 0, 0, 444444, D_DOWN, D_STOCH);
+//  add_dilution(D_NONE, D_NONE, D_FULL, 0, 0, 0, 555555, D_DOWN, D_STOCH);
+//  add_dilution(D_FULL, D_NONE, D_NONE, 0, 0, 0, 666666, D_DOWN, D_STOCH);
+//  add_dilution(D_NONE, D_FULL, D_NONE, 0, 0, 0, 777777, D_DOWN, D_STOCH);
+//  add_dilution(D_NONE, D_NONE, D_NONE, 0, 0, 0, 888888, D_DOWN, D_STOCH);
+//  add_dilution(D_INTER, D_FULL, D_FULL, 2, 0, 0, 999999, D_DOWN, D_STOCH);
+//  add_dilution(D_FULL, D_FULL, D_INTER, 0, 0, 2, 1111110, D_DOWN, D_STOCH);
+//  add_dilution(D_INTER, D_FULL, D_INTER, 2, 0, 2, 1222221, D_DOWN, D_STOCH);
+//  add_dilution(D_INTER, D_NONE, D_FULL, 2, 0, 0, 1333332, D_DOWN, D_STOCH);
+//  add_dilution(D_FULL, D_NONE, D_INTER, 0, 0, 2, 1444443, D_DOWN, D_STOCH);
+//  add_dilution(D_INTER, D_NONE, D_INTER, 2, 0, 2, 1555554, D_DOWN, D_STOCH);
+//  add_dilution(D_FULL, D_FULL, D_FULL, 0, 0, 0, 111111, D_UP, D_LOCAL);
+//  add_dilution(D_NONE, D_FULL, D_FULL, 0, 0, 0, 222222, D_UP, D_LOCAL);
+//  add_dilution(D_FULL, D_NONE, D_FULL, 0, 0, 0, 333333, D_UP, D_LOCAL);
+//  add_dilution(D_FULL, D_FULL, D_NONE, 0, 0, 0, 444444, D_UP, D_LOCAL);
+//  add_dilution(D_NONE, D_NONE, D_FULL, 0, 0, 0, 555555, D_UP, D_LOCAL);
+//  add_dilution(D_FULL, D_NONE, D_NONE, 0, 0, 0, 666666, D_UP, D_LOCAL);
+//  add_dilution(D_NONE, D_FULL, D_NONE, 0, 0, 0, 777777, D_UP, D_LOCAL);
+//  add_dilution(D_NONE, D_NONE, D_NONE, 0, 0, 0, 888888, D_UP, D_LOCAL);
+//  add_dilution(D_INTER, D_FULL, D_FULL, 2, 0, 0, 999999, D_UP, D_LOCAL);
+//  add_dilution(D_FULL, D_FULL, D_INTER, 0, 0, 2, 1111110, D_UP, D_LOCAL);
+//  add_dilution(D_INTER, D_FULL, D_INTER, 2, 0, 2, 1222221, D_UP, D_LOCAL);
+//  add_dilution(D_INTER, D_NONE, D_FULL, 2, 0, 0, 1333332, D_UP, D_LOCAL);
+//  add_dilution(D_FULL, D_NONE, D_INTER, 0, 0, 2, 1444443, D_UP, D_LOCAL);
+//  add_dilution(D_INTER, D_NONE, D_INTER, 2, 0, 2, 1555554, D_UP, D_LOCAL);
+//  add_dilution(D_FULL, D_FULL, D_FULL, 0, 0, 0, 111111, D_DOWN, D_LOCAL);
+//  add_dilution(D_NONE, D_FULL, D_FULL, 0, 0, 0, 222222, D_DOWN, D_LOCAL);
+//  add_dilution(D_FULL, D_NONE, D_FULL, 0, 0, 0, 333333, D_DOWN, D_LOCAL);
+//  add_dilution(D_FULL, D_FULL, D_NONE, 0, 0, 0, 444444, D_DOWN, D_LOCAL);
+//  add_dilution(D_NONE, D_NONE, D_FULL, 0, 0, 0, 555555, D_DOWN, D_LOCAL);
+//  add_dilution(D_FULL, D_NONE, D_NONE, 0, 0, 0, 666666, D_DOWN, D_LOCAL);
+//  add_dilution(D_NONE, D_FULL, D_NONE, 0, 0, 0, 777777, D_DOWN, D_LOCAL);
+//  add_dilution(D_NONE, D_NONE, D_NONE, 0, 0, 0, 888888, D_DOWN, D_LOCAL);
+//  add_dilution(D_INTER, D_FULL, D_FULL, 2, 0, 0, 999999, D_DOWN, D_LOCAL);
+//  add_dilution(D_FULL, D_FULL, D_INTER, 0, 0, 2, 1111110, D_DOWN, D_LOCAL);
+//  add_dilution(D_INTER, D_FULL, D_INTER, 2, 0, 2, 1222221, D_DOWN, D_LOCAL);
+//  add_dilution(D_INTER, D_NONE, D_FULL, 2, 0, 0, 1333332, D_DOWN, D_LOCAL);
+//  add_dilution(D_FULL, D_NONE, D_INTER, 0, 0, 2, 1444443, D_DOWN, D_LOCAL);
+//  add_dilution(D_INTER, D_NONE, D_INTER, 2, 0, 2, 1555554, D_DOWN, D_LOCAL);
 
 //nicht getestet
 //  add_dilution(D_BLOCK, D_FULL, D_FULL, 0, 0, 0, 111111);
@@ -661,19 +706,20 @@ int create_invert_sources(int const conf, int const dilution) {
  * create the perambulators
  */
 void create_perambulators(int const conf, int const dilution) {
-  // local parameters
+// local parameters
   int tsource, tsink;
   int nvsource, ndsource, nvsink, i, point1, count;
   int t_end = -1, l_end = -1, d_end = 4;
   int blockwidth, blocksize, blockheigth = 4 * no_eigenvalues;
   int timeblock = LX * LY * LZ;
   spinor *inverted, *even, *odd, *tmp;
-  su3_vector* eigenvector;
+  su3_vector* eigenvector = NULL;
+  _Complex double *tmpeigenvector = NULL;
   char eigenvectorfile[200], invertedfile[200], perambulatorfile[200];
   FILE *file = NULL;
   _Complex double *block;
 
-  // set the correct parameters for the loops
+// set the correct parameters for the loops
   if (g_stochastical_run == 0) {
     t_end = T;
     d_end = 4;
@@ -708,7 +754,7 @@ void create_perambulators(int const conf, int const dilution) {
   blockwidth = d_end * l_end;
   blocksize = blockheigth * blockwidth;
 
-  // allocate the needed memory for spinors, eigenvectors and peramulator
+// allocate the needed memory for spinors, eigenvectors and peramulator
   tmp = (spinor*) calloc(VOLUMEPLUSRAND + 1, sizeof(spinor));
 #if (defined SSE || defined SSE2 || defined SSE3)
   inverted = (spinor*) (((unsigned long int) (tmp) + ALIGN_BASE) & ~ALIGN_BASE);
@@ -729,6 +775,13 @@ void create_perambulators(int const conf, int const dilution) {
 #endif
 
   eigenvector = (su3_vector*) calloc(timeblock, sizeof(su3_vector));
+  if (eigenvector == NULL ) {
+    fprintf(stderr, "not enough space to create eigenvector.\nAborting...\n");
+    return;
+  }
+  if (dilution_list[dilution].smearing == D_LOCAL) {
+    tmpeigenvector = (_Complex double*) eigenvector;
+  }
 
   block = (_Complex double*) calloc(blocksize, sizeof(_Complex double));
   if (block == NULL ) {
@@ -754,25 +807,29 @@ void create_perambulators(int const conf, int const dilution) {
 
           // iterate through the eigenvectors
           for (nvsink = 0; nvsink < no_eigenvalues; nvsink++) {
-            sprintf(eigenvectorfile, "eigenvector.%03d.%03d.%04d", nvsink,
-                tsink, conf);
-            read_su3_vector(eigenvector, eigenvectorfile, 0, tsink, 1);
-
-            // binary dump of the eigenvectors, needed for the operators
-            sprintf(eigenvectorfile, "./b_eigenvector.%03d.%03d.%04d", nvsink,
-                tsink, conf);
-            if ((file = fopen(eigenvectorfile, "wb")) == NULL ) {
-              fprintf(stderr,
-                  "could not open eigenvector file %s.\nAborting...\n",
-                  eigenvectorfile);
-              exit(-1);
+            if (dilution_list[dilution].smearing == D_STOCH) {
+              sprintf(eigenvectorfile, "eigenvector.%03d.%03d.%04d", nvsink,
+                  tsink, conf);
+              read_su3_vector(eigenvector, eigenvectorfile, 0, tsink, 1);
+              // binary dump of the eigenvectors, needed for the operators
+              sprintf(eigenvectorfile, "./b_eigenvector.%03d.%03d.%04d", nvsink,
+                  tsink, conf);
+              if ((file = fopen(eigenvectorfile, "wb")) == NULL ) {
+                fprintf(stderr,
+                    "could not open eigenvector file %s.\nAborting...\n",
+                    eigenvectorfile);
+                exit(-1);
+              }
+              count = fwrite(eigenvector, sizeof(su3_vector), timeblock, file);
+              if (count != timeblock) {
+                fprintf(stderr, "could not write all data to file %s.\n",
+                    eigenvectorfile);
+              }
+              fclose(file);
+            } else {
+              memset(eigenvector, 0, sizeof(su3_vector) * timeblock);
+              tmpeigenvector[nvsink] = 1.0;
             }
-            count = fwrite(eigenvector, sizeof(su3_vector), timeblock, file);
-            if (count != timeblock) {
-              fprintf(stderr, "could not write all data to file %s.\n",
-                  eigenvectorfile);
-            }
-            fclose(file);
 
             for (point1 = 0; point1 < timeblock; point1++) {
               spinor_times_su3vec(
@@ -1159,3 +1216,282 @@ void test_system(int const conf) {
   free(eigenvector);
   return;
 }
+
+inline void fill_unit_matrix(_Complex double *matrix, int const blockwidth) {
+  matrix[0 * blockwidth + 0] = 1.;
+  matrix[1 * blockwidth + 1] = 1.;
+  matrix[2 * blockwidth + 2] = 1.;
+  matrix[3 * blockwidth + 3] = 1.;
+
+  matrix[0 * blockwidth + 1] = 0.;
+  matrix[0 * blockwidth + 2] = 0.;
+  matrix[0 * blockwidth + 3] = 0.;
+
+  matrix[1 * blockwidth + 0] = 0.;
+  matrix[1 * blockwidth + 2] = 0.;
+  matrix[1 * blockwidth + 3] = 0.;
+
+  matrix[2 * blockwidth + 0] = 0.;
+  matrix[2 * blockwidth + 1] = 0.;
+  matrix[2 * blockwidth + 3] = 0.;
+
+  matrix[3 * blockwidth + 0] = 0.;
+  matrix[3 * blockwidth + 1] = 0.;
+  matrix[3 * blockwidth + 2] = 0.;
+}
+
+inline void fill_vector_one(_Complex double *matrix, int const blockwidth) {
+  matrix[0 * blockwidth] = 1.;
+  matrix[1 * blockwidth] = 1.;
+  matrix[2 * blockwidth] = 1.;
+  matrix[3 * blockwidth] = 1.;
+}
+
+void create_perambulator_matrix(const int dil) {
+  if (g_stochastical_run == 0)
+    return;
+  int t_end = 0;
+  int l_end = 0;
+  int d_end = (dilution_list[dil].type[1] == D_FULL) ? 4 : 1;
+  int t1 = 0, t2 = 0, l1 = 0, l2 = 0;
+  int blocklength, size = 4 * T * no_eigenvalues;
+
+  if (dilution_list[dil].type[0] == D_FULL) {
+    t_end = T;
+  } else if (dilution_list[dil].type[0] == D_INTER) {
+    t_end = dilution_list[dil].size[0];
+  } else if (dilution_list[dil].type[0] == D_BLOCK) {
+    t_end = dilution_list[dil].size[0];
+  } else if (dilution_list[dil].type[0] == D_NONE) {
+    t_end = 1;
+  }
+
+  if (dilution_list[dil].type[2] == D_FULL) {
+    l_end = no_eigenvalues;
+  } else if (dilution_list[dil].type[2] == D_INTER) {
+    l_end = dilution_list[dil].size[2];
+  } else if (dilution_list[dil].type[2] == D_BLOCK) {
+    l_end = dilution_list[dil].size[2];
+  } else if (dilution_list[dil].type[2] == D_NONE) {
+    l_end = 1;
+  }
+  blocklength = t_end * l_end * d_end;
+
+  _Complex double *matrix;
+  matrix = (_Complex double*) calloc(size * blocklength,
+      sizeof(_Complex double));
+  if (matrix == NULL ) {
+    fprintf(stderr,
+        "Could not allocate matrix in create_perambulator_matrix.\nAborting...");
+    exit(-1);
+  }
+
+  for (t2 = 0; t2 < T; t2++) {
+    for (l2 = 0; l2 < no_eigenvalues; l2++) {
+//**********************************************************************************
+      if (dilution_list[dil].type[0] == D_FULL) { // full time dilution
+        for (t1 = 0; t1 < T; t1++) {
+          if (dilution_list[dil].type[1] == D_FULL) { // full laph dilution
+            for (l1 = 0; l1 < no_eigenvalues; l1++) {
+              if (dilution_list[dil].type[2] == D_FULL) {  // full spin dilution
+                fill_unit_matrix(
+                    &(matrix[(t2 * no_eigenvalues * 4 + l2 * 4) * blocklength
+                        + t1 * no_eigenvalues * 4 + l1 * 4]), blocklength);
+              } else {                                       // no spin dilution
+                fill_vector_one(
+                    &(matrix[(t2 * no_eigenvalues * 4 + l2 * 4) * blocklength
+                        + t1 * no_eigenvalues + l1]), blocklength);
+              }
+            }
+          } else if (dilution_list[dil].type[1] == D_NONE) { // no laph dilution
+            if (dilution_list[dil].type[2] == D_FULL) {  // full spin dilution
+              fill_unit_matrix(
+                  &(matrix[(t2 * no_eigenvalues * 4) * blocklength + t1 * 4]),
+                  blocklength);
+            } else {                                       // no spin dilution
+              fill_vector_one(
+                  &(matrix[(t2 * no_eigenvalues * 4 + l2 * 4) * blocklength + t1]),
+                  blocklength);
+            }
+          } else if (dilution_list[dil].type[1] == D_INTER) { // interlacing laph dilution
+            for (l1 = l2; l1 < no_eigenvalues; l1 += l_end) {
+              if (dilution_list[dil].type[2] == D_FULL) {  // full spin dilution
+                fill_unit_matrix(
+                    &(matrix[(t2 * no_eigenvalues * 4 + l2 * 4) * blocklength
+                        + t1 * no_eigenvalues * 4 + l1 * 4]), blocklength);
+              } else {                                       // no spin dilution
+                fill_vector_one(
+                    &(matrix[(t2 * no_eigenvalues * 4 + l2 * 4) * blocklength
+                        + t1 * no_eigenvalues + l1]), blocklength);
+              }
+            }
+          } else if (dilution_list[dil].type[1] == D_BLOCK) { // block laph dilution
+            for (l1 = l2; l1 < l2 + no_eigenvalues / l_end; l1++) {
+              if (dilution_list[dil].type[2] == D_FULL) {  // full spin dilution
+                fill_unit_matrix(
+                    &(matrix[(t2 * no_eigenvalues * 4 + l2 * 4) * blocklength
+                        + t1 * no_eigenvalues * 4 + l1 * 4]), blocklength);
+              } else {                                       // no spin dilution
+                fill_vector_one(
+                    &(matrix[(t2 * no_eigenvalues * 4 + l2 * 4) * blocklength
+                        + t1 * no_eigenvalues + l1]), blocklength);
+              }
+            }
+          }
+        }
+//**********************************************************************************
+      } else if (dilution_list[dil].type[0] == D_NONE) { // no time dilution
+        if (dilution_list[dil].type[1] == D_FULL) { // full laph dilution
+          for (l1 = 0; l1 < no_eigenvalues; l1++) {
+            if (dilution_list[dil].type[2] == D_FULL) {  // full spin dilution
+              fill_unit_matrix(
+                  &(matrix[(t2 * no_eigenvalues * 4 + l2 * 4) * blocklength
+                      + l1 * 4]), blocklength);
+            } else {                                       // no spin dilution
+              fill_vector_one(
+                  &(matrix[(t2 * no_eigenvalues * 4 + l2 * 4) * blocklength + l1]),
+                  blocklength);
+            }
+          }
+        } else if (dilution_list[dil].type[1] == D_NONE) { // no laph dilution
+          if (dilution_list[dil].type[2] == D_FULL) {  // full spin dilution
+            fill_unit_matrix(
+                &(matrix[(t2 * no_eigenvalues * 4) * blocklength + t1 * 4]),
+                blocklength);
+          } else {                                       // no spin dilution
+            fill_vector_one(
+                &(matrix[(t2 * no_eigenvalues * 4 + l2 * 4) * blocklength + t1]),
+                blocklength);
+          }
+        } else if (dilution_list[dil].type[1] == D_INTER) { // interlacing laph dilution
+          for (l1 = l2; l1 < no_eigenvalues; l1 += l_end) {
+            if (dilution_list[dil].type[2] == D_FULL) {  // full spin dilution
+              fill_unit_matrix(
+                  &(matrix[(t2 * no_eigenvalues * 4 + l2 * 4) * blocklength
+                      + l1 * 4]), blocklength);
+            } else {                                       // no spin dilution
+              fill_vector_one(
+                  &(matrix[(t2 * no_eigenvalues * 4 + l2 * 4) * blocklength + l1]),
+                  blocklength);
+            }
+          }
+        } else if (dilution_list[dil].type[1] == D_BLOCK) { // block laph dilution
+          for (l1 = l2; l1 < l2 + no_eigenvalues / l_end; l1++) {
+            if (dilution_list[dil].type[2] == D_FULL) {  // full spin dilution
+              fill_unit_matrix(
+                  &(matrix[(t2 * no_eigenvalues * 4 + l2 * 4) * blocklength
+                      + l1 * 4]), blocklength);
+            } else {                                       // no spin dilution
+              fill_vector_one(
+                  &(matrix[(t2 * no_eigenvalues * 4 + l2 * 4) * blocklength + l1]),
+                  blocklength);
+            }
+          }
+        }
+//**********************************************************************************
+      } else if (dilution_list[dil].type[0] == D_INTER) { // interlace time dilution
+        for (t1 = t2; t1 < T; t1 += t_end) {
+          if (dilution_list[dil].type[1] == D_FULL) { // full laph dilution
+            for (l1 = 0; l1 < no_eigenvalues; l1++) {
+              if (dilution_list[dil].type[2] == D_FULL) {  // full spin dilution
+                fill_unit_matrix(
+                    &(matrix[(t2 * no_eigenvalues * 4 + l2 * 4) * blocklength
+                        + t1 * no_eigenvalues * 4 + l1 * 4]), blocklength);
+              } else {                                       // no spin dilution
+                fill_vector_one(
+                    &(matrix[(t2 * no_eigenvalues * 4 + l2 * 4) * blocklength
+                        + t1 * no_eigenvalues + l1]), blocklength);
+              }
+            }
+          } else if (dilution_list[dil].type[1] == D_NONE) { // no laph dilution
+            if (dilution_list[dil].type[2] == D_FULL) {  // full spin dilution
+              fill_unit_matrix(
+                  &(matrix[(t2 * no_eigenvalues * 4) * blocklength + t1 * 4]),
+                  blocklength);
+            } else {                                       // no spin dilution
+              fill_vector_one(
+                  &(matrix[(t2 * no_eigenvalues * 4 + l2 * 4) * blocklength + t1]),
+                  blocklength);
+            }
+          } else if (dilution_list[dil].type[1] == D_INTER) { // interlacing laph dilution
+            for (l1 = l2; l1 < no_eigenvalues; l1 += l_end) {
+              if (dilution_list[dil].type[2] == D_FULL) {  // full spin dilution
+                fill_unit_matrix(
+                    &(matrix[(t2 * no_eigenvalues * 4 + l2 * 4) * blocklength
+                        + t1 * no_eigenvalues * 4 + l1 * 4]), blocklength);
+              } else {                                       // no spin dilution
+                fill_vector_one(
+                    &(matrix[(t2 * no_eigenvalues * 4 + l2 * 4) * blocklength
+                        + t1 * no_eigenvalues + l1]), blocklength);
+              }
+            }
+          } else if (dilution_list[dil].type[1] == D_BLOCK) { // block laph dilution
+            for (l1 = l2; l1 < l2 + no_eigenvalues / l_end; l1++) {
+              if (dilution_list[dil].type[2] == D_FULL) {  // full spin dilution
+                fill_unit_matrix(
+                    &(matrix[(t2 * no_eigenvalues * 4 + l2 * 4) * blocklength
+                        + t1 * no_eigenvalues * 4 + l1 * 4]), blocklength);
+              } else {                                       // no spin dilution
+                fill_vector_one(
+                    &(matrix[(t2 * no_eigenvalues * 4 + l2 * 4) * blocklength
+                        + t1 * no_eigenvalues + l1]), blocklength);
+              }
+            }
+          }
+        }
+//**********************************************************************************
+      } else if (dilution_list[dil].type[0] == D_BLOCK) { // block time dilution
+        for (t1 = t2; t1 < t2 + T / t_end; t1++) {
+          if (dilution_list[dil].type[1] == D_FULL) { // full laph dilution
+            for (l1 = 0; l1 < no_eigenvalues; l1++) {
+              if (dilution_list[dil].type[2] == D_FULL) {  // full spin dilution
+                fill_unit_matrix(
+                    &(matrix[(t2 * no_eigenvalues * 4 + l2 * 4) * blocklength
+                        + t1 * no_eigenvalues * 4 + l1 * 4]), blocklength);
+              } else {                                       // no spin dilution
+                fill_vector_one(
+                    &(matrix[(t2 * no_eigenvalues * 4 + l2 * 4) * blocklength
+                        + t1 * no_eigenvalues + l1]), blocklength);
+              }
+            }
+          } else if (dilution_list[dil].type[1] == D_NONE) { // no laph dilution
+            if (dilution_list[dil].type[2] == D_FULL) {  // full spin dilution
+              fill_unit_matrix(
+                  &(matrix[(t2 * no_eigenvalues * 4) * blocklength + t1 * 4]),
+                  blocklength);
+            } else {                                       // no spin dilution
+              fill_vector_one(
+                  &(matrix[(t2 * no_eigenvalues * 4 + l2 * 4) * blocklength + t1]),
+                  blocklength);
+            }
+          } else if (dilution_list[dil].type[1] == D_INTER) { // interlacing laph dilution
+            for (l1 = l2; l1 < no_eigenvalues; l1 += l_end) {
+              if (dilution_list[dil].type[2] == D_FULL) {  // full spin dilution
+                fill_unit_matrix(
+                    &(matrix[(t2 * no_eigenvalues * 4 + l2 * 4) * blocklength
+                        + t1 * no_eigenvalues * 4 + l1 * 4]), blocklength);
+              } else {                                       // no spin dilution
+                fill_vector_one(
+                    &(matrix[(t2 * no_eigenvalues * 4 + l2 * 4) * blocklength
+                        + t1 * no_eigenvalues + l1]), blocklength);
+              }
+            }
+          } else if (dilution_list[dil].type[1] == D_BLOCK) { // block laph dilution
+            for (l1 = l2; l1 < l2 + no_eigenvalues / l_end; l1++) {
+              if (dilution_list[dil].type[2] == D_FULL) {  // full spin dilution
+                fill_unit_matrix(
+                    &(matrix[(t2 * no_eigenvalues * 4 + l2 * 4) * blocklength
+                        + t1 * no_eigenvalues * 4 + l1 * 4]), blocklength);
+              } else {                                       // no spin dilution
+                fill_vector_one(
+                    &(matrix[(t2 * no_eigenvalues * 4 + l2 * 4) * blocklength
+                        + t1 * no_eigenvalues + l1]), blocklength);
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
+

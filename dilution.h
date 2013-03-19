@@ -33,6 +33,12 @@
 #define D_BLOCK 2
 #define D_INTER 3
 
+#define D_UP 0
+#define D_DOWN 1
+
+#define D_STOCH 0
+#define D_LOCAL 1
+
 typedef struct {
   // type of the dilution: none, full, block or interlace
   int type[3];
@@ -43,6 +49,12 @@ typedef struct {
   // seed for the random number generator
   int seed;
 
+  // quark type
+  int quark;
+
+  // smearing
+  int smearing;
+
 } dilution;
 
 extern int g_stochastical_run;
@@ -50,6 +62,7 @@ extern int no_dilution;
 extern dilution dilution_list[max_no_dilution];
 
 void add_dilution(const int d_type_t, const int d_type_d, const int d_type_l,
-    const int d_t, const int d_d, const int d_l, const int d_seed);
+    const int d_t, const int d_d, const int d_l, const int d_seed,
+    const int quark_type, const int smearing);
 
 #endif /* DILUTION_H_ */
