@@ -198,51 +198,53 @@ int main(int argc, char* argv[]) {
 
   g_stochastical_run = 1;
 
-//  add_dilution(D_INTER, D_FULL, D_INTER, 8, 0, 8, 1227, D_UP, D_STOCH);
-//  add_dilution(D_INTER, D_FULL, D_INTER, 8, 0, 8, 1337, D_UP, D_STOCH);
-//  add_dilution(D_INTER, D_FULL, D_INTER, 8, 0, 8, 1447, D_DOWN, D_STOCH);
-//  add_dilution(D_INTER, D_FULL, D_INTER, 8, 0, 8, 1557, D_DOWN, D_STOCH);
+  add_dilution(D_INTER, D_FULL, D_INTER, 8, 0, 8, 1227, D_UP, D_STOCH);
+  add_dilution(D_INTER, D_FULL, D_INTER, 8, 0, 8, 1337, D_UP, D_STOCH);
+  add_dilution(D_INTER, D_FULL, D_INTER, 8, 0, 8, 1447, D_DOWN, D_STOCH);
+  add_dilution(D_INTER, D_FULL, D_INTER, 8, 0, 8, 1557, D_DOWN, D_STOCH);
+
+
   //getestet
 
-  add_dilution(D_FULL, D_FULL, D_FULL, 0, 0, 0, 111111, D_UP, D_STOCH);
-  add_dilution(D_FULL, D_FULL, D_NONE, 0, 0, 0, 222222, D_UP, D_STOCH);
-  add_dilution(D_FULL, D_FULL, D_INTER, 0, 0, 2, 333333, D_UP, D_STOCH);
-  add_dilution(D_FULL, D_FULL, D_BLOCK, 0, 0, 2, 444444, D_UP, D_STOCH);
-
-  add_dilution(D_NONE, D_FULL, D_FULL, 0, 0, 0, 111111, D_UP, D_STOCH);
-  add_dilution(D_NONE, D_FULL, D_NONE, 0, 0, 0, 222222, D_UP, D_STOCH);
-  add_dilution(D_NONE, D_FULL, D_INTER, 2, 0, 2, 333333, D_UP, D_STOCH);
-  add_dilution(D_NONE, D_FULL, D_BLOCK, 0, 0, 2, 444444, D_UP, D_STOCH);
-
-  add_dilution(D_INTER, D_FULL, D_FULL, 2, 0, 0, 111111, D_UP, D_STOCH);
-  add_dilution(D_INTER, D_FULL, D_NONE, 2, 0, 2, 222222, D_UP, D_STOCH);
-  add_dilution(D_INTER, D_FULL, D_INTER, 2, 0, 2, 333333, D_UP, D_STOCH);
-  add_dilution(D_INTER, D_FULL, D_BLOCK, 2, 0, 2, 444444, D_UP, D_STOCH);
-
-  add_dilution(D_BLOCK, D_FULL, D_FULL, 2, 0, 0, 111111, D_UP, D_STOCH);
-  add_dilution(D_BLOCK, D_FULL, D_NONE, 2, 0, 0, 222222, D_UP, D_STOCH);
-  add_dilution(D_BLOCK, D_FULL, D_INTER, 2, 0, 2, 333333, D_UP, D_STOCH);
-  add_dilution(D_BLOCK, D_FULL, D_BLOCK, 2, 0, 2, 444444, D_UP, D_STOCH);
-
-  add_dilution(D_FULL, D_NONE, D_FULL, 0, 0, 0, 111111, D_UP, D_STOCH);
-  add_dilution(D_FULL, D_NONE, D_NONE, 0, 0, 0, 222222, D_UP, D_STOCH);
-  add_dilution(D_FULL, D_NONE, D_INTER, 0, 0, 2, 333333, D_UP, D_STOCH);
-  add_dilution(D_FULL, D_NONE, D_BLOCK, 0, 0, 2, 444444, D_UP, D_STOCH);
-
-  add_dilution(D_NONE, D_NONE, D_FULL, 0, 0, 0, 111111, D_UP, D_STOCH);
-  add_dilution(D_NONE, D_NONE, D_NONE, 0, 0, 0, 222222, D_UP, D_STOCH);
-  add_dilution(D_NONE, D_NONE, D_INTER, 2, 0, 2, 333333, D_UP, D_STOCH);
-  add_dilution(D_NONE, D_NONE, D_BLOCK, 0, 0, 2, 444444, D_UP, D_STOCH);
-
-  add_dilution(D_INTER, D_NONE, D_FULL, 2, 0, 0, 111111, D_UP, D_STOCH);
-  add_dilution(D_INTER, D_NONE, D_NONE, 2, 0, 2, 222222, D_UP, D_STOCH);
-  add_dilution(D_INTER, D_NONE, D_INTER, 2, 0, 2, 333333, D_UP, D_STOCH);
-  add_dilution(D_INTER, D_NONE, D_BLOCK, 2, 0, 2, 444444, D_UP, D_STOCH);
-
-  add_dilution(D_BLOCK, D_NONE, D_FULL, 2, 0, 0, 111111, D_UP, D_STOCH);
-  add_dilution(D_BLOCK, D_NONE, D_NONE, 2, 0, 0, 222222, D_UP, D_STOCH);
-  add_dilution(D_BLOCK, D_NONE, D_INTER, 2, 0, 2, 333333, D_UP, D_STOCH);
-  add_dilution(D_BLOCK, D_NONE, D_BLOCK, 2, 0, 2, 444444, D_UP, D_STOCH);
+//  add_dilution(D_FULL, D_FULL, D_FULL, 0, 0, 0, 111111, D_UP, D_STOCH);
+//  add_dilution(D_FULL, D_FULL, D_NONE, 0, 0, 0, 222222, D_UP, D_STOCH);
+//  add_dilution(D_FULL, D_FULL, D_INTER, 0, 0, 2, 333333, D_UP, D_STOCH);
+//  add_dilution(D_FULL, D_FULL, D_BLOCK, 0, 0, 2, 444444, D_UP, D_STOCH);
+//
+//  add_dilution(D_NONE, D_FULL, D_FULL, 0, 0, 0, 111111, D_UP, D_STOCH);
+//  add_dilution(D_NONE, D_FULL, D_NONE, 0, 0, 0, 222222, D_UP, D_STOCH);
+//  add_dilution(D_NONE, D_FULL, D_INTER, 2, 0, 2, 333333, D_UP, D_STOCH);
+//  add_dilution(D_NONE, D_FULL, D_BLOCK, 0, 0, 2, 444444, D_UP, D_STOCH);
+//
+//  add_dilution(D_INTER, D_FULL, D_FULL, 2, 0, 0, 111111, D_UP, D_STOCH);
+//  add_dilution(D_INTER, D_FULL, D_NONE, 2, 0, 2, 222222, D_UP, D_STOCH);
+//  add_dilution(D_INTER, D_FULL, D_INTER, 2, 0, 2, 333333, D_UP, D_STOCH);
+//  add_dilution(D_INTER, D_FULL, D_BLOCK, 2, 0, 2, 444444, D_UP, D_STOCH);
+//
+//  add_dilution(D_BLOCK, D_FULL, D_FULL, 2, 0, 0, 111111, D_UP, D_STOCH);
+//  add_dilution(D_BLOCK, D_FULL, D_NONE, 2, 0, 0, 222222, D_UP, D_STOCH);
+//  add_dilution(D_BLOCK, D_FULL, D_INTER, 2, 0, 2, 333333, D_UP, D_STOCH);
+//  add_dilution(D_BLOCK, D_FULL, D_BLOCK, 2, 0, 2, 444444, D_UP, D_STOCH);
+//
+//  add_dilution(D_FULL, D_NONE, D_FULL, 0, 0, 0, 111111, D_UP, D_STOCH);
+//  add_dilution(D_FULL, D_NONE, D_NONE, 0, 0, 0, 222222, D_UP, D_STOCH);
+//  add_dilution(D_FULL, D_NONE, D_INTER, 0, 0, 2, 333333, D_UP, D_STOCH);
+//  add_dilution(D_FULL, D_NONE, D_BLOCK, 0, 0, 2, 444444, D_UP, D_STOCH);
+//
+//  add_dilution(D_NONE, D_NONE, D_FULL, 0, 0, 0, 111111, D_UP, D_STOCH);
+//  add_dilution(D_NONE, D_NONE, D_NONE, 0, 0, 0, 222222, D_UP, D_STOCH);
+//  add_dilution(D_NONE, D_NONE, D_INTER, 2, 0, 2, 333333, D_UP, D_STOCH);
+//  add_dilution(D_NONE, D_NONE, D_BLOCK, 0, 0, 2, 444444, D_UP, D_STOCH);
+//
+//  add_dilution(D_INTER, D_NONE, D_FULL, 2, 0, 0, 111111, D_UP, D_STOCH);
+//  add_dilution(D_INTER, D_NONE, D_NONE, 2, 0, 2, 222222, D_UP, D_STOCH);
+//  add_dilution(D_INTER, D_NONE, D_INTER, 2, 0, 2, 333333, D_UP, D_STOCH);
+//  add_dilution(D_INTER, D_NONE, D_BLOCK, 2, 0, 2, 444444, D_UP, D_STOCH);
+//
+//  add_dilution(D_BLOCK, D_NONE, D_FULL, 2, 0, 0, 111111, D_UP, D_STOCH);
+//  add_dilution(D_BLOCK, D_NONE, D_NONE, 2, 0, 0, 222222, D_UP, D_STOCH);
+//  add_dilution(D_BLOCK, D_NONE, D_INTER, 2, 0, 2, 333333, D_UP, D_STOCH);
+//  add_dilution(D_BLOCK, D_NONE, D_BLOCK, 2, 0, 2, 444444, D_UP, D_STOCH);
 
 //  add_dilution(D_FULL, D_FULL, D_FULL, 0, 0, 0, 111111, D_DOWN, D_STOCH);
 //  add_dilution(D_FULL, D_FULL, D_NONE, 0, 0, 0, 222222, D_DOWN, D_STOCH);
@@ -1979,7 +1981,7 @@ int create_invert_sources(int const conf, int const dilution) {
               for (t = 0; t < T; t++) {
                 // read in eigenvector and distribute it to the sources
                 sprintf(filename, "./eigenvector.%03d.%03d.%04d", v, t, conf);
-                read_su3_vector(eigenvector, filename, 0, tslice, 1);
+                read_su3_vector(eigenvector, filename, 0, t, 1);
                 index = t * no_eigenvalues * 4 + v * 4;
                 for (point = 0; point < block; point++) {
                   _vector_add_mul( dirac0[block*t + point].s0,
