@@ -68,12 +68,12 @@ int read_su3_vector(su3_vector * const s, char * filename, const int position_,
           } else {
             if (t0 != timeslice) {
               fprintf(stderr,
-                  "eigenvector of the wrong timeslice!\nAborting...");
+                  "eigenvector of the wrong timeslice!\nAborting...\n");
               return (-9);
             }
             if (nsets != sets) {
               fprintf(stderr,
-                  "wrong number of eigenvectors!\nAborting...");
+                  "wrong number of eigenvectors!\nAborting...\n");
               return (-10);
             }
           }

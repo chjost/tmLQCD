@@ -45,7 +45,7 @@ void add_dilution(const int d_type_t, const int d_type_d, const int d_type_l,
     const int quark_type, const int smearing) {
   dilution * dptr = &dilution_list[no_dilution];
   if (no_dilution == max_no_dilution) {
-    fprintf(stderr, "maximal number of dilutions %d exceeded!\n",
+    fprintf(stderr, "maximal number of dilutions (%d) exceeded!\n",
         max_no_dilution);
     exit(-1);
   }
