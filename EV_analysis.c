@@ -104,6 +104,17 @@ void create_input_files(int const dirac, int const timeslice, int const conf,
 void create_perambulators(int const conf, int const dilution);
 void test_system(int const conf);
 
+static void rnd_z2_vector(double *v, const int N) {
+  ranlxd(v,N);
+  for (int i = 0; i < N; ++i) {
+    if(v[i] < 0.5)
+      v[i]=1/sqrt(2);
+    else
+      v[i]=-1/sqrt(2);
+  }
+  return;
+}
+
 int main(int argc, char* argv[]) {
   int status = 0, c, j, conf;
   char * input_filename = NULL;
@@ -560,7 +571,7 @@ int create_invert_sources(int const conf, int const dilution) {
 
   if (g_stochastical_run != 0) {
     rnd_vector = (double*) calloc(rnd_vec_size, sizeof(double));
-    rnd_z2_array(rnd_vector, rnd_vec_size);
+    rnd_z2_vector(rnd_vector, rnd_vec_size);
     sprintf(filename, "randomvector.%03d.%04d", dilution, conf);
     if ((file = fopen(filename, "wb")) == NULL ) {
       fprintf(stderr, "Could not open file %s for random vector\nAborting...\n",
@@ -2497,7 +2508,7 @@ void create_perambulators(int const conf, int const dilution) {
   for (tsource = 0; tsource < t_end; tsource++) {
     for (tsink = 0; tsink < T; tsink++) {
       // set the entries of the block to zero
-      memset(block, 0, sizeof(double) * blocksize);
+      memset(block, 0, sizeof(_Complex double) * blocksize);
 
       // iterate through the inverted source
       for (nvsource = 0; nvsource < l_end; nvsource++) {
