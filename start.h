@@ -75,4 +75,6 @@ void write_test_spinor_field(spinor * const k , const int eoflag, char * postfix
 void random_jacobi_field(su3_vector * const k);
 # endif
 
+void rnd_z2_array(double* array, const int length);
+
 #endif

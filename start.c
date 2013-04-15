@@ -927,3 +927,7 @@ void random_jacobi_field(su3_vector * const k) {
 #endif
 }
 #endif // WITHLAPH 
+
+void rnd_z2_array(double* array, const int length) {
+  z2_vector(array, length);
+}

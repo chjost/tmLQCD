@@ -203,7 +203,6 @@ int main(int argc, char* argv[]) {
   add_dilution(D_INTER, D_FULL, D_INTER, 8, 0, 8, 1447, D_DOWN, D_STOCH);
   add_dilution(D_INTER, D_FULL, D_INTER, 8, 0, 8, 1557, D_DOWN, D_STOCH);
 
-
   //getestet
 
 //  add_dilution(D_FULL, D_FULL, D_FULL, 0, 0, 0, 111111, D_UP, D_STOCH);
@@ -403,10 +402,10 @@ int main(int argc, char* argv[]) {
 // clean up
         if (REMOVESOURCES) {
           printf("\n# removing sources\n");
-          sprintf(call, "rm source?.%04d.* dirac*.input", conf, conf);
+          sprintf(call, "rm source?.%04d.* dirac*.input", conf);
           system(call);
           if (j == (no_dilution - 1)) {
-            sprintf(call, "rm eigenv*.%04d output.para", conf, conf);
+            sprintf(call, "rm eigenv*.%04d output.para", conf);
             system(call);
           }
         }
@@ -561,7 +560,7 @@ int create_invert_sources(int const conf, int const dilution) {
 
   if (g_stochastical_run != 0) {
     rnd_vector = (double*) calloc(rnd_vec_size, sizeof(double));
-    ranlxd(rnd_vector, rnd_vec_size);
+    rnd_z2_array(rnd_vector, rnd_vec_size);
     sprintf(filename, "randomvector.%03d.%04d", dilution, conf);
     if ((file = fopen(filename, "wb")) == NULL ) {
       fprintf(stderr, "Could not open file %s for random vector\nAborting...\n",
@@ -2498,9 +2497,7 @@ void create_perambulators(int const conf, int const dilution) {
   for (tsource = 0; tsource < t_end; tsource++) {
     for (tsink = 0; tsink < T; tsink++) {
       // set the entries of the block to zero
-      for (i = 0; i < blocksize; i++) {
-        block[i] = 0.0;
-      }
+      memset(block, 0, sizeof(double) * blocksize);
 
       // iterate through the inverted source
       for (nvsource = 0; nvsource < l_end; nvsource++) {
@@ -2533,7 +2530,8 @@ void create_perambulators(int const conf, int const dilution) {
               fclose(file);
             } else {
               memset(eigenvector, 0, sizeof(su3_vector) * timeblock);
-              tmpeigenvector[nvsink] = 1.0;
+              if (nvsink < 3 * timeblock)
+                tmpeigenvector[nvsink] = 1.0;
             }
 
             for (point1 = 0; point1 < timeblock; point1++) {
