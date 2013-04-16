@@ -105,12 +105,12 @@ void create_perambulators(int const conf, int const dilution);
 void test_system(int const conf);
 
 static void rnd_z2_vector(double *v, const int N) {
-  ranlxd(v,N);
+  ranlxd(v, N);
   for (int i = 0; i < N; ++i) {
-    if(v[i] < 0.5)
-      v[i]=1/sqrt(2);
+    if (v[i] < 0.5)
+      v[i] = 1 / sqrt(2);
     else
-      v[i]=-1/sqrt(2);
+      v[i] = -1 / sqrt(2);
   }
   return;
 }
@@ -213,6 +213,10 @@ int main(int argc, char* argv[]) {
   add_dilution(D_INTER, D_FULL, D_INTER, 8, 0, 8, 1337, D_UP, D_STOCH);
   add_dilution(D_INTER, D_FULL, D_INTER, 8, 0, 8, 1447, D_DOWN, D_STOCH);
   add_dilution(D_INTER, D_FULL, D_INTER, 8, 0, 8, 1557, D_DOWN, D_STOCH);
+  add_dilution(D_INTER, D_FULL, D_INTER, 8, 0, 8, 1667, D_UP, D_LOCAL);
+  add_dilution(D_INTER, D_FULL, D_INTER, 8, 0, 8, 1777, D_UP, D_LOCAL);
+  add_dilution(D_INTER, D_FULL, D_INTER, 8, 0, 8, 1887, D_DOWN, D_LOCAL);
+  add_dilution(D_INTER, D_FULL, D_INTER, 8, 0, 8, 1997, D_DOWN, D_LOCAL);
 
   //getestet
 
@@ -685,6 +689,7 @@ int create_invert_sources(int const conf, int const dilution) {
     }
     // stochastic part
   } else {
+    // TODO check the block dilution!!!
     // full spin dilution
     if (dilution_list[dilution].type[1] == D_FULL) {
       // full time dilution
@@ -2425,13 +2430,14 @@ int create_invert_sources(int const conf, int const dilution) {
 void create_perambulators(int const conf, int const dilution) {
 // local parameters
   int tsource, tsink;
-  int nvsource, ndsource, nvsink, i, point1, count;
+  int nvsource, ndsource, nvsink, point1, count;
   int t_end = -1, l_end = -1, d_end = 4;
   int blockwidth, blocksize, blockheigth = 4 * no_eigenvalues;
   int timeblock = LX * LY * LZ;
   spinor *inverted, *even, *odd, *tmp;
   su3_vector* eigenvector = NULL;
   _Complex double *tmpeigenvector = NULL;
+  int counter = 0;
   char eigenvectorfile[200], invertedfile[200], perambulatorfile[200];
   FILE *file = NULL;
   _Complex double *block;
@@ -2517,6 +2523,7 @@ void create_perambulators(int const conf, int const dilution) {
               conf, tsource, nvsource);
           read_spinor(even, odd, invertedfile, 0);
           convert_eo_to_lexic(inverted, even, odd);
+          counter = 0;
 
           // iterate through the eigenvectors
           for (nvsink = 0; nvsink < no_eigenvalues; nvsink++) {
