@@ -101,6 +101,7 @@ int generate_eigensystem(int const conf);
 int create_invert_sources(int const conf, int const dilution);
 void create_input_files(int const dirac, int const timeslice, int const conf,
     int const dilution);
+void create_propagators(int const conf, int const dilution);
 void create_perambulators(int const conf, int const dilution);
 void test_system(int const conf);
 
@@ -209,18 +210,18 @@ int main(int argc, char* argv[]) {
 
   g_stochastical_run = 1;
 
-  add_dilution(D_INTER, D_FULL, D_INTER, 8, 0, 8, 1227, D_UP, D_STOCH);
-  add_dilution(D_INTER, D_FULL, D_INTER, 8, 0, 8, 1337, D_UP, D_STOCH);
-  add_dilution(D_INTER, D_FULL, D_INTER, 8, 0, 8, 1447, D_DOWN, D_STOCH);
-  add_dilution(D_INTER, D_FULL, D_INTER, 8, 0, 8, 1557, D_DOWN, D_STOCH);
-  add_dilution(D_INTER, D_FULL, D_INTER, 8, 0, 8, 1667, D_UP, D_LOCAL);
-  add_dilution(D_INTER, D_FULL, D_INTER, 8, 0, 8, 1777, D_UP, D_LOCAL);
-  add_dilution(D_INTER, D_FULL, D_INTER, 8, 0, 8, 1887, D_DOWN, D_LOCAL);
-  add_dilution(D_INTER, D_FULL, D_INTER, 8, 0, 8, 1997, D_DOWN, D_LOCAL);
+//  add_dilution(D_INTER, D_FULL, D_INTER, 8, 0, 8, 1227, D_UP, D_STOCH);
+//  add_dilution(D_INTER, D_FULL, D_INTER, 8, 0, 8, 1337, D_UP, D_STOCH);
+//  add_dilution(D_INTER, D_FULL, D_INTER, 8, 0, 8, 1447, D_DOWN, D_STOCH);
+//  add_dilution(D_INTER, D_FULL, D_INTER, 8, 0, 8, 1557, D_DOWN, D_STOCH);
+//  add_dilution(D_INTER, D_FULL, D_INTER, 8, 0, 8, 1667, D_UP, D_LOCAL);
+//  add_dilution(D_INTER, D_FULL, D_INTER, 8, 0, 8, 1777, D_UP, D_LOCAL);
+//  add_dilution(D_INTER, D_FULL, D_INTER, 8, 0, 8, 1887, D_DOWN, D_LOCAL);
+//  add_dilution(D_INTER, D_FULL, D_INTER, 8, 0, 8, 1997, D_DOWN, D_LOCAL);
 
-  //getestet
+//getestet
 
-//  add_dilution(D_FULL, D_FULL, D_FULL, 0, 0, 0, 111111, D_UP, D_STOCH);
+  add_dilution(D_FULL, D_FULL, D_FULL, 0, 0, 0, 111111, D_UP, D_STOCH);
 //  add_dilution(D_FULL, D_FULL, D_NONE, 0, 0, 0, 222222, D_UP, D_STOCH);
 //  add_dilution(D_FULL, D_FULL, D_INTER, 0, 0, 2, 333333, D_UP, D_STOCH);
 //  add_dilution(D_FULL, D_FULL, D_BLOCK, 0, 0, 2, 444444, D_UP, D_STOCH);
@@ -409,10 +410,15 @@ int main(int argc, char* argv[]) {
         create_invert_sources(conf, j);
 
 // construct the perambulators
-        printf("\n# constructing perambulators (%d of %d)\n", j + 1,
-            no_dilution);
+//        printf("\n# constructing perambulators (%d of %d)\n", j + 1,
+//            no_dilution);
+//        fflush(stdout);
+//        create_perambulators(conf, j);
+
+// construct the propagators
+        printf("\n# constructing propagators (%d of %d)\n", j + 1, no_dilution);
         fflush(stdout);
-        create_perambulators(conf, j);
+        create_propagators(conf, j);
 
 // clean up
         if (REMOVESOURCES) {
@@ -472,6 +478,10 @@ int main(int argc, char* argv[]) {
 int generate_eigensystem(int const conf) {
   int tslice, j, k;
   char conf_filename[50];
+  char eigenvectorfile[100];
+  FILE* file = NULL;
+  su3_vector* eigenvector = NULL;
+  int count = 0, vec, t, volume = LX * LY * LZ;
 
   /* Read Gauge field */
   sprintf(conf_filename, "%s.%.4d", gauge_input_filename, conf);
@@ -526,6 +536,31 @@ int generate_eigensystem(int const conf) {
     eigenvalues_Jacobi(&no_eigenvalues, 5000, eigenvalue_precision, 0, tslice,
         conf);
   }
+
+  eigenvector = (su3_vector*) calloc(volume, sizeof(su3_vector));
+  if (eigenvector == NULL ) {
+    fprintf(stderr, "not enough space to create eigenvector.\nAborting...\n");
+    return (-1);
+  }
+  for (t = 0; t < T; t++) {
+    for (vec = 0; vec < no_eigenvalues; vec++) {
+      sprintf(eigenvectorfile, "eigenvector.%03d.%03d.%04d", vec, t, conf);
+      read_su3_vector(eigenvector, eigenvectorfile, 0, t, 1);
+      // binary dump of the eigenvectors, needed for the operators
+      sprintf(eigenvectorfile, "./b_eigenvector.%03d.%03d.%04d", vec, t, conf);
+      if ((file = fopen(eigenvectorfile, "wb")) == NULL ) {
+        fprintf(stderr, "could not open eigenvector file %s.\nAborting...\n",
+            eigenvectorfile);
+        exit(-1);
+      }
+      count = fwrite(eigenvector, sizeof(su3_vector), volume, file);
+      if (count != volume) {
+        fprintf(stderr, "could not write all data to file %s.\n",
+            eigenvectorfile);
+      }
+      fclose(file);
+    }
+  }
   return (0);
 }
 
@@ -554,7 +589,7 @@ int generate_eigensystem(int const conf) {
  * create and invert new sources
  */
 int create_invert_sources(int const conf, int const dilution) {
-  // local variables
+// local variables
   char filename[200];
   char call[150];
   int tslice = 0, vec = 0, point = 0, j = 0;
@@ -633,7 +668,7 @@ int create_invert_sources(int const conf, int const dilution) {
   odd = tmp;
 #endif
 
-  // normal run without stochastic part
+// normal run without stochastic part
   if (g_stochastical_run == 0) {
     for (tslice = 0; tslice < T; tslice++) {
       for (vec = 0; vec < no_eigenvalues; vec++) {
@@ -2425,6 +2460,138 @@ int create_invert_sources(int const conf, int const dilution) {
 }
 
 /*
+ * create propagators
+ */
+void create_propagators(int const conf, int const dilution) {
+// local parameters
+  int time, inversion;
+  int point1, count, vec, dirac;
+  int t_end = -1, l_end = -1, d_end = 4;
+  int blockwidth, blocksize, blockheight = LX * LY * LZ * T;
+  spinor *inverted, *even, *odd, *tmp;
+  int counter = 0;
+  char invertedfile[200], propagatorfile[200];
+  FILE *file = NULL;
+  spinor *block;
+
+// set the correct parameters for the loops
+  if (g_stochastical_run == 0) {
+    t_end = T;
+    d_end = 4;
+    l_end = no_eigenvalues;
+  } else { // dilution in spin space not implemented!
+    if (dilution_list[dilution].type[0] == D_FULL) {
+      t_end = T;
+    } else if (dilution_list[dilution].type[0] == D_INTER
+        || dilution_list[dilution].type[0] == D_BLOCK) {
+      t_end = dilution_list[dilution].size[0];
+    } else if (dilution_list[dilution].type[0] == D_NONE) {
+      t_end = 1;
+    }
+
+    if (dilution_list[dilution].type[1] == D_FULL) {
+      d_end = 4;
+    } else if (dilution_list[dilution].type[1] == D_NONE) {
+      d_end = 1;
+    }
+
+    if (dilution_list[dilution].type[2] == D_FULL) {
+      l_end = no_eigenvalues;
+    } else if (dilution_list[dilution].type[2] == D_INTER
+        || dilution_list[dilution].type[2] == D_BLOCK) {
+      l_end = dilution_list[dilution].size[2];
+    } else if (dilution_list[dilution].type[2] == D_NONE) {
+      l_end = 1;
+    }
+  }
+  blockwidth = d_end * l_end;
+  blocksize = blockheight * blockwidth;
+
+// allocate the needed memory for spinors, eigenvectors and peramulator
+  tmp = (spinor*) calloc(VOLUMEPLUSRAND + 1, sizeof(spinor));
+#if (defined SSE || defined SSE2 || defined SSE3)
+  inverted = (spinor*) (((unsigned long int) (tmp) + ALIGN_BASE) & ~ALIGN_BASE);
+#else
+  inverted = tmp;
+#endif
+  tmp = (spinor*) calloc(VOLUMEPLUSRAND + 1, sizeof(spinor));
+#if (defined SSE || defined SSE2 || defined SSE3)
+  even = (spinor*) (((unsigned long int) (tmp) + ALIGN_BASE) & ~ALIGN_BASE);
+#else
+  even = tmp;
+#endif
+  tmp = (spinor*) calloc(VOLUMEPLUSRAND + 1, sizeof(spinor));
+#if (defined SSE || defined SSE2 || defined SSE3)
+  odd = (spinor*) (((unsigned long int) (tmp) + ALIGN_BASE) & ~ALIGN_BASE);
+#else
+  odd = tmp;
+#endif
+
+  tmp = (spinor*) calloc(blocksize, sizeof(spinor));
+  if (tmp == NULL ) {
+    fprintf(stderr, "not enough space to create propagator.\nAborting...\n");
+    return;
+  }
+#if (defined SSE || defined SSE2 || defined SSE3)
+  block = (spinor*) (((unsigned long int) (tmp) + ALIGN_BASE) & ~ALIGN_BASE);
+#else
+  block = tmp;
+#endif
+
+  // iterate through time inversions and create one file for each time slice
+  for (time = 0; time < t_end; time++) {
+    // set the propagator to zero
+    memset(block, 0, sizeof(spinor) * blocksize);
+
+    // iterate over the LapH space
+    for (vec = 0; vec < l_end; vec++) {
+
+      // iterate over the dirac space
+      for (dirac = 0; dirac < d_end; dirac++) {
+        // read in inverted source
+        sprintf(invertedfile, "source%d.%04d.%02d.%02d.inverted", dirac, conf,
+            time, vec);
+        read_spinor(even, odd, invertedfile, 0);
+        convert_eo_to_lexic(inverted, even, odd);
+
+        // transfer to the propagator
+        inversion = vec * d_end + dirac;
+        for (point1 = 0; point1 < blockheight; point1++) {
+          _spinor_assign(block[inversion + point1 * blockwidth],
+              inverted[point1]);
+        }
+      } // dirac
+    } // LapH
+
+    // save file
+    if (g_stochastical_run == 0) {
+      sprintf(propagatorfile, "propagator.%03d.%04d", time, conf);
+    } else {
+      sprintf(propagatorfile, "propagator_i.%02d.%03d.%04d", dilution, time,
+          conf);
+    }
+    if ((file = fopen(propagatorfile, "wb")) == NULL ) {
+      fprintf(stderr, "could not open propagator file %s.\nAborting...\n",
+          propagatorfile);
+      exit(-1);
+    }
+    count = fwrite(block, sizeof(spinor), blocksize, file);
+    if (count != blocksize) {
+      fprintf(stderr, "could not write all data to file %s.\n", propagatorfile);
+    }
+    fflush(file);
+    fclose(file);
+  } // time
+
+  free(even);
+  free(odd);
+  free(inverted);
+  free(block);
+
+  return;
+}
+
+/*
  * create the perambulators
  */
 void create_perambulators(int const conf, int const dilution) {
@@ -2531,21 +2698,6 @@ void create_perambulators(int const conf, int const dilution) {
               sprintf(eigenvectorfile, "eigenvector.%03d.%03d.%04d", nvsink,
                   tsink, conf);
               read_su3_vector(eigenvector, eigenvectorfile, 0, tsink, 1);
-              // binary dump of the eigenvectors, needed for the operators
-              sprintf(eigenvectorfile, "./b_eigenvector.%03d.%03d.%04d", nvsink,
-                  tsink, conf);
-              if ((file = fopen(eigenvectorfile, "wb")) == NULL ) {
-                fprintf(stderr,
-                    "could not open eigenvector file %s.\nAborting...\n",
-                    eigenvectorfile);
-                exit(-1);
-              }
-              count = fwrite(eigenvector, sizeof(su3_vector), timeblock, file);
-              if (count != timeblock) {
-                fprintf(stderr, "could not write all data to file %s.\n",
-                    eigenvectorfile);
-              }
-              fclose(file);
             } else {
               memset(eigenvector, 0, sizeof(su3_vector) * timeblock);
               if (nvsink < 3 * timeblock)
