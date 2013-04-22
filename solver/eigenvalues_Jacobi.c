@@ -210,11 +210,11 @@ double eigenvalues_Jacobi(int * nr_of_eigenvalues, const int max_iterations,
 		}
 	}
 
-        sprintf(filename, "eigenvector.all.%.3d.%.4d", tslice, nstore);
-        construct_writer(&writer, filename, 0);
-        s=(su3_vector*)&eigenvectors_su3v[0];
-        status = write_su3_vector(writer, &eigenvls_su3v[0], s, 64, tslice, (*nr_of_eigenvalues));
-        destruct_writer(writer);
+//        sprintf(filename, "eigenvector.all.%.3d.%.4d", tslice, nstore);
+//        construct_writer(&writer, filename, 0);
+//        s=(su3_vector*)&eigenvectors_su3v[0];
+//        status = write_su3_vector(writer, &eigenvls_su3v[0], s, 64, tslice, (*nr_of_eigenvalues));
+//        destruct_writer(writer);
 
 	returnvalue=eigenvls_su3v[0];
 	free(max_eigenvector_);

@@ -57,21 +57,21 @@
 #include "mpi_init.h"
 #include "solver/eigenvalues_Jacobi.h"
 
-int main(int argc,char *argv[])
-{
-  int tslice,j,k;
+int main(int argc, char *argv[]) {
+  int tslice, j, k, conf;
   char conf_filename[50];
-  
+  char call[200];
+
 #ifdef MPI
   MPI_Init(&argc, &argv);
 #endif
-  
+
   /* Read the input file */
   read_input("LapH.input");
-  
+
   tmlqcd_mpi_init(argc, argv);
-  
-  if(g_proc_id==0) {
+
+  if (g_proc_id == 0) {
 #ifdef SSE
     printf("# The code was compiled with SSE instructions\n");
 #endif
@@ -115,13 +115,13 @@ int main(int argc,char *argv[])
   }
 
 #ifdef OMP
-  if(omp_num_threads > 0) 
+  if(omp_num_threads > 0)
   {
-     omp_set_num_threads(omp_num_threads);
+    omp_set_num_threads(omp_num_threads);
   }
   else {
     if( g_proc_id == 0 )
-      printf("# No value provided for OmpNumThreads, running in single-threaded mode!\n");
+    printf("# No value provided for OmpNumThreads, running in single-threaded mode!\n");
 
     omp_num_threads = 1;
     omp_set_num_threads(omp_num_threads);
@@ -149,63 +149,43 @@ int main(int argc,char *argv[])
   exit(0);
 #endif
 
-  
   init_gauge_field(VOLUMEPLUSRAND + g_dbw2rand, 0);
   init_geometry_indices(VOLUMEPLUSRAND + g_dbw2rand);
 
-  if(g_proc_id == 0) {
-    fprintf(stdout,"The number of processes is %d \n",g_nproc);
-    printf("# The lattice size is %d x %d x %d x %d\n",
-	   (int)(T*g_nproc_t), (int)(LX*g_nproc_x), (int)(LY*g_nproc_y), (int)(g_nproc_z*LZ));
-    printf("# The local lattice size is %d x %d x %d x %d\n", 
-	   (int)(T), (int)(LX), (int)(LY),(int) LZ);
+  if (g_proc_id == 0) {
+    fprintf(stdout, "The number of processes is %d \n", g_nproc);
+    printf("# The lattice size is %d x %d x %d x %d\n", (int) (T * g_nproc_t),
+        (int) (LX * g_nproc_x), (int) (LY * g_nproc_y), (int) (g_nproc_z * LZ));
+    printf("# The local lattice size is %d x %d x %d x %d\n", (int) (T),
+        (int) (LX), (int) (LY), (int) LZ);
     printf("# Computing LapH eigensystem \n");
-
+    printf("# start = %i, end = %i, steps = %i \n", nstore, Nmeas, Nsave);
     fflush(stdout);
   }
-  
+
   /* define the geometry */
   geometry();
+  start_ranlux(1, random_seed);
 
-  start_ranlux(1, 123456);
-
-  /* Read Gauge field */
-  sprintf(conf_filename, "%s.%.4d", gauge_input_filename, nstore);
-  if (g_cart_id == 0) {
-    printf("#\n# Trying to read gauge field from file %s in %s precision.\n",
-	   conf_filename, (gauge_precision_read_flag == 32 ? "single" : "double"));
-    fflush(stdout);
-  }
-  if( (j = read_gauge_field(conf_filename)) !=0) {
-    fprintf(stderr, "Error %d while reading gauge field from %s\n Aborting...\n", j, conf_filename);
-    exit(-2);
-  }
-
-  
-  if (g_cart_id == 0) {
-    printf("# Finished reading gauge field.\n");
-    fflush(stdout);
-  }
-  
 #ifdef MPI
   /*For parallelization: exchange the gaugefield */
   xchange_gauge(g_gauge_field);
 #endif
-  
+
   /* Init Jacobi field */
-  init_jacobi_field(SPACEVOLUME+SPACERAND,3);
+  init_jacobi_field(SPACEVOLUME + SPACERAND, 3);
 
 #ifdef MPI
   {
-     /* for debugging in parallel set i_gdb = 0 */
+    /* for debugging in parallel set i_gdb = 0 */
     volatile int i_gdb = 8;
     char hostname[256];
     gethostname(hostname, sizeof(hostname));
     printf("PID %d on %s ready for attach\n", getpid(), hostname);
     fflush(stdout);
-    if(g_cart_id == 0){
-      while (0 == i_gdb){
-	sleep(5);
+    if(g_cart_id == 0) {
+      while (0 == i_gdb) {
+        sleep(5);
       }
     }
   }
@@ -213,18 +193,42 @@ int main(int argc,char *argv[])
   MPI_Barrier(MPI_COMM_WORLD);
 #endif
 
-  for (k=0 ; k<3 ; k++)
-    random_jacobi_field(g_jacobi_field[k]);
+  for (conf = nstore; conf < nstore + Nmeas; conf += Nsave) {
+    for (k = 0; k < 3; k++)
+      random_jacobi_field(g_jacobi_field[k]);
+    /* Read Gauge field */
+    sprintf(conf_filename, "%s.%.4d", gauge_input_filename, conf);
+    if (g_cart_id == 0) {
+      printf("#\n# Trying to read gauge field from file %s in %s precision.\n",
+          conf_filename,
+          (gauge_precision_read_flag == 32 ? "single" : "double"));
+      fflush(stdout);
+    }
+    if ((j = read_gauge_field(conf_filename)) != 0) {
+      fprintf(stderr,
+          "Error %d while reading gauge field from %s\n Aborting...\n", j,
+          conf_filename);
+      exit(-2);
+    }
+    if (g_cart_id == 0) {
+      printf("# Finished reading gauge field.\n");
+      fflush(stdout);
+    }
 
+    /* Compute LapH Eigensystem */
 
-  /* Compute LapH Eigensystem */
-  
-  for(tslice=0; tslice<T; tslice++){ 
-    eigenvalues_Jacobi(&no_eigenvalues,5000, eigenvalue_precision,0,tslice,nstore);
+    for (tslice = 0; tslice < T; tslice++) {
+      eigenvalues_Jacobi(&no_eigenvalues, 5000, eigenvalue_precision, 0, tslice,
+          conf);
+    }
+    sprintf(call, "tar cf eigensystem.%04d.tar eigenv*.%04d", conf, conf);
+    system(call);
+    sprintf(call, "rm eigenv*.%04d", conf);
+    system(call);
   }
-  
+
 #ifdef MPI
   MPI_Finalize();
 #endif
-  return(0);
+  return (0);
 }
