@@ -465,7 +465,11 @@ int main(int argc, char* argv[]) {
 //        "cp b_eigenvector*.%04d /dsk/lattice02-0/jost/data/8times16_d", conf);
 //    system(call);
   }
-
+  sprintf(call,
+      "tar cf 8times16_prop_all.tar b_eigenvector* randomvector* propagator*");
+  system(call);
+  sprintf(call, "cp 8times16_prop_all.tar /dsk/lattice01-0/jost/data/");
+  system(call);
   printf("\n# program finished without problems\n# Clearing memory\n");
 
 #ifdef MPI
