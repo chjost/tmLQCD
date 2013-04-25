@@ -59,18 +59,22 @@
 #include "rnd_gauge_trafo.h"
 #include "dilution.h"
 
-#define DEBUG 1
+#define DEBUG 0
 #define INVERTER "./invert"
 
 #define REMOVESOURCES 1 // remove all output except for the perambulators
 #define _vector_one(r) \
-  (r).c0 = 1.;\
-  (r).c1 = 1.;\
-  (r).c2 = 1.;
+  (r).c0 = 1. + 0.*I;\
+  (r).c1 = 1. + 0.*I;\
+  (r).c2 = 1. + 0.*I;
 #define _vector_I_one(r) \
-  (r).c0 = 1.*I;\
-  (r).c1 = 1.*I;\
-  (r).c2 = 1.*I;
+  (r).c0 = 0. + 1.*I;\
+  (r).c1 = 0. + 1.*I;\
+  (r).c2 = 0. + 1.*I;
+#define _vector_const(r, c, d) \
+  (r).c0 = 0. + 0.*I;\
+  (r).c1 = 0. + 0.*I;\
+  (r).c2 = c + d*I;
 
 void usage() {
   fprintf(stdout, "Program for investigating stochastical LapH smearing\n");
@@ -2464,15 +2468,11 @@ int create_invert_sources(int const conf, int const dilution) {
  */
 void create_propagators(int const conf, int const dilution) {
 // local parameters
-  int time, inversion;
-  int point1, count, vec, dirac;
+  int time = 0, count = 0, vec = 0, dirac = 0;
   int t_end = -1, l_end = -1, d_end = 4;
-  int blockwidth, blocksize, blockheight = LX * LY * LZ * T;
-  spinor *inverted, *even, *odd, *tmp;
-  int counter = 0;
+  spinor *inverted = NULL, *even = NULL, *odd = NULL, *tmp = NULL;
   char invertedfile[200], propagatorfile[200];
   FILE *file = NULL;
-  spinor *block;
 
 // set the correct parameters for the loops
   if (g_stochastical_run == 0) {
@@ -2504,8 +2504,6 @@ void create_propagators(int const conf, int const dilution) {
       l_end = 1;
     }
   }
-  blockwidth = d_end * l_end;
-  blocksize = blockheight * blockwidth;
 
 // allocate the needed memory for spinors, eigenvectors and peramulator
   tmp = (spinor*) calloc(VOLUMEPLUSRAND + 1, sizeof(spinor));
@@ -2527,66 +2525,49 @@ void create_propagators(int const conf, int const dilution) {
   odd = tmp;
 #endif
 
-  tmp = (spinor*) calloc(blocksize, sizeof(spinor));
-  if (tmp == NULL ) {
-    fprintf(stderr, "not enough space to create propagator.\nAborting...\n");
-    return;
-  }
-#if (defined SSE || defined SSE2 || defined SSE3)
-  block = (spinor*) (((unsigned long int) (tmp) + ALIGN_BASE) & ~ALIGN_BASE);
-#else
-  block = tmp;
-#endif
-
-  // iterate through time inversions and create one file for each time slice
+  // save each propagator into new file
+  // iterate over time
   for (time = 0; time < t_end; time++) {
-    // set the propagator to zero
-    memset(block, 0, sizeof(spinor) * blocksize);
-
     // iterate over the LapH space
     for (vec = 0; vec < l_end; vec++) {
-
       // iterate over the dirac space
       for (dirac = 0; dirac < d_end; dirac++) {
+
         // read in inverted source
         sprintf(invertedfile, "source%d.%04d.%02d.%02d.inverted", dirac, conf,
             time, vec);
         read_spinor(even, odd, invertedfile, 0);
         convert_eo_to_lexic(inverted, even, odd);
 
-        // transfer to the propagator
-        inversion = vec * d_end + dirac;
-        for (point1 = 0; point1 < blockheight; point1++) {
-          _spinor_assign(block[inversion + point1 * blockwidth],
-              inverted[point1]);
+        // save to file
+        if (g_stochastical_run == 0) {
+          sprintf(propagatorfile, "propagator.T%03d.D%01d.V%03d.%04d", time,
+              dirac, vec, conf);
+        } else {
+          sprintf(propagatorfile, "propagator.%s.R%03d.T%03d.D%01d.V%03d.%04d",
+              (dilution_list[dilution].quark == D_UP) ? "u" : "d", dilution,
+              time, dirac, vec, conf);
         }
+        if ((file = fopen(propagatorfile, "wb")) == NULL ) {
+          fprintf(stderr, "could not open propagator file %s.\nAborting...\n",
+              propagatorfile);
+          exit(-1);
+        }
+        count = fwrite(inverted, sizeof(spinor), VOLUMEPLUSRAND, file);
+        if (count != VOLUMEPLUSRAND) {
+          fprintf(stderr, "could not write all data to file %s.\n",
+              propagatorfile);
+        }
+        fflush(file);
+        fclose(file);
+
       } // dirac
     } // LapH
-
-    // save file
-    if (g_stochastical_run == 0) {
-      sprintf(propagatorfile, "propagator.%03d.%04d", time, conf);
-    } else {
-      sprintf(propagatorfile, "propagator_i.%02d.%03d.%04d", dilution, time,
-          conf);
-    }
-    if ((file = fopen(propagatorfile, "wb")) == NULL ) {
-      fprintf(stderr, "could not open propagator file %s.\nAborting...\n",
-          propagatorfile);
-      exit(-1);
-    }
-    count = fwrite(block, sizeof(spinor), blocksize, file);
-    if (count != blocksize) {
-      fprintf(stderr, "could not write all data to file %s.\n", propagatorfile);
-    }
-    fflush(file);
-    fclose(file);
   } // time
 
   free(even);
   free(odd);
   free(inverted);
-  free(block);
 
   return;
 }
