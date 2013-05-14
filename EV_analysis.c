@@ -59,10 +59,10 @@
 #include "rnd_gauge_trafo.h"
 #include "dilution.h"
 
-#define DEBUG 0
+#define DEBUG 1
 #define INVERTER "./invert"
 
-#define REMOVESOURCES 1 // remove all output except for the perambulators
+#define REMOVESOURCES 0 // remove all output except for the perambulators
 #define _vector_one(r) \
   (r).c0 = 1. + 0.*I;\
   (r).c1 = 1. + 0.*I;\
@@ -164,6 +164,7 @@ int main(int argc, char* argv[]) {
 #ifdef OMP
   if (omp_num_threads > 0) {
     omp_set_num_threads(omp_num_threads);
+    printf(" threads: %d\n", omp_num_threads);
   } else {
     if (g_proc_id == 0)
       printf(
@@ -223,12 +224,12 @@ int main(int argc, char* argv[]) {
 //  add_dilution(D_INTER, D_FULL, D_INTER, 8, 0, 8, 1887, D_DOWN, D_LOCAL);
 //  add_dilution(D_INTER, D_FULL, D_INTER, 8, 0, 8, 1997, D_DOWN, D_LOCAL);
 
-//getestet
+//getestet (time, dirac, laph, ., ., ., seed, up/down, stoch/local)
 
   add_dilution(D_FULL, D_FULL, D_FULL, 0, 0, 0, 111111, D_UP, D_STOCH);
-//  add_dilution(D_FULL, D_FULL, D_NONE, 0, 0, 0, 222222, D_UP, D_STOCH);
-//  add_dilution(D_FULL, D_FULL, D_INTER, 0, 0, 2, 333333, D_UP, D_STOCH);
-//  add_dilution(D_FULL, D_FULL, D_BLOCK, 0, 0, 2, 444444, D_UP, D_STOCH);
+  add_dilution(D_FULL, D_FULL, D_NONE, 0, 0, 0, 222222, D_UP, D_STOCH);
+  add_dilution(D_FULL, D_FULL, D_INTER, 0, 0, 2, 333333, D_UP, D_STOCH);
+  add_dilution(D_FULL, D_FULL, D_BLOCK, 0, 0, 2, 444444, D_UP, D_STOCH);
 //
 //  add_dilution(D_NONE, D_FULL, D_FULL, 0, 0, 0, 111111, D_UP, D_STOCH);
 //  add_dilution(D_NONE, D_FULL, D_NONE, 0, 0, 0, 222222, D_UP, D_STOCH);
@@ -237,7 +238,7 @@ int main(int argc, char* argv[]) {
 //
 //  add_dilution(D_INTER, D_FULL, D_FULL, 2, 0, 0, 111111, D_UP, D_STOCH);
 //  add_dilution(D_INTER, D_FULL, D_NONE, 2, 0, 2, 222222, D_UP, D_STOCH);
-//  add_dilution(D_INTER, D_FULL, D_INTER, 2, 0, 2, 333333, D_UP, D_STOCH);
+  add_dilution(D_INTER, D_FULL, D_INTER, 2, 0, 2, 333333, D_UP, D_STOCH);
 //  add_dilution(D_INTER, D_FULL, D_BLOCK, 2, 0, 2, 444444, D_UP, D_STOCH);
 //
 //  add_dilution(D_BLOCK, D_FULL, D_FULL, 2, 0, 0, 111111, D_UP, D_STOCH);
@@ -444,9 +445,9 @@ int main(int argc, char* argv[]) {
       // construct the perambulators
       printf("\n# constructing perambulators\n");
       fflush(stdout);
-      create_perambulators(conf, 1);
+//      create_perambulators(conf, 1);
 
-      // clean up
+// clean up
       if (REMOVESOURCES) {
         printf("\n# removing sources\n");
         sprintf(call, "rm source?.%04d.* eigenv*.%04d dirac*.input output.para",
@@ -465,12 +466,12 @@ int main(int argc, char* argv[]) {
 //        "cp b_eigenvector*.%04d /dsk/lattice02-0/jost/data/8times16_d", conf);
 //    system(call);
   }
-  sprintf(call,
-      "tar cf 8times16_prop_all.tar b_eigenvector* randomvector* propagator*");
-  system(call);
-  sprintf(call, "cp 8times16_prop_all.tar /dsk/lattice01-0/jost/data/");
-  system(call);
-  printf("\n# program finished without problems\n# Clearing memory\n");
+//  sprintf(call,
+//      "tar cf 8times16_prop_all.tar b_eigenvector* randomvector* propagator*");
+//  system(call);
+//  sprintf(call, "cp 8times16_prop_all.tar /dsk/lattice01-0/jost/data/");
+//  system(call);
+//  printf("\n# program finished without problems\n# Clearing memory\n");
 
 #ifdef MPI
   MPI_Finalize();
@@ -539,11 +540,17 @@ int generate_eigensystem(int const conf) {
     random_jacobi_field(g_jacobi_field[k]);
 
   /* Compute LapH Eigensystem */
-
-  for (tslice = 0; tslice < T; tslice++) {
-    eigenvalues_Jacobi(&no_eigenvalues, 5000, eigenvalue_precision, 0, tslice,
-        conf);
+#ifdef OMP
+#pragma omp master
+  {
+#endif
+    for (tslice = 0; tslice < T; tslice++) {
+      eigenvalues_Jacobi(&no_eigenvalues, 5000, eigenvalue_precision, 0, tslice,
+          conf);
+    }
+#ifdef OMP
   }
+#endif
 
   eigenvector = (su3_vector*) calloc(volume, sizeof(su3_vector));
   if (eigenvector == NULL ) {
@@ -597,7 +604,8 @@ int generate_eigensystem(int const conf) {
  * create and invert new sources
  */
 int create_invert_sources(int const conf, int const dilution) {
-// local variables
+
+  // local variables
   char filename[200];
   char call[150];
   int tslice = 0, vec = 0, point = 0, j = 0;
@@ -618,6 +626,10 @@ int create_invert_sources(int const conf, int const dilution) {
 
   if (g_stochastical_run != 0) {
     rnd_vector = (double*) calloc(rnd_vec_size, sizeof(double));
+    if (rnd_vector == NULL ) {
+      fprintf(stderr, "Could not allocate random vector!\nAborting...\n");
+      exit(-1);
+    }
     rnd_z2_vector(rnd_vector, rnd_vec_size);
     sprintf(filename, "randomvector.%03d.%04d", dilution, conf);
     if ((file = fopen(filename, "wb")) == NULL ) {
@@ -678,6 +690,7 @@ int create_invert_sources(int const conf, int const dilution) {
 
 // normal run without stochastic part
   if (g_stochastical_run == 0) {
+
     for (tslice = 0; tslice < T; tslice++) {
       for (vec = 0; vec < no_eigenvalues; vec++) {
         // zero the spinor fields
@@ -739,268 +752,20 @@ int create_invert_sources(int const conf, int const dilution) {
       if (dilution_list[dilution].type[0] == D_FULL) {
         // full LapH dilution
         if (dilution_list[dilution].type[2] == D_FULL) {
-
-          for (tslice = 0; tslice < T; tslice++) {
-            for (vec = 0; vec < no_eigenvalues; vec++) {
-              // zero the spinor fields
-              zero_spinor_field(dirac0, VOLUMEPLUSRAND);
-              zero_spinor_field(dirac1, VOLUMEPLUSRAND);
-              zero_spinor_field(dirac2, VOLUMEPLUSRAND);
-              zero_spinor_field(dirac3, VOLUMEPLUSRAND);
-
-              // read in eigenvector and distribute it to the sources
-              sprintf(filename, "./eigenvector.%03d.%03d.%04d", vec, tslice,
-                  conf);
-              read_su3_vector(eigenvector, filename, 0, tslice, 1);
-              index = tslice * no_eigenvalues * 4 + vec * 4;
-              for (point = 0; point < block; point++) {
-                _vector_add_mul( dirac0[block*tslice + point].s0,
-                    rnd_vector[index+0], eigenvector[point]);
-                _vector_add_mul( dirac1[block*tslice + point].s1,
-                    rnd_vector[index+1], eigenvector[point]);
-                _vector_add_mul( dirac2[block*tslice + point].s2,
-                    rnd_vector[index+2], eigenvector[point]);
-                _vector_add_mul( dirac3[block*tslice + point].s3,
-                    rnd_vector[index+3], eigenvector[point]);
-              }
-
-              // write spinor field with entries at dirac 0
-              convert_lexic_to_eo(even, odd, dirac0);
-              sprintf(filename, "%s.%04d.%02d.%02d", "source0", conf, tslice,
-                  vec);
-              construct_writer(&writer, filename, 0);
-              status = write_spinor(writer, &even, &odd, 1, 64);
-              destruct_writer(writer);
-              // write spinor field with entries at dirac 1
-              convert_lexic_to_eo(even, odd, dirac1);
-              sprintf(filename, "%s.%04d.%02d.%02d", "source1", conf, tslice,
-                  vec);
-              construct_writer(&writer, filename, 0);
-              status = write_spinor(writer, &even, &odd, 1, 64);
-              destruct_writer(writer);
-              // write spinor field with entries at dirac 2
-              convert_lexic_to_eo(even, odd, dirac2);
-              sprintf(filename, "%s.%04d.%02d.%02d", "source2", conf, tslice,
-                  vec);
-              construct_writer(&writer, filename, 0);
-              status = write_spinor(writer, &even, &odd, 1, 64);
-              destruct_writer(writer);
-              // write spinor field with entries at dirac 3
-              convert_lexic_to_eo(even, odd, dirac3);
-              sprintf(filename, "%s.%04d.%02d.%02d", "source3", conf, tslice,
-                  vec);
-              construct_writer(&writer, filename, 0);
-              status = write_spinor(writer, &even, &odd, 1, 64);
-              destruct_writer(writer);
-
-              create_input_files(4, tslice, conf, dilution);
-              for (j = 0; j < 4; j++) {
-                sprintf(call, "%s -f dirac%d-cg.input", INVERTER, j);
-                printf("\n\ntrying: %s for conf %d, t %d (full)\n", call, conf,
-                    tslice);
-                fflush(stdout);
-                system(call);
-              }
-            }
-          }
+          create_source_tf_df_lf(conf, dilution, INVERTER);
 
           // no LapH dilution
         } else if (dilution_list[dilution].type[2] == D_NONE) {
-          // zero the spinor fields
-          for (tslice = 0; tslice < T; tslice++) {
-            zero_spinor_field(dirac0, VOLUMEPLUSRAND);
-            zero_spinor_field(dirac1, VOLUMEPLUSRAND);
-            zero_spinor_field(dirac2, VOLUMEPLUSRAND);
-            zero_spinor_field(dirac3, VOLUMEPLUSRAND);
-
-            for (vec = 0; vec < no_eigenvalues; vec++) {
-              // read in eigenvector and distribute it to the sources
-              sprintf(filename, "./eigenvector.%03d.%03d.%04d", vec, tslice,
-                  conf);
-              read_su3_vector(eigenvector, filename, 0, tslice, 1);
-              index = tslice * no_eigenvalues * 4 + vec * 4;
-              for (point = 0; point < block; point++) {
-                _vector_add_mul( dirac0[block*tslice + point].s0,
-                    rnd_vector[index+0], eigenvector[point]);
-                _vector_add_mul( dirac1[block*tslice + point].s1,
-                    rnd_vector[index+1], eigenvector[point]);
-                _vector_add_mul( dirac2[block*tslice + point].s2,
-                    rnd_vector[index+2], eigenvector[point]);
-                _vector_add_mul( dirac3[block*tslice + point].s3,
-                    rnd_vector[index+3], eigenvector[point]);
-              }
-            }
-
-            // write spinor field with entries at dirac 0
-            convert_lexic_to_eo(even, odd, dirac0);
-            sprintf(filename, "%s.%04d.%02d.%02d", "source0", conf, tslice, 0);
-            construct_writer(&writer, filename, 0);
-            status = write_spinor(writer, &even, &odd, 1, 64);
-            destruct_writer(writer);
-            // write spinor field with entries at dirac 1
-            convert_lexic_to_eo(even, odd, dirac1);
-            sprintf(filename, "%s.%04d.%02d.%02d", "source1", conf, tslice, 0);
-            construct_writer(&writer, filename, 0);
-            status = write_spinor(writer, &even, &odd, 1, 64);
-            destruct_writer(writer);
-            // write spinor field with entries at dirac 2
-            convert_lexic_to_eo(even, odd, dirac2);
-            sprintf(filename, "%s.%04d.%02d.%02d", "source2", conf, tslice, 0);
-            construct_writer(&writer, filename, 0);
-            status = write_spinor(writer, &even, &odd, 1, 64);
-            destruct_writer(writer);
-            // write spinor field with entries at dirac 3
-            convert_lexic_to_eo(even, odd, dirac3);
-            sprintf(filename, "%s.%04d.%02d.%02d", "source3", conf, tslice, 0);
-            construct_writer(&writer, filename, 0);
-            status = write_spinor(writer, &even, &odd, 1, 64);
-            destruct_writer(writer);
-
-            create_input_files(4, tslice, conf, dilution);
-            for (j = 0; j < 4; j++) {
-              sprintf(call, "%s -f dirac%d-cg.input", INVERTER, j);
-              printf("\n\ntrying: %s for conf %d, t %d (full)\n", call, conf,
-                  tslice);
-              fflush(stdout);
-              system(call);
-            }
-          }
+          create_source_tf_df_ln(conf, dilution, INVERTER);
 
           // interlace LapH dilution
         } else if (dilution_list[dilution].type[2] == D_INTER) {
-          for (tslice = 0; tslice < T; tslice++) {
-            for (vec = 0; vec < dilution_list[dilution].size[2]; vec++) {
-              // zero the spinor fields
-              zero_spinor_field(dirac0, VOLUMEPLUSRAND);
-              zero_spinor_field(dirac1, VOLUMEPLUSRAND);
-              zero_spinor_field(dirac2, VOLUMEPLUSRAND);
-              zero_spinor_field(dirac3, VOLUMEPLUSRAND);
+          create_source_tf_df_li(conf, dilution, INVERTER);
 
-              for (v = vec; v < no_eigenvalues;
-                  v += dilution_list[dilution].size[2]) {
-                // read in eigenvector and distribute it to the sources
-                sprintf(filename, "./eigenvector.%03d.%03d.%04d", v, tslice,
-                    conf);
-                read_su3_vector(eigenvector, filename, 0, tslice, 1);
-                index = tslice * no_eigenvalues * 4 + v * 4;
-                for (point = 0; point < block; point++) {
-                  _vector_add_mul( dirac0[block*tslice + point].s0,
-                      rnd_vector[index+0], eigenvector[point]);
-                  _vector_add_mul( dirac1[block*tslice + point].s1,
-                      rnd_vector[index+1], eigenvector[point]);
-                  _vector_add_mul( dirac2[block*tslice + point].s2,
-                      rnd_vector[index+2], eigenvector[point]);
-                  _vector_add_mul( dirac3[block*tslice + point].s3,
-                      rnd_vector[index+3], eigenvector[point]);
-                }
-              }
-
-              // write spinor field with entries at dirac 0
-              convert_lexic_to_eo(even, odd, dirac0);
-              sprintf(filename, "%s.%04d.%02d.%02d", "source0", conf, tslice,
-                  vec);
-              construct_writer(&writer, filename, 0);
-              status = write_spinor(writer, &even, &odd, 1, 64);
-              destruct_writer(writer);
-              // write spinor field with entries at dirac 1
-              convert_lexic_to_eo(even, odd, dirac1);
-              sprintf(filename, "%s.%04d.%02d.%02d", "source1", conf, tslice,
-                  vec);
-              construct_writer(&writer, filename, 0);
-              status = write_spinor(writer, &even, &odd, 1, 64);
-              destruct_writer(writer);
-              // write spinor field with entries at dirac 2
-              convert_lexic_to_eo(even, odd, dirac2);
-              sprintf(filename, "%s.%04d.%02d.%02d", "source2", conf, tslice,
-                  vec);
-              construct_writer(&writer, filename, 0);
-              status = write_spinor(writer, &even, &odd, 1, 64);
-              destruct_writer(writer);
-              // write spinor field with entries at dirac 3
-              convert_lexic_to_eo(even, odd, dirac3);
-              sprintf(filename, "%s.%04d.%02d.%02d", "source3", conf, tslice,
-                  vec);
-              construct_writer(&writer, filename, 0);
-              status = write_spinor(writer, &even, &odd, 1, 64);
-              destruct_writer(writer);
-
-              create_input_files(4, tslice, conf, dilution);
-              for (j = 0; j < 4; j++) {
-                sprintf(call, "%s -f dirac%d-cg.input", INVERTER, j);
-                printf("\n\ntrying: %s for conf %d, t %d (full)\n", call, conf,
-                    tslice);
-                fflush(stdout);
-                system(call);
-              }
-            }
-          }
           // block LapH dilution
         } else if (dilution_list[dilution].type[2] == D_BLOCK) {
-          for (tslice = 0; tslice < T; tslice++) {
-            for (vec = 0; vec < dilution_list[dilution].size[2]; vec++) {
-              // zero the spinor fields
-              zero_spinor_field(dirac0, VOLUMEPLUSRAND);
-              zero_spinor_field(dirac1, VOLUMEPLUSRAND);
-              zero_spinor_field(dirac2, VOLUMEPLUSRAND);
-              zero_spinor_field(dirac3, VOLUMEPLUSRAND);
+          create_source_tf_df_lb(conf, dilution, INVERTER);
 
-              for (v = vec; v < vec + dilution_list[dilution].size[2]; v++) {
-                // read in eigenvector and distribute it to the sources
-                sprintf(filename, "./eigenvector.%03d.%03d.%04d", v, tslice,
-                    conf);
-                read_su3_vector(eigenvector, filename, 0, tslice, 1);
-                index = tslice * no_eigenvalues * 4 + v * 4;
-                for (point = 0; point < block; point++) {
-                  _vector_add_mul( dirac0[block*tslice + point].s0,
-                      rnd_vector[index+0], eigenvector[point]);
-                  _vector_add_mul( dirac1[block*tslice + point].s1,
-                      rnd_vector[index+1], eigenvector[point]);
-                  _vector_add_mul( dirac2[block*tslice + point].s2,
-                      rnd_vector[index+2], eigenvector[point]);
-                  _vector_add_mul( dirac3[block*tslice + point].s3,
-                      rnd_vector[index+3], eigenvector[point]);
-                }
-              }
-
-              // write spinor field with entries at dirac 0
-              convert_lexic_to_eo(even, odd, dirac0);
-              sprintf(filename, "%s.%04d.%02d.%02d", "source0", conf, tslice,
-                  vec);
-              construct_writer(&writer, filename, 0);
-              status = write_spinor(writer, &even, &odd, 1, 64);
-              destruct_writer(writer);
-              // write spinor field with entries at dirac 1
-              convert_lexic_to_eo(even, odd, dirac1);
-              sprintf(filename, "%s.%04d.%02d.%02d", "source1", conf, tslice,
-                  vec);
-              construct_writer(&writer, filename, 0);
-              status = write_spinor(writer, &even, &odd, 1, 64);
-              destruct_writer(writer);
-              // write spinor field with entries at dirac 2
-              convert_lexic_to_eo(even, odd, dirac2);
-              sprintf(filename, "%s.%04d.%02d.%02d", "source2", conf, tslice,
-                  vec);
-              construct_writer(&writer, filename, 0);
-              status = write_spinor(writer, &even, &odd, 1, 64);
-              destruct_writer(writer);
-              // write spinor field with entries at dirac 3
-              convert_lexic_to_eo(even, odd, dirac3);
-              sprintf(filename, "%s.%04d.%02d.%02d", "source3", conf, tslice,
-                  vec);
-              construct_writer(&writer, filename, 0);
-              status = write_spinor(writer, &even, &odd, 1, 64);
-              destruct_writer(writer);
-
-              create_input_files(4, tslice, conf, dilution);
-              for (j = 0; j < 4; j++) {
-                sprintf(call, "%s -f dirac%d-cg.input", INVERTER, j);
-                printf("\n\ntrying: %s for conf %d, t %d (full)\n", call, conf,
-                    tslice);
-                fflush(stdout);
-                system(call);
-              }
-            }
-          }
         } // LapH dilution end
 
         // no time dilution
@@ -1378,72 +1143,7 @@ int create_invert_sources(int const conf, int const dilution) {
 
           // interlace LapH dilution
         } else if (dilution_list[dilution].type[2] == D_INTER) {
-          for (tslice = 0; tslice < dilution_list[dilution].size[0]; tslice++) {
-            for (vec = 0; vec < dilution_list[dilution].size[2]; vec++) {
-              zero_spinor_field(dirac0, VOLUMEPLUSRAND);
-              zero_spinor_field(dirac1, VOLUMEPLUSRAND);
-              zero_spinor_field(dirac2, VOLUMEPLUSRAND);
-              zero_spinor_field(dirac3, VOLUMEPLUSRAND);
-
-              for (v = vec; v < no_eigenvalues;
-                  v += dilution_list[dilution].size[2]) {
-                for (t = tslice; t < T; t += dilution_list[dilution].size[0]) {
-                  // read in eigenvector and distribute it to the sources
-                  sprintf(filename, "./eigenvector.%03d.%03d.%04d", v, t, conf);
-                  read_su3_vector(eigenvector, filename, 0, t, 1);
-                  index = t * no_eigenvalues * 4 + v * 4;
-                  for (point = 0; point < block; point++) {
-                    _vector_add_mul( dirac0[block*t + point].s0,
-                        rnd_vector[index+0], eigenvector[point]);
-                    _vector_add_mul( dirac1[block*t + point].s1,
-                        rnd_vector[index+1], eigenvector[point]);
-                    _vector_add_mul( dirac2[block*t + point].s2,
-                        rnd_vector[index+2], eigenvector[point]);
-                    _vector_add_mul( dirac3[block*t + point].s3,
-                        rnd_vector[index+3], eigenvector[point]);
-                  }
-                }
-              }
-
-              // write spinor field with entries at dirac 0
-              convert_lexic_to_eo(even, odd, dirac0);
-              sprintf(filename, "%s.%04d.%02d.%02d", "source0", conf, tslice,
-                  vec);
-              construct_writer(&writer, filename, 0);
-              status = write_spinor(writer, &even, &odd, 1, 64);
-              destruct_writer(writer);
-              // write spinor field with entries at dirac 1
-              convert_lexic_to_eo(even, odd, dirac1);
-              sprintf(filename, "%s.%04d.%02d.%02d", "source1", conf, tslice,
-                  vec);
-              construct_writer(&writer, filename, 0);
-              status = write_spinor(writer, &even, &odd, 1, 64);
-              destruct_writer(writer);
-              // write spinor field with entries at dirac 2
-              convert_lexic_to_eo(even, odd, dirac2);
-              sprintf(filename, "%s.%04d.%02d.%02d", "source2", conf, tslice,
-                  vec);
-              construct_writer(&writer, filename, 0);
-              status = write_spinor(writer, &even, &odd, 1, 64);
-              destruct_writer(writer);
-              // write spinor field with entries at dirac 3
-              convert_lexic_to_eo(even, odd, dirac3);
-              sprintf(filename, "%s.%04d.%02d.%02d", "source3", conf, tslice,
-                  vec);
-              construct_writer(&writer, filename, 0);
-              status = write_spinor(writer, &even, &odd, 1, 64);
-              destruct_writer(writer);
-
-              create_input_files(4, tslice, conf, dilution);
-              for (j = 0; j < 4; j++) {
-                sprintf(call, "%s -f dirac%d-cg.input", INVERTER, j);
-                printf("\n\ntrying: %s for conf %d, t %d (interlace)\n", call,
-                    conf, tslice);
-                fflush(stdout);
-                system(call);
-              }
-            }
-          }
+          create_source_ti_df_li(conf, dilution, INVERTER);
 
           // block LapH dilution
         } else if (dilution_list[dilution].type[2] == D_BLOCK) {
@@ -2471,14 +2171,8 @@ int create_invert_sources(int const conf, int const dilution) {
  * create propagators
  */
 void create_propagators(int const conf, int const dilution) {
-// local parameters
-  int time = 0, count = 0, vec = 0, dirac = 0;
-  int t_end = -1, l_end = -1, d_end = 4;
-  spinor *inverted = NULL, *even = NULL, *odd = NULL, *tmp = NULL;
-  char invertedfile[200], propagatorfile[200];
-  FILE *file = NULL;
-
 // set the correct parameters for the loops
+  int t_end = -1, l_end = -1, d_end = 4;
   if (g_stochastical_run == 0) {
     t_end = T;
     d_end = 4;
@@ -2508,71 +2202,123 @@ void create_propagators(int const conf, int const dilution) {
       l_end = 1;
     }
   }
-
-// allocate the needed memory for spinors, eigenvectors and peramulator
-  tmp = (spinor*) calloc(VOLUMEPLUSRAND + 1, sizeof(spinor));
-#if (defined SSE || defined SSE2 || defined SSE3)
-  inverted = (spinor*) (((unsigned long int) (tmp) + ALIGN_BASE) & ~ALIGN_BASE);
-#else
-  inverted = tmp;
-#endif
-  tmp = (spinor*) calloc(VOLUMEPLUSRAND + 1, sizeof(spinor));
-#if (defined SSE || defined SSE2 || defined SSE3)
-  even = (spinor*) (((unsigned long int) (tmp) + ALIGN_BASE) & ~ALIGN_BASE);
-#else
-  even = tmp;
-#endif
-  tmp = (spinor*) calloc(VOLUMEPLUSRAND + 1, sizeof(spinor));
-#if (defined SSE || defined SSE2 || defined SSE3)
-  odd = (spinor*) (((unsigned long int) (tmp) + ALIGN_BASE) & ~ALIGN_BASE);
-#else
-  odd = tmp;
+#if DEBUG
+  printf("\nparameters for propagator: t %d, d %d, l %d\n", t_end, d_end,
+      l_end);
 #endif
 
-  // save each propagator into new file
-  // iterate over time
-  for (time = 0; time < t_end; time++) {
-    // iterate over the LapH space
-    for (vec = 0; vec < l_end; vec++) {
-      // iterate over the dirac space
-      for (dirac = 0; dirac < d_end; dirac++) {
+#ifdef OMP
+#pragma omp parallel \
+  shared(t_end, l_end, d_end)
+  {
+#endif
+    int time = 0, count = 0, vec = 0, dirac = 0;
+    spinor *inverted = NULL, *even = NULL, *odd = NULL, *tmp = NULL;
+    char invertedfile[200], propagatorfile[200];
+    FILE *file = NULL;
+    // allocate the needed memory for spinors, eigenvectors and peramulator
+    tmp = (spinor*) calloc(VOLUMEPLUSRAND + 1, sizeof(spinor));
+    if (tmp == NULL ) {
+      fprintf(stderr, "Could not allocate spinor!\nAborting...\n");
+      exit(-1);
+    }
+#if (defined SSE || defined SSE2 || defined SSE3)
+    inverted =
+        (spinor*) (((unsigned long int) (tmp) + ALIGN_BASE) & ~ALIGN_BASE);
+#else
+    inverted = tmp;
+#endif
+    tmp = (spinor*) calloc(VOLUMEPLUSRAND + 1, sizeof(spinor));
+    if (tmp == NULL ) {
+      free(inverted);
+      fprintf(stderr, "Could not allocate spinor!\nAborting...\n");
+      exit(-1);
+    }
+#if (defined SSE || defined SSE2 || defined SSE3)
+    even = (spinor*) (((unsigned long int) (tmp) + ALIGN_BASE) & ~ALIGN_BASE);
+#else
+    even = tmp;
+#endif
+    tmp = (spinor*) calloc(VOLUMEPLUSRAND + 1, sizeof(spinor));
+    if (tmp == NULL ) {
+      free(inverted);
+      free(even);
+      fprintf(stderr, "Could not allocate spinor!\nAborting...\n");
+      exit(-1);
+    }
+#if (defined SSE || defined SSE2 || defined SSE3)
+    odd = (spinor*) (((unsigned long int) (tmp) + ALIGN_BASE) & ~ALIGN_BASE);
+#else
+    odd = tmp;
+#endif
 
-        // read in inverted source
-        sprintf(invertedfile, "source%d.%04d.%02d.%02d.inverted", dirac, conf,
-            time, vec);
-        read_spinor(even, odd, invertedfile, 0);
-        convert_eo_to_lexic(inverted, even, odd);
+    // save each propagator into new file
+    // iterate over time
+#ifdef OMP
+#pragma omp for private(time)
+#endif
+    for (time = 0; time < t_end; time++) {
+      // iterate over the LapH space
+      for (vec = 0; vec < l_end; vec++) {
+        // iterate over the dirac space
+        for (dirac = 0; dirac < d_end; dirac++) {
 
-        // save to file
-        if (g_stochastical_run == 0) {
-          sprintf(propagatorfile, "propagator.T%03d.D%01d.V%03d.%04d", time,
-              dirac, vec, conf);
-        } else {
-          sprintf(propagatorfile, "propagator.%s.R%03d.T%03d.D%01d.V%03d.%04d",
-              (dilution_list[dilution].quark == D_UP) ? "u" : "d", dilution,
-              time, dirac, vec, conf);
-        }
-        if ((file = fopen(propagatorfile, "wb")) == NULL ) {
-          fprintf(stderr, "could not open propagator file %s.\nAborting...\n",
+          // read in inverted source
+          sprintf(invertedfile, "source%d.%04d.%02d.%02d.inverted", dirac, conf,
+              time, vec);
+#if DEBUG
+#ifdef OMP
+          printf("thread %d reading file %s\n", omp_get_thread_num(),
+              invertedfile);
+#else
+          printf("reading file %s\n", invertedfile);
+#endif
+#endif
+          read_spinor(even, odd, invertedfile, 0);
+          convert_eo_to_lexic(inverted, even, odd);
+
+          // save to file
+          if (g_stochastical_run == 0) {
+            sprintf(propagatorfile, "propagator.T%03d.D%01d.V%03d.%04d", time,
+                dirac, vec, conf);
+          } else {
+            sprintf(propagatorfile,
+                "propagator.%s.R%03d.T%03d.D%01d.V%03d.%04d",
+                (dilution_list[dilution].quark == D_UP) ? "u" : "d", dilution,
+                time, dirac, vec, conf);
+          }
+#if DEBUG
+#ifdef OMP
+          printf("thread %d writing file %s\n", omp_get_thread_num(),
               propagatorfile);
-          exit(-1);
-        }
-        count = fwrite(inverted, sizeof(spinor), VOLUMEPLUSRAND, file);
-        if (count != VOLUMEPLUSRAND) {
-          fprintf(stderr, "could not write all data to file %s.\n",
-              propagatorfile);
-        }
-        fflush(file);
-        fclose(file);
+#else
+          printf("writing file %s\n", propagatorfile);
+#endif
+#endif
+          if ((file = fopen(propagatorfile, "wb")) == NULL ) {
+            fprintf(stderr, "could not open propagator file %s.\nAborting...\n",
+                propagatorfile);
+            exit(-1);
+          }
+          count = fwrite(inverted, sizeof(spinor), VOLUMEPLUSRAND, file);
+          if (count != VOLUMEPLUSRAND) {
+            fprintf(stderr, "could not write all data to file %s.\n",
+                propagatorfile);
+          }
+          fflush(file);
+          fclose(file);
 
-      } // dirac
-    } // LapH
-  } // time
+        } // dirac
+      } // LapH
+    } // time
 
-  free(even);
-  free(odd);
-  free(inverted);
+    free(even);
+    free(odd);
+    free(inverted);
 
+#ifdef OMP
+  }
+#endif
   return;
 }
 
