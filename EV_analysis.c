@@ -62,7 +62,7 @@
 #define DEBUG 1
 #define INVERTER "./invert"
 
-#define REMOVESOURCES 0 // remove all output except for the perambulators
+#define REMOVESOURCES 1 // remove all output except for the perambulators
 #define _vector_one(r) \
   (r).c0 = 1. + 0.*I;\
   (r).c1 = 1. + 0.*I;\
@@ -109,13 +109,17 @@ void create_propagators(int const conf, int const dilution);
 void create_perambulators(int const conf, int const dilution);
 void test_system(int const conf);
 
-static void rnd_z2_vector(double *v, const int N) {
-  ranlxd(v, N);
+static void rnd_z2_vector(_Complex double *v, const int N) {
+  ranlxd((double*) v, 2 * N);
   for (int i = 0; i < N; ++i) {
-    if (v[i] < 0.5)
-      v[i] = 1 / sqrt(2);
+    if (creal(v[i]) < 0.5 && cimag(v[i]) < 0.5)
+      v[i] = 1 / sqrt(2) + I * 1 / sqrt(2);
+    else if (creal(v[i]) >= 0.5 && cimag(v[i]) < 0.5)
+      v[i] = -1 / sqrt(2) + I * 1 / sqrt(2);
+    else if (creal(v[i]) < 0.5 && cimag(v[i]) >= 0.5)
+      v[i] = 1 / sqrt(2) - I * 1 / sqrt(2);
     else
-      v[i] = -1 / sqrt(2);
+      v[i] = -1 / sqrt(2) - I * 1 / sqrt(2);
   }
   return;
 }
@@ -215,21 +219,25 @@ int main(int argc, char* argv[]) {
 
   g_stochastical_run = 1;
 
-//  add_dilution(D_INTER, D_FULL, D_INTER, 8, 0, 8, 1227, D_UP, D_STOCH);
-//  add_dilution(D_INTER, D_FULL, D_INTER, 8, 0, 8, 1337, D_UP, D_STOCH);
-//  add_dilution(D_INTER, D_FULL, D_INTER, 8, 0, 8, 1447, D_DOWN, D_STOCH);
-//  add_dilution(D_INTER, D_FULL, D_INTER, 8, 0, 8, 1557, D_DOWN, D_STOCH);
-//  add_dilution(D_INTER, D_FULL, D_INTER, 8, 0, 8, 1667, D_UP, D_LOCAL);
-//  add_dilution(D_INTER, D_FULL, D_INTER, 8, 0, 8, 1777, D_UP, D_LOCAL);
-//  add_dilution(D_INTER, D_FULL, D_INTER, 8, 0, 8, 1887, D_DOWN, D_LOCAL);
-//  add_dilution(D_INTER, D_FULL, D_INTER, 8, 0, 8, 1997, D_DOWN, D_LOCAL);
+  add_dilution(D_INTER, D_FULL, D_INTER, 8, 0, 8, 1227, D_UP, D_STOCH);
+  add_dilution(D_INTER, D_FULL, D_INTER, 8, 0, 8, 1337, D_UP, D_STOCH);
+  add_dilution(D_INTER, D_FULL, D_INTER, 8, 0, 8, 1447, D_UP, D_STOCH);
+  add_dilution(D_INTER, D_FULL, D_INTER, 8, 0, 8, 1557, D_UP, D_STOCH);
+  add_dilution(D_INTER, D_FULL, D_INTER, 8, 0, 8, 1667, D_UP, D_STOCH);
+  add_dilution(D_INTER, D_FULL, D_INTER, 8, 0, 8, 1777, D_UP, D_STOCH);
+  add_dilution(D_INTER, D_FULL, D_INTER, 8, 0, 8, 1887, D_UP, D_STOCH);
+  add_dilution(D_INTER, D_FULL, D_INTER, 8, 0, 8, 1997, D_UP, D_STOCH);
+  add_dilution(D_INTER, D_FULL, D_INTER, 8, 0, 8, 1007, D_UP, D_STOCH);
+  add_dilution(D_INTER, D_FULL, D_INTER, 8, 0, 8, 1117, D_UP, D_STOCH);
+//  add_dilution(D_INTER, D_FULL, D_INTER, 8, 0, 8, 11227, D_DOWN, D_STOCH);
+//  add_dilution(D_INTER, D_FULL, D_INTER, 8, 0, 8, 11337, D_DOWN, D_STOCH);
 
-//getestet (time, dirac, laph, ., ., ., seed, up/down, stoch/local)
+//getestet (time, dirac, laph, int, int, int, seed, up/down, stoch/local)
 
-  add_dilution(D_FULL, D_FULL, D_FULL, 0, 0, 0, 111111, D_UP, D_STOCH);
-  add_dilution(D_FULL, D_FULL, D_NONE, 0, 0, 0, 222222, D_UP, D_STOCH);
-  add_dilution(D_FULL, D_FULL, D_INTER, 0, 0, 2, 333333, D_UP, D_STOCH);
-  add_dilution(D_FULL, D_FULL, D_BLOCK, 0, 0, 2, 444444, D_UP, D_STOCH);
+//  add_dilution(D_FULL, D_FULL, D_FULL, 0, 0, 0, 111111, D_UP, D_STOCH);
+//  add_dilution(D_FULL, D_FULL, D_NONE, 0, 0, 0, 222222, D_UP, D_STOCH);
+//  add_dilution(D_FULL, D_FULL, D_INTER, 0, 0, 2, 333333, D_UP, D_STOCH);
+//  add_dilution(D_FULL, D_FULL, D_BLOCK, 0, 0, 2, 444444, D_UP, D_STOCH);
 //
 //  add_dilution(D_NONE, D_FULL, D_FULL, 0, 0, 0, 111111, D_UP, D_STOCH);
 //  add_dilution(D_NONE, D_FULL, D_NONE, 0, 0, 0, 222222, D_UP, D_STOCH);
@@ -238,7 +246,7 @@ int main(int argc, char* argv[]) {
 //
 //  add_dilution(D_INTER, D_FULL, D_FULL, 2, 0, 0, 111111, D_UP, D_STOCH);
 //  add_dilution(D_INTER, D_FULL, D_NONE, 2, 0, 2, 222222, D_UP, D_STOCH);
-  add_dilution(D_INTER, D_FULL, D_INTER, 2, 0, 2, 333333, D_UP, D_STOCH);
+//  add_dilution(D_INTER, D_FULL, D_INTER, 2, 0, 2, 333333, D_UP, D_STOCH);
 //  add_dilution(D_INTER, D_FULL, D_BLOCK, 2, 0, 2, 444444, D_UP, D_STOCH);
 //
 //  add_dilution(D_BLOCK, D_FULL, D_FULL, 2, 0, 0, 111111, D_UP, D_STOCH);
@@ -620,12 +628,13 @@ int create_invert_sources(int const conf, int const dilution) {
   spinor *dirac2 = NULL;
   spinor *dirac3 = NULL;
   WRITER* writer = NULL;
-  double *rnd_vector = NULL;
+  _Complex double *rnd_vector = NULL;
   FILE* file;
   int index = 0;
 
   if (g_stochastical_run != 0) {
-    rnd_vector = (double*) calloc(rnd_vec_size, sizeof(double));
+    rnd_vector = (_Complex double*) calloc(rnd_vec_size,
+        sizeof(_Complex double));
     if (rnd_vector == NULL ) {
       fprintf(stderr, "Could not allocate random vector!\nAborting...\n");
       exit(-1);
@@ -637,7 +646,7 @@ int create_invert_sources(int const conf, int const dilution) {
           filename);
       exit(-1);
     }
-    count = fwrite(rnd_vector, sizeof(double), rnd_vec_size, file);
+    count = fwrite(rnd_vector, sizeof(_Complex double), rnd_vec_size, file);
 
     if (count != rnd_vec_size) {
       fprintf(stderr,

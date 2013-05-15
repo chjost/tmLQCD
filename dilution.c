@@ -51,13 +51,17 @@ int g_stochastical_run = 1;
 int no_dilution = 0;
 dilution dilution_list[max_no_dilution];
 
-static void rnd_z2_vector(double *v, const int N) {
-  ranlxd(v, N);
+static void rnd_z2_vector(_Complex double *v, const int N) {
+  ranlxd((double*) v, 2 * N);
   for (int i = 0; i < N; ++i) {
-    if (v[i] < 0.5)
-      v[i] = 1 / sqrt(2);
+    if (creal(v[i]) < 0.5 && cimag(v[i]) < 0.5)
+      v[i] = 1 / sqrt(2) + I * 1 / sqrt(2);
+    else if (creal(v[i]) >= 0.5 && cimag(v[i]) < 0.5)
+      v[i] = -1 / sqrt(2) + I * 1 / sqrt(2);
+    else if (creal(v[i]) < 0.5 && cimag(v[i]) >= 0.5)
+      v[i] = 1 / sqrt(2) - I * 1 / sqrt(2);
     else
-      v[i] = -1 / sqrt(2);
+      v[i] = -1 / sqrt(2) - I * 1 / sqrt(2);
   }
   return;
 }
@@ -191,6 +195,9 @@ void static create_input_files(int const dirac, int const timeslice,
   return;
 }
 
+// TODO change the call of the inverter in the routines,
+// range of vec is covered by the inverter itself
+
 void create_source_tf_df_lf(const int nr_conf, const int nr_dilution,
     char* inverterpath) {
   char filename[200];
@@ -207,11 +214,11 @@ void create_source_tf_df_lf(const int nr_conf, const int nr_dilution,
   spinor *dirac2 = NULL;
   spinor *dirac3 = NULL;
   WRITER* writer = NULL;
-  double *rnd_vector = NULL;
+  _Complex double *rnd_vector = NULL;
   FILE* file;
   int index = 0;
 
-  rnd_vector = (double*) calloc(rnd_vec_size, sizeof(double));
+  rnd_vector = (_Complex double*) calloc(rnd_vec_size, sizeof(_Complex double));
   if (rnd_vector == NULL ) {
     fprintf(stderr, "Could not allocate random vector!\nAborting...\n");
     exit(-1);
@@ -226,7 +233,7 @@ void create_source_tf_df_lf(const int nr_conf, const int nr_dilution,
         filename);
     exit(-1);
   }
-  count = fwrite(rnd_vector, sizeof(double), rnd_vec_size, file);
+  count = fwrite(rnd_vector, sizeof(_Complex double), rnd_vec_size, file);
 
   if (count != rnd_vec_size) {
     fprintf(stderr,
@@ -354,7 +361,8 @@ void create_source_tf_df_lf(const int nr_conf, const int nr_dilution,
         sprintf(filename, "./eigenvector.%03d.%03d.%04d", vec, tslice, nr_conf);
 #if DEBUG
 #ifdef OMP
-        printf("thread %d reading file %s\n", tid, filename);fflush(stdout);
+        printf("thread %d reading file %s\n", tid, filename);
+        fflush(stdout);
 #else
         printf("reading file %s\n", filename);
 #endif
@@ -432,10 +440,11 @@ void create_source_tf_df_lf(const int nr_conf, const int nr_dilution,
 #if DEBUG
 #ifdef OMP
         printf("\n\nthread %d trying: %s for conf %d, t %d (full)\n", tid, call,
-            nr_conf, tslice);fflush(stdout);
+            nr_conf, tslice);
+        fflush(stdout);
 #else
         printf("\n\ntrying: %s for conf %d, t %d (full)\n", call,
-            nr_conf, tslice);fflush(stdout);
+            nr_conf, tslice);
 #endif
 #endif
 
@@ -473,11 +482,11 @@ void create_source_tf_df_ln(const int nr_conf, const int nr_dilution,
   spinor *dirac2 = NULL;
   spinor *dirac3 = NULL;
   WRITER* writer = NULL;
-  double *rnd_vector = NULL;
+  _Complex double *rnd_vector = NULL;
   FILE* file;
   int index = 0;
 
-  rnd_vector = (double*) calloc(rnd_vec_size, sizeof(double));
+  rnd_vector = (_Complex double*) calloc(rnd_vec_size, sizeof(_Complex double));
   if (rnd_vector == NULL ) {
     fprintf(stderr, "Could not allocate random vector!\nAborting...\n");
     exit(-1);
@@ -492,7 +501,7 @@ void create_source_tf_df_ln(const int nr_conf, const int nr_dilution,
         filename);
     exit(-1);
   }
-  count = fwrite(rnd_vector, sizeof(double), rnd_vec_size, file);
+  count = fwrite(rnd_vector, sizeof(_Complex double), rnd_vec_size, file);
 
   if (count != rnd_vec_size) {
     fprintf(stderr,
@@ -619,7 +628,8 @@ void create_source_tf_df_ln(const int nr_conf, const int nr_dilution,
         sprintf(filename, "./eigenvector.%03d.%03d.%04d", vec, tslice, nr_conf);
 #if DEBUG
 #ifdef OMP
-        printf("thread %d reading file %s\n", tid, filename);fflush(stdout);
+        printf("thread %d reading file %s\n", tid, filename);
+        fflush(stdout);
 #else
         printf("reading file %s\n", filename);
 #endif
@@ -643,9 +653,9 @@ void create_source_tf_df_ln(const int nr_conf, const int nr_dilution,
       sprintf(filename, "%s.%04d.%02d.%02d", "source0", nr_conf, tslice, 0);
 #if DEBUG
 #ifdef OMP
-        printf("thread %d writing file %s\n", tid, filename);
+      printf("thread %d writing file %s\n", tid, filename);
 #else
-        printf("writing file %s\n", filename);
+      printf("writing file %s\n", filename);
 #endif
 #endif
       construct_writer(&writer, filename, 0);
@@ -656,9 +666,9 @@ void create_source_tf_df_ln(const int nr_conf, const int nr_dilution,
       sprintf(filename, "%s.%04d.%02d.%02d", "source1", nr_conf, tslice, 0);
 #if DEBUG
 #ifdef OMP
-        printf("thread %d writing file %s\n", tid, filename);
+      printf("thread %d writing file %s\n", tid, filename);
 #else
-        printf("writing file %s\n", filename);
+      printf("writing file %s\n", filename);
 #endif
 #endif
       construct_writer(&writer, filename, 0);
@@ -669,9 +679,9 @@ void create_source_tf_df_ln(const int nr_conf, const int nr_dilution,
       sprintf(filename, "%s.%04d.%02d.%02d", "source2", nr_conf, tslice, 0);
 #if DEBUG
 #ifdef OMP
-        printf("thread %d writing file %s\n", tid, filename);
+      printf("thread %d writing file %s\n", tid, filename);
 #else
-        printf("writing file %s\n", filename);
+      printf("writing file %s\n", filename);
 #endif
 #endif
       construct_writer(&writer, filename, 0);
@@ -682,9 +692,9 @@ void create_source_tf_df_ln(const int nr_conf, const int nr_dilution,
       sprintf(filename, "%s.%04d.%02d.%02d", "source3", nr_conf, tslice, 0);
 #if DEBUG
 #ifdef OMP
-        printf("thread %d writing file %s\n", tid, filename);
+      printf("thread %d writing file %s\n", tid, filename);
 #else
-        printf("writing file %s\n", filename);
+      printf("writing file %s\n", filename);
 #endif
 #endif
       construct_writer(&writer, filename, 0);
@@ -698,10 +708,11 @@ void create_source_tf_df_ln(const int nr_conf, const int nr_dilution,
 #if DEBUG
 #ifdef OMP
         printf("\n\nthread %d trying: %s for conf %d, t %d (full)\n", tid, call,
-            nr_conf, tslice);fflush(stdout);
+            nr_conf, tslice);
+        fflush(stdout);
 #else
         printf("\n\ntrying: %s for conf %d, t %d (full)\n", call,
-            nr_conf, tslice);fflush(stdout);
+            nr_conf, tslice);
 #endif
 #endif
         fflush(stdout);
@@ -738,11 +749,11 @@ void create_source_tf_df_li(const int nr_conf, const int nr_dilution,
   spinor *dirac2 = NULL;
   spinor *dirac3 = NULL;
   WRITER* writer = NULL;
-  double *rnd_vector = NULL;
+  _Complex double *rnd_vector = NULL;
   FILE* file;
   int index = 0;
 
-  rnd_vector = (double*) calloc(rnd_vec_size, sizeof(double));
+  rnd_vector = (_Complex double*) calloc(rnd_vec_size, sizeof(_Complex double));
   if (rnd_vector == NULL ) {
     fprintf(stderr, "Could not allocate random vector!\nAborting...\n");
     exit(-1);
@@ -757,7 +768,7 @@ void create_source_tf_df_li(const int nr_conf, const int nr_dilution,
         filename);
     exit(-1);
   }
-  count = fwrite(rnd_vector, sizeof(double), rnd_vec_size, file);
+  count = fwrite(rnd_vector, sizeof(_Complex double), rnd_vec_size, file);
 
   if (count != rnd_vec_size) {
     fprintf(stderr,
@@ -886,7 +897,8 @@ void create_source_tf_df_li(const int nr_conf, const int nr_dilution,
           sprintf(filename, "./eigenvector.%03d.%03d.%04d", v, tslice, nr_conf);
 #if DEBUG
 #ifdef OMP
-          printf("thread %d reading file %s\n", tid, filename);fflush(stdout);
+          printf("thread %d reading file %s\n", tid, filename);
+          fflush(stdout);
 #else
           printf("reading file %s\n", filename);
 #endif
@@ -957,23 +969,24 @@ void create_source_tf_df_li(const int nr_conf, const int nr_dilution,
         construct_writer(&writer, filename, 0);
         status = write_spinor(writer, &even, &odd, 1, 64);
         destruct_writer(writer);
+      }
 
-        create_input_files(4, tslice, nr_conf, nr_dilution, tid);
-        for (j = 0; j < 4; j++) {
-          sprintf(call, "%s -f dirac%d.%d-cg.input 1> /dev/null", inverterpath,
-              j, tid);
+      create_input_files(4, tslice, nr_conf, nr_dilution, tid);
+      for (j = 0; j < 4; j++) {
+        sprintf(call, "%s -f dirac%d.%d-cg.input 1> /dev/null", inverterpath, j,
+            tid);
 #if DEBUG
 #ifdef OMP
-          printf("\n\nthread %d trying: %s for conf %d, t %d (full)\n", tid,
-              call, nr_conf, tslice);fflush(stdout);
+        printf("\n\nthread %d trying: %s for conf %d, t %d (full)\n", tid, call,
+            nr_conf, tslice);
+        fflush(stdout);
 #else
-          printf("\n\ntrying: %s for conf %d, t %d (full)\n", call,
-              nr_conf, tslice);fflush(stdout);
+        printf("\n\ntrying: %s for conf %d, t %d (full)\n", call,
+            nr_conf, tslice);
 #endif
 #endif
-          fflush(stdout);
-          system(call);
-        }
+        fflush(stdout);
+        system(call);
       }
     }
     free(eigenvector);
@@ -1006,11 +1019,11 @@ void create_source_tf_df_lb(const int nr_conf, const int nr_dilution,
   spinor *dirac2 = NULL;
   spinor *dirac3 = NULL;
   WRITER* writer = NULL;
-  double *rnd_vector = NULL;
+  _Complex double *rnd_vector = NULL;
   FILE* file;
   int index = 0;
 
-  rnd_vector = (double*) calloc(rnd_vec_size, sizeof(double));
+  rnd_vector = (_Complex double*) calloc(rnd_vec_size, sizeof(_Complex double));
   if (rnd_vector == NULL ) {
     fprintf(stderr, "Could not allocate random vector!\nAborting...\n");
     exit(-1);
@@ -1025,7 +1038,7 @@ void create_source_tf_df_lb(const int nr_conf, const int nr_dilution,
         filename);
     exit(-1);
   }
-  count = fwrite(rnd_vector, sizeof(double), rnd_vec_size, file);
+  count = fwrite(rnd_vector, sizeof(_Complex double), rnd_vec_size, file);
 
   if (count != rnd_vec_size) {
     fprintf(stderr,
@@ -1154,7 +1167,8 @@ void create_source_tf_df_lb(const int nr_conf, const int nr_dilution,
           sprintf(filename, "./eigenvector.%03d.%03d.%04d", v, tslice, nr_conf);
 #if DEBUG
 #ifdef OMP
-          printf("thread %d reading file %s\n", tid, filename);fflush(stdout);
+          printf("thread %d reading file %s\n", tid, filename);
+          fflush(stdout);
 #else
           printf("reading file %s\n", filename);
 #endif
@@ -1225,23 +1239,24 @@ void create_source_tf_df_lb(const int nr_conf, const int nr_dilution,
         construct_writer(&writer, filename, 0);
         status = write_spinor(writer, &even, &odd, 1, 64);
         destruct_writer(writer);
+      }
 
-        create_input_files(4, tslice, nr_conf, nr_dilution, tid);
-        for (j = 0; j < 4; j++) {
-          sprintf(call, "%s -f dirac%d.%d-cg.input 1> /dev/null", inverterpath,
-              j, tid);
+      create_input_files(4, tslice, nr_conf, nr_dilution, tid);
+      for (j = 0; j < 4; j++) {
+        sprintf(call, "%s -f dirac%d.%d-cg.input 1> /dev/null", inverterpath, j,
+            tid);
 #if DEBUG
 #ifdef OMP
-          printf("\n\nthread %d trying: %s for conf %d, t %d (full)\n", tid,
-              call, nr_conf, tslice);fflush(stdout);
+        printf("\n\nthread %d trying: %s for conf %d, t %d (full)\n", tid, call,
+            nr_conf, tslice);
+        fflush(stdout);
 #else
-          printf("\n\ntrying: %s for conf %d, t %d (full)\n", call,
-              nr_conf, tslice);fflush(stdout);
+        printf("\n\ntrying: %s for conf %d, t %d (full)\n", call,
+            nr_conf, tslice);
 #endif
 #endif
-          fflush(stdout);
-          system(call);
-        }
+        fflush(stdout);
+        system(call);
       }
     }
     free(eigenvector);
@@ -1274,11 +1289,11 @@ void create_source_ti_df_li(const int nr_conf, const int nr_dilution,
   spinor *dirac2 = NULL;
   spinor *dirac3 = NULL;
   WRITER* writer = NULL;
-  double *rnd_vector = NULL;
+  _Complex double *rnd_vector = NULL;
   FILE* file;
   int index = 0;
 
-  rnd_vector = (double*) calloc(rnd_vec_size, sizeof(double));
+  rnd_vector = (_Complex double*) calloc(rnd_vec_size, sizeof(_Complex double));
   if (rnd_vector == NULL ) {
     fprintf(stderr, "Could not allocate random vector!\nAborting...\n");
     exit(-1);
@@ -1293,7 +1308,7 @@ void create_source_ti_df_li(const int nr_conf, const int nr_dilution,
         filename);
     exit(-1);
   }
-  count = fwrite(rnd_vector, sizeof(double), rnd_vec_size, file);
+  count = fwrite(rnd_vector, sizeof(_Complex double), rnd_vec_size, file);
 
   if (count != rnd_vec_size) {
     fprintf(stderr,
@@ -1423,7 +1438,8 @@ void create_source_ti_df_li(const int nr_conf, const int nr_dilution,
             sprintf(filename, "./eigenvector.%03d.%03d.%04d", v, t, nr_conf);
 #if DEBUG
 #ifdef OMP
-            printf("thread %d reading file %s\n", tid, filename);fflush(stdout);
+            printf("thread %d reading file %s\n", tid, filename);
+            fflush(stdout);
 #else
             printf("reading file %s\n", filename);
 #endif
@@ -1495,23 +1511,24 @@ void create_source_ti_df_li(const int nr_conf, const int nr_dilution,
         construct_writer(&writer, filename, 0);
         status = write_spinor(writer, &even, &odd, 1, 64);
         destruct_writer(writer);
+      }
 
-        create_input_files(4, tslice, nr_conf, nr_dilution, tid);
-        for (j = 0; j < 4; j++) {
-          sprintf(call, "%s -f dirac%d.%d-cg.input 1> /dev/null", inverterpath,
-              j, tid);
+      create_input_files(4, tslice, nr_conf, nr_dilution, tid);
+      for (j = 0; j < 4; j++) {
+        sprintf(call, "%s -f dirac%d.%d-cg.input 1> /dev/null", inverterpath, j, tid);
 #if DEBUG
 #ifdef OMP
-          printf("\n\nthread %d trying: %s for conf %d, t %d (full)\n", tid,
-              call, nr_conf, tslice);fflush(stdout);
+        printf("\n\nthread %d trying: %s for conf %d, t %d (full)\n", tid, call,
+            nr_conf, tslice);
+        fflush(stdout);
 #else
-          printf("\n\ntrying: %s for conf %d, t %d (full)\n", call,
-              nr_conf, tslice);fflush(stdout);
+        printf("\n\ntrying: %s for conf %d, t %d (full)\n", call,
+            nr_conf, tslice);
 #endif
 #endif
-          fflush(stdout);
-          system(call);
-        }
+        fflush(stdout);
+        system(call);
+
       }
     }
     free(eigenvector);
