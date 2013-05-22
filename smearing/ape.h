@@ -1,11 +1,20 @@
 #pragma once
 
-#include <smearing/utils.h>
+#include <buffers/gauge.h>
 
-struct ape_parameters
+typedef struct
 {
-  double rho;
-  int    iterations;
-};
+  double coeff;
+  unsigned int iterations;
+  
+  /* Result -- main output for users */
+  gauge_field_t    result; /* For direct access to the result, shallow copy... */
 
-int ape_smear(su3_tuple *m_field_out, struct ape_parameters const *params, su3_tuple *m_field_in);
+  /* Intermediate results, stored to enhance locality of the analysis */
+  gauge_field_t   *U;     /* The sequence of iterations gauge fields */
+} ape_control;
+
+ape_control *construct_ape_control(unsigned int iterations, double coeff);
+void free_ape_control(ape_control *control);
+
+void ape_smear(ape_control *control, gauge_field_t in);

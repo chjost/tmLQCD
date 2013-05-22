@@ -1,10 +1,7 @@
 #include "gauge.ih"
 
-void initialize_gauge_buffers(unsigned int max)
-{
-  g_gauge_buffers.max = max;
-  g_gauge_buffers.allocated = 0;
-  g_gauge_buffers.free = 0;
-  g_gauge_buffers.reserve = (su3_tuple**)calloc(max, sizeof(su3_tuple*));
-}
+#include "template_initialize_buffers.inc"
 
+__DEFINE_INITIALIZE_BUFFERS(su3_tuple, gauge)
+
+#undef __DEFINE_INITIALIZE_BUFFERS

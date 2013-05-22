@@ -55,6 +55,9 @@ typedef struct {
   
   /* functions for the measurement */
   void (*measurefunc) (const int traj, const int id, const int ieo);
+  
+  /* what smearing should be applied -- 0 applies no smearing? */
+  int smearing;
 } measurement;
 
 

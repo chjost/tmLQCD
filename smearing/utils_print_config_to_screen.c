@@ -1,6 +1,6 @@
 #include "utils.ih"
 
-void  print_config_to_screen(su3 **in) 
+void  print_config_to_screen(gauge_field_t in) 
 {
   for(int x = 0; x < VOLUME; ++x)
     for(int mu = 0; mu < 4; ++mu)

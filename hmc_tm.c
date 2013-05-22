@@ -38,6 +38,7 @@
 #include <sys/time.h>
 #include <string.h>
 #include <signal.h>
+#include <unistd.h>
 #ifdef MPI
 # include <mpi.h>
 #endif
@@ -71,16 +72,18 @@
 #include "sighandler.h"
 #include "measurements.h"
 
-extern int nstore;
+#include <buffers/gauge.h>
+#include <buffers/utils.h>
 
+extern int nstore;
 int const rlxdsize = 105;
 
 static void usage();
 static void process_args(int argc, char *argv[], char ** input_filename, char ** filename);
 static void set_default_filenames(char ** input_filename, char ** filename);
 
-int main(int argc,char *argv[]) {
-
+int main(int argc,char *argv[])
+{
   FILE *parameterfile=NULL, *countfile=NULL;
   char *filename = NULL;
   char datafilename[206];
@@ -90,7 +93,9 @@ int main(int argc,char *argv[]) {
   char tmp_filename[50];
   char *input_filename = NULL;
   int status = 0, accept = 0;
-  int j,ix,mu, trajectory_counter=1;
+  int j,ix,mu, trajectory_counter=0;
+  unsigned int const io_max_attempts = 5; /* Make this configurable? */
+  unsigned int const io_timeout = 5; /* Make this configurable? */
   struct timeval t1;
 
   /* Energy corresponding to the Gauge part */
@@ -100,8 +105,6 @@ int main(int argc,char *argv[]) {
   /* Do we want to perform reversibility checks */
   /* See also return_check_flag in read_input.h */
   int return_check = 0;
-  /* For getopt */
-  int c;
 
   paramsXlfInfo *xlfInfo;
 
@@ -151,7 +154,7 @@ int main(int argc,char *argv[]) {
 #ifdef OMP
   init_openmp();
 #endif
-
+ 
   DUM_DERI = 4;
   DUM_SOLVER = DUM_DERI+1;
   DUM_MATRIX = DUM_SOLVER+6;
@@ -169,6 +172,10 @@ int main(int argc,char *argv[]) {
 
   tmlqcd_mpi_init(argc, argv);
 
+  initialize_gauge_buffers(12);
+  initialize_adjoint_buffers(6);
+  init_smearing();
+  
   if(nstore == -1) {
     countfile = fopen(nstore_filename, "r");
     if(countfile != NULL) {
@@ -190,7 +197,7 @@ int main(int argc,char *argv[]) {
   
   g_mu = g_mu1;
   
-#ifdef _GAUGE_COPY
+  #ifdef _GAUGE_COPY
   status = init_gauge_field(VOLUMEPLUSRAND + g_dbw2rand, 1);
 #else
   status = init_gauge_field(VOLUMEPLUSRAND + g_dbw2rand, 0);
@@ -247,6 +254,10 @@ int main(int argc,char *argv[]) {
   }
   init_measurements();
 
+  zero_spinor_field(g_spinor_field[DUM_DERI+4],VOLUME);
+  zero_spinor_field(g_spinor_field[DUM_DERI+5],VOLUME);
+  zero_spinor_field(g_spinor_field[DUM_DERI+6],VOLUME);
+
   /*construct the filenames for the observables and the parameters*/
   strncpy(datafilename,filename,200);  
   strcat(datafilename,".data");
@@ -287,7 +298,7 @@ int main(int argc,char *argv[]) {
 #endif
 
   /* Initialise random number generator */
-  start_ranlux(rlxd_level, random_seed^nstore );
+  start_ranlux(rlxd_level, random_seed^trajectory_counter);
 
   /* Set up the gauge field */
   /* continue and restart */
@@ -318,7 +329,7 @@ int main(int argc,char *argv[]) {
 
   /*For parallelization: exchange the gaugefield */
 #ifdef MPI
-  xchange_gauge(g_gauge_field);
+  exchange_gauge_field(&g_gf);
 #endif
 
   if(even_odd_flag) {
@@ -332,6 +343,8 @@ int main(int argc,char *argv[]) {
     exit(0);
   }
 
+  plaquette_energy = measure_gauge_action(g_gf);
+
   init_integrator();
 
   if(g_proc_id == 0) {
@@ -340,7 +353,6 @@ int main(int argc,char *argv[]) {
     }
   }
 
-  plaquette_energy = measure_gauge_action( (const su3**) g_gauge_field);
   if(g_rgi_C1 > 0. || g_rgi_C1 < 0.) {
     rectangle_energy = measure_rectangles( (const su3**) g_gauge_field);
     if(g_proc_id == 0){
@@ -414,38 +426,57 @@ int main(int argc,char *argv[]) {
        * then the configuration is currently stored in .conf.tmp, written out by update_tm.
        * In that case also a readback was performed, so no need to test .conf.tmp
        * In all other cases the gauge configuration still needs to be written out here. */
-      if (!(return_check && accept)) {
-        xlfInfo = construct_paramsXlfInfo(plaquette_energy/(6.*VOLUME*g_nproc), trajectory_counter);
-        if (g_proc_id == 0) {
-          fprintf(stdout, "# Writing gauge field to %s.\n", tmp_filename);
-        }
-        if((status = write_gauge_field( tmp_filename, gauge_precision_write_flag, xlfInfo) != 0 )) {
-          /* Writing the gauge field failed directly */
-          fprintf(stderr, "Error %d while writing gauge field to %s\nAborting...\n", status, tmp_filename);
-          exit(-2);
-        }
-        if (!g_disable_IO_checks) {
-#ifdef HAVE_LIBLEMON
+      if (!(return_check && accept))
+        for (unsigned int attempt = 1; attempt <= io_max_attempts; ++attempt)
+        {
+          if (g_proc_id == 0)
+            fprintf(stdout, "# Writing gauge field to %s.\n", tmp_filename);
+
+          xlfInfo = construct_paramsXlfInfo(plaquette_energy/(6.*VOLUME*g_nproc), trajectory_counter);
+          status = write_gauge_field( tmp_filename, gauge_precision_write_flag, xlfInfo);
+          free(xlfInfo);
+          
+          if (status) {
+            /* Writing the gauge field failed directly */
+            fprintf(stderr, "Error %d while writing gauge field to %s\nAborting...\n", status, tmp_filename);
+            exit(-2);
+          }
+          
+          if (g_disable_IO_checks) {
+            if (g_proc_id == 0)
+              fprintf(stdout, "# Write completed successfully. Write not verified!\n");
+            break;
+          }
+
           /* Read gauge field back to verify the writeout */
-          if (g_proc_id == 0) {
+          if (g_proc_id == 0) 
             fprintf(stdout, "# Write completed, verifying write...\n");
+
+          status = read_gauge_field(tmp_filename);
+          
+          if (!status) {
+            if (g_proc_id == 0)
+              fprintf(stdout, "# Write successfully verified.\n");
+            break;
           }
-          if( (status = read_gauge_field(tmp_filename)) != 0) {
-            fprintf(stderr, "WARNING, writeout of %s returned no error, but verification discovered errors.\n", tmp_filename);
-            fprintf(stderr, "Potential disk or MPI I/O error. Aborting...\n");
-            exit(-3);
-          }
+
           if (g_proc_id == 0) {
-            fprintf(stdout, "# Write successfully verified.\n");
+            fprintf(stdout, "# Writeout of %s returned no error, but verification discovered errors.\n", tmp_filename);
+            fprintf(stdout, "# Potential disk or MPI I/O error.\n");
+            fprintf(stdout, "# This was attempt %d out of %d.\n", attempt, io_max_attempts);
           }
-#else
-          if (g_proc_id == 0) {
-            fprintf(stdout, "# Write completed successfully.\n");
-          }
+
+          if (attempt == io_max_attempts)
+            kill_with_error(NULL, g_proc_id, "Persistent I/O failures!\n");
+
+          if (g_proc_id == 0)
+            fprintf(stdout, "# Will attempt to write again in %d seconds.\n", io_timeout);
+          
+          sleep(io_timeout);
+#ifdef MPI
+          MPI_Barrier(MPI_COMM_WORLD);
 #endif
         }
-        free(xlfInfo);
-      }
       /* Now move .conf.tmp into place */
       if(g_proc_id == 0) {
         fprintf(stdout, "# Renaming %s to %s.\n", tmp_filename, gauge_filename);
@@ -508,6 +539,7 @@ int main(int argc,char *argv[]) {
 #endif
   free_gauge_tmp();
   free_gauge_field();
+  return_gauge_field(&g_gf);
   free_geometry_indices();
   free_spinor_field();
   free_moment_field();
@@ -516,8 +548,13 @@ int main(int argc,char *argv[]) {
     free_bispinor_field();
     free_chi_spinor_field();
   }
+  finalize_smearing();
+  finalize_gauge_buffers();
+  finalize_adjoint_buffers();
+
   free(input_filename);
   free(filename);
+
   return(0);
 #ifdef _KOJAK_INST
 #pragma pomp inst end(main)

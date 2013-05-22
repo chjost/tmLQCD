@@ -38,29 +38,82 @@
 #include "update_momenta.h"
 #include "gettime.h"
 
-/* Updates the momenta: equation 16 of Gottlieb */
-void update_momenta(int * mnllist, double step, const int no, 
-		    hamiltonian_field_t * const hf) {
+#include <buffers/utils.h>
 
-#ifdef OMP
-#pragma omp parallel for
-#endif
-  for(int i = 0; i < (VOLUMEPLUSRAND + g_dbw2rand);i++) { 
-    for(int mu=0;mu<4;mu++) { 
-      _zero_su3adj(hf->derivative[i][mu]);
+#include <dirty_shameful_business.h>
+
+/* Updates the momenta: equation 16 of Gottlieb */
+void update_momenta(int * mnllist, double step, const int no, hamiltonian_field_t * const hf)
+{
+  double atime=0., etime=0.;
+  int *relevant_smearings = malloc(no_smearings_monomial * sizeof(int));
+  int no_relevant_smearings = 0;
+  
+  for(int k = 0; k < no; k++)
+  {
+    int current_idx = 0;
+    while ((current_idx < no_relevant_smearings) && (monomial_list[ mnllist[k] ].smearing != relevant_smearings[current_idx]))
+      ++current_idx;
+    if (current_idx == no_relevant_smearings)
+    {
+      relevant_smearings[current_idx] = monomial_list[ mnllist[k] ].smearing;
+      ++no_relevant_smearings;
     }
   }
   
-  for(int k = 0; k < no; k++) {
-    if(monomial_list[ mnllist[k] ].derivativefunction != NULL) {
-      monomial_list[ mnllist[k] ].derivativefunction(mnllist[k], hf);
-    }
-  }
+  adjoint_field_t tmp_derivative = get_adjoint_field();
   
+  zero_adjoint_field(&df);
+
+  ohnohack_remap_df0(tmp_derivative); /* FIXME Such that we can aggregate results per smearing type. */
+  for (int s_ctr = 0; s_ctr < no_relevant_smearings; ++s_ctr)
+  {
+    int s_type = relevant_smearings[s_ctr];
+
+    smear(smearing_control_monomial[s_type], g_gf);
+    zero_adjoint_field(&tmp_derivative);
+    ohnohack_remap_g_gauge_field(smearing_control_monomial[s_type]->result);
+
+    for(int k = 0; k < no; k++)
+    {
+      if (monomial_list[ mnllist[k] ].smearing == s_type)
+      {
+        if(monomial_list[ mnllist[k] ].derivativefunction != NULL)
+        {
 #ifdef MPI
-  xchange_deri(hf->derivative);
+          atime = MPI_Wtime();
+#else
+          atime = (double)clock()/(double)(CLOCKS_PER_SEC);
 #endif
-    
+
+          monomial_list[ mnllist[k] ].derivativefunction(mnllist[k], hf);
+
+#ifdef MPI
+          etime = MPI_Wtime();
+#else
+          etime = (double)clock()/(double)(CLOCKS_PER_SEC);
+#endif
+        }
+      }
+    }
+
+#ifdef MPI
+    xchange_deri(hf->derivative);
+#endif
+
+    smear_forces(smearing_control_monomial[s_type], tmp_derivative);
+
+    for(int i = 0; i < (VOLUMEPLUSRAND + g_dbw2rand); ++i)
+    { 
+      for(int mu = 0; mu < 4; ++mu)
+      {
+        _add_su3adj(df[i][mu], smearing_control_monomial[s_type]->force_result[i][mu]);
+      }
+    }
+  }
+  ohnohack_remap_df0(df);
+  ohnohack_remap_g_gauge_field(g_gf);
+
 #ifdef OMP
 #pragma omp parallel for
 #endif
@@ -70,7 +123,8 @@ void update_momenta(int * mnllist, double step, const int no,
       _su3adj_minus_const_times_su3adj(hf->momenta[i][mu], step, hf->derivative[i][mu]); 
     }
   }
-
+  return_adjoint_field(&tmp_derivative);
+  free(relevant_smearings);
   return;
 }
 

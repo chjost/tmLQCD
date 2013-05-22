@@ -31,11 +31,10 @@
 #endif
 #include "init/init_moment_field.h"
 #include "init/init_spinor_field.h"
-#include "init/init_stout_smear_vars.h"
 #ifdef OMP
 # include <omp.h>
 # include "init/init_omp_accumulators.h"
 # include "init/init_openmp.h"
 #endif
-
+#include "init/init_smearing.h"
 #endif

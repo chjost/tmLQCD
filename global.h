@@ -43,6 +43,7 @@
 #endif
 #include "su3.h"
 #include "su3adj.h"
+#include "buffers/gauge.h"
 //#  include <tormpi_export.h>
 
 #define N_CHEBYMAX 49
@@ -62,6 +63,8 @@
 #elif defined BGL
 # include "bgl.h"
 #endif
+
+#include <smearing/control.h>
 
 EXTERN int DUM_DERI, DUM_SOLVER, DUM_MATRIX;
 EXTERN int NO_OF_SPINORFIELDS;
@@ -172,6 +175,7 @@ EXTERN int g_running_phmc;
 /* End IF PHMC  */
 
 EXTERN su3 ** g_gauge_field;
+EXTERN gauge_field_t g_gf;
 #ifdef _USE_HALFSPINOR
 EXTERN su3 *** g_gauge_field_copy;
 #elif (defined _USE_TSPLITPAR )
@@ -183,6 +187,8 @@ EXTERN su3 ** g_gauge_field_copy;
 
 /*for temporalgauge in GPU part*/
 EXTERN su3 ** g_tempgauge_field;
+
+EXTERN adjoint_field_t df;
 
 EXTERN su3adj ** moment;
 EXTERN su3adj ** df0;
@@ -255,8 +261,6 @@ EXTERN int ** g_idn3d;
 
 #undef EXTERN
 /* #undef ALIGN */
-
-void fatal_error(char const *error, char const *function);
 
 #ifdef MAIN_PROGRAM
 #endif

@@ -2,9 +2,11 @@
 # include <config.h>
 #endif
 
+#include <complex.h>
 #include <string.h>
 
 #include <global.h>
 #include <xchange/xchange.h>
+#include <fatal_error.h>
 
 #include <buffers/utils.h>

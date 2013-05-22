@@ -100,7 +100,8 @@ void gauge_heatbath(const int id, hamiltonian_field_t * const hf) {
   atime = gettime();
   if(mnl->use_rectangles) mnl->c0 = 1. - 8.*mnl->c1;
   
-  mnl->energy0 = g_beta*(mnl->c0 * measure_gauge_action( (const su3**) hf->gaugefield));
+  mnl->energy0 = g_beta*(mnl->c0 * measure_gauge_action(_AS_GAUGE_FIELD_T(hf->gaugefield)));
+
   if(mnl->use_rectangles) {
     mnl->energy0 += g_beta*(mnl->c1 * measure_rectangles( (const su3**) hf->gaugefield));
   }
@@ -118,9 +119,10 @@ void gauge_heatbath(const int id, hamiltonian_field_t * const hf) {
 
 double gauge_acc(const int id, hamiltonian_field_t * const hf) {
   monomial * mnl = &monomial_list[id];
+  
   double atime, etime;
   atime = gettime();
-  mnl->energy1 = g_beta*(mnl->c0 * measure_gauge_action( (const su3**) hf->gaugefield));
+  mnl->energy1 = g_beta*(mnl->c0 * measure_gauge_action( _AS_GAUGE_FIELD_T(hf->gaugefield)));
   if(mnl->use_rectangles) {
     mnl->energy1 += g_beta*(mnl->c1 * measure_rectangles( (const su3**) hf->gaugefield));
   }

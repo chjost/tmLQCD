@@ -60,6 +60,7 @@ typedef struct {
   int even_odd_flag;
   int rngrepro;
   int solver;
+  int smearing;
   int iter0, iter1, iter2;
   int csg_N, csg_N2;
   int csg_n, csg_n2;
@@ -110,6 +111,7 @@ typedef struct {
   spinor ** csg_field;
   spinor ** csg_field2;
   spinor ** w_fields;
+
   /* functions for the HMC update */
   void (*hbfunction) (const int no, hamiltonian_field_t * const hf);
   double (*accfunction) (const int no, hamiltonian_field_t * const hf);

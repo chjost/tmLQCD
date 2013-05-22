@@ -1,21 +1,23 @@
 #pragma once
 
-#include <smearing/utils.h>
+#include <buffers/gauge.h>
 
-struct hyp_parameters
+typedef su3 su3_two_index[12];
+
+typedef struct
 {
-  double alpha[3];
-  int    iterations;
-};
+  double coeff[3];
+  unsigned int iterations;
 
-/* All defined in terms of arrays of tuples -- needed to allow for g_gauge_field as input */
+  /* Result -- main output for users */
+  gauge_field_t    result; /* For direct access to the result, shallow copy... */
 
-void hyp_staples_exclude_none(su3_tuple **buff_out, su3_tuple **buff_in); /* 12 components in, 12 components out */
-void hyp_staples_exclude_one (su3_tuple **buff_out, su3_tuple **buff_in);  /* 12 components in, 12 components out */
-void hyp_staples_exclude_two (su3_tuple **buff_out, su3_tuple  *buff_in);  /*  4 components in, 12 components out */
+  /* Intermediate results, stored to enhance locality of the analysis */
+  su3_two_index     **staples; /* Scratch space, available here so it is persistent */
+  gauge_field_t      *U;     /* The sequence of iterations gauge fields */
+} hyp_control;
 
-void APE_project_exclude_none(su3_tuple  *buff_out, double const coeff, su3_tuple **staples, su3_tuple *buff_in);
-void APE_project_exclude_one (su3_tuple **buff_out, double const coeff, su3_tuple **staples, su3_tuple *buff_in);
-void APE_project_exclude_two (su3_tuple **buff_out, double const coeff, su3_tuple **staples, su3_tuple *buff_in);
+hyp_control *construct_hyp_control(unsigned int iterations, double const coeff_0, double const coeff_1, double const coeff_2);
+void free_hyp_control(hyp_control *control);
 
-int hyp_smear(su3_tuple *m_field_out, struct hyp_parameters const *params, su3_tuple *m_field_in);  /*  4 components in, 4 components out */
+void hyp_smear(hyp_control *control, gauge_field_t in);

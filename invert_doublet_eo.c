@@ -88,9 +88,9 @@ int invert_doublet_eo(spinor * const Even_new_s, spinor * const Odd_new_s,
     }
     
     /* do trafo */
-    plaquette1 = measure_gauge_action(g_gauge_field);
+    plaquette1 = measure_gauge_action(g_gf);
     apply_gtrafo(g_gauge_field, g_trafo);								// transformation of the gauge field
-    plaquette2 = measure_gauge_action(g_gauge_field);
+    plaquette2 = measure_gauge_action(g_gf);
     if (g_proc_id == 0) printf("\tPlaquette before gauge fixing: %.16e\n", plaquette1/6./VOLUME);
     if (g_proc_id == 0) printf("\tPlaquette after gauge fixing:  %.16e\n", plaquette2/6./VOLUME);
     
@@ -128,8 +128,6 @@ int invert_doublet_eo(spinor * const Even_new_s, spinor * const Odd_new_s,
     
   } 
 #  endif  
-#endif /* HAVE_GPU*/
-
 
   /* here comes the inversion using even/odd preconditioning */
   if(g_proc_id == 0) {printf("# Using even/odd preconditioning!\n"); fflush(stdout);}
@@ -155,7 +153,7 @@ int invert_doublet_eo(spinor * const Even_new_s, spinor * const Odd_new_s,
   }
   gamma5(g_spinor_field[DUM_DERI], g_spinor_field[DUM_DERI], VOLUME/2);
   gamma5(g_spinor_field[DUM_DERI+1], g_spinor_field[DUM_DERI+1], VOLUME/2);
-  
+#endif  
   
 #ifdef HAVE_GPU
   if (usegpu_flag) {	// GPU, mixed precision solver
@@ -203,14 +201,13 @@ int invert_doublet_eo(spinor * const Even_new_s, spinor * const Odd_new_s,
 #  ifdef TEMPORALGAUGE
   
   if (usegpu_flag) { 
-    
     /* undo trafo */
     /* apply_inv_gtrafo(g_gauge_field, g_trafo);*/
     /* copy back the saved original field located in g_tempgauge_field -> update necessary*/
-    plaquette1 = measure_gauge_action(g_gauge_field);
+    plaquette1 = measure_gauge_action(g_gf);
     copy_gauge_field(g_gauge_field, g_tempgauge_field);
     g_update_gauge_copy = 1;
-    plaquette2 = measure_gauge_action(g_gauge_field);
+    plaquette2 = measure_gauge_action(g_gf);
     if (g_proc_id == 0) printf("\tPlaquette before inverse gauge fixing: %.16e\n", plaquette1/6./VOLUME);
     if (g_proc_id == 0) printf("\tPlaquette after inverse gauge fixing:  %.16e\n", plaquette2/6./VOLUME);
     

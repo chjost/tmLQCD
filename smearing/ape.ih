@@ -13,9 +13,13 @@
 #include <ranlxd.h>
 #include <sse.h>
 #include <get_staples.h>
-#include <xchange_gauge.h>
-#include <xchange.h>
+#include <xchange/xchange.h>
 #include <io/gauge.h>
 #include <update_backward_gauge.h>
 
+#include <fatal_error.h>
+
 #include <smearing/ape.h>
+#include <smearing/utils.h>
+#include <buffers/gauge.h>
+#include <buffers/utils.h>

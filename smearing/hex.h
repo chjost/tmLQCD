@@ -1,14 +1,38 @@
 #pragma once
 
-#include <buffers/gauge.h>
+#include <smearing/stout.h>
 #include <smearing/hyp.h>
 
-/* Just to have a consistent look to the interface  */
-typedef struct hyp_parameters hex_parameters;
+typedef stout_notes_t stout_notes_two_index[12];
+typedef stout_notes_t stout_notes_three_index[24];
 
-/* All defined in terms of arrays of tuples -- needed to allow for g_gauge_field as input */
-void stout_exclude_none(gauge_field_t buff_out, double const coeff, gauge_field_array_t staples, gauge_field_t buff_in);
-void stout_exclude_one (gauge_field_array_t buff_out, double const coeff, gauge_field_array_t staples, gauge_field_t buff_in);
-void stout_exclude_two (gauge_field_array_t buff_out, double const coeff, gauge_field_array_t staples, gauge_field_t buff_in);
+typedef struct
+{
+  /* Flags */
+  int             calculate_force_terms;
+  
+  /* Parameters */
+  double          coeff[3];
+  unsigned int    iterations;
+  
+  /* Intermediate results, stored to enhance locality of the analysis */
+  gauge_field_t *U;       /* The sequence of iterations gauge fields */
+  
+  su3_two_index           **V_stage_1;
+  stout_notes_three_index **trace_stage_1;
+  
+  su3_two_index           **V_stage_2;
+  stout_notes_two_index   **trace_stage_2;
 
-int hex_smear(gauge_field_t m_field_out, hex_parameters const *params, gauge_field_t m_field_in);  /*  4 components in, 4 components out */
+  stout_notes_tuple       **trace_stage_3; /* Intermediate results to avoid double calculations */
+  
+  /* Final results -- the first is a shallow copy */
+  gauge_field_t    result;
+  adjoint_field_t  force_result;
+} hex_control;
+
+hex_control *construct_hex_control(int calculate_force_terms, unsigned int iterations, double const coeff_0, double const coeff_1, double const coeff_2);
+void free_hex_control(hex_control *control);
+
+void hex_smear(hex_control *control, gauge_field_t in);
+void hex_smear_forces(hex_control *control, adjoint_field_t in);

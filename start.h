@@ -53,9 +53,7 @@ void random_spinor_field_lexic(spinor * const k, const int repro, const enum RN_
 void random_spinor_field_eo(spinor * const k, const int repro, const enum RN_TYPE rn_type);
 
 void unit_g_gauge_field(void);
-
 void random_gauge_field(const int repro, su3 ** const gf);
-
 double random_su3adj_field(const int repro, su3adj ** const momenta);
 
 void set_spinor_field(int k, const double c);
@@ -71,10 +69,6 @@ void start_ranlux(int level,int seed);
 void gen_test_spinor_field(spinor * const k , const int eoflag);
 void write_test_spinor_field(spinor * const k , const int eoflag, char * postfix);
 
-# ifdef WITHLAPH
-void random_jacobi_field(su3_vector * const k);
-# endif
-
-void rnd_z2_array(double* array, const int length);
+void random_su3(su3 * const u);
 
 #endif

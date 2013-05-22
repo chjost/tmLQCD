@@ -1,45 +1,25 @@
 #include "utils.ih"
 
-void generic_staples(su3 *buff_out, int x, int mu, su3_tuple *buff_in)
+void generic_staples(su3 *out, unsigned int x, unsigned int mu, gauge_field_t in)
 {
-  static su3 tmp;
+  su3 ALIGN tmp;
 
-#define _ADD_STAPLES_TO_COMPONENT(to, via) \
-  { \
-    _su3_times_su3d(tmp, buff_in[g_iup[x][via]][to], buff_in[g_iup[x][to]][via]); \
-    _su3_times_su3_acc(*buff_out, buff_in[x][via], tmp); \
-    _su3_times_su3(tmp, buff_in[g_idn[x][via]][to], buff_in[g_iup[g_idn[x][via]][to]][via]); \
-    _su3d_times_su3_acc(*buff_out, buff_in[g_idn[x][via]][via], tmp); \
-  }
+  memset(out, 0, sizeof(su3));
 
-  _su3_zero(*buff_out);
-
-  switch (mu)
+  for (unsigned int nu = 0; nu < 4; ++nu)
   {
-    case 0:
-      _ADD_STAPLES_TO_COMPONENT(0, 1);
-      _ADD_STAPLES_TO_COMPONENT(0, 2);
-      _ADD_STAPLES_TO_COMPONENT(0, 3);
-      break;
-
-    case 1:
-      _ADD_STAPLES_TO_COMPONENT(1, 0);
-      _ADD_STAPLES_TO_COMPONENT(1, 2);
-      _ADD_STAPLES_TO_COMPONENT(1, 3);
-      break;
-
-    case 2:
-      _ADD_STAPLES_TO_COMPONENT(2, 0);
-      _ADD_STAPLES_TO_COMPONENT(2, 1);
-      _ADD_STAPLES_TO_COMPONENT(2, 3);
-      break;
-
-    case 3:
-      _ADD_STAPLES_TO_COMPONENT(3, 0);
-      _ADD_STAPLES_TO_COMPONENT(3, 1);
-      _ADD_STAPLES_TO_COMPONENT(3, 2);
-      break;
+    if (nu == mu)
+      continue;
+    
+    /* Prefetch the indices */
+    unsigned int const xpm   = g_iup[x][mu];
+    unsigned int const xmn   = g_idn[x][nu];
+    unsigned int const xpn   = g_iup[x][nu];
+    unsigned int const xpmmn = g_idn[xpm][nu];
+    
+    _su3_times_su3d(tmp, in[xpn][mu], in[xpm][nu]);
+    _su3_times_su3_acc(*out, in[x][nu], tmp);
+    _su3_times_su3(tmp, in[xmn][mu], in[xpmmn][nu]);
+    _su3d_times_su3_acc(*out, in[xmn][nu], tmp);
   }
-
-#undef _ADD_STAPLES_TO_COMPONENT
 }

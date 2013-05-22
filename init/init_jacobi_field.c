@@ -32,38 +32,88 @@
 
 #ifdef WITHLAPH
 
-su3_vector  *jacobi_field = NULL;
+su3_vector *jacobi_field = NULL;
 
-int init_jacobi_field(const int V, const int nr)
-{
-int i=0;
+int init_jacobi_field(const int V, const int nr) {
+  int i = 0;
 
-	if((void*)(jacobi_field = (su3_vector*)calloc(nr*V+1, sizeof(su3_vector))) == NULL)
-	{
-		printf("malloc errno : %d\n",errno);
-		errno = 0;
-		return(1);
-	}
-	if((void*)(g_jacobi_field = (su3_vector**)malloc(nr*sizeof(su3_vector*))) == NULL)
-	{
-		printf("malloc errno : %d\n",errno);
-		errno = 0;
-		return(2);
-	}
+  if ((void*) (jacobi_field = (su3_vector*) calloc(nr * V + 1,
+      sizeof(su3_vector))) == NULL ) {
+    printf("malloc errno : %d\n", errno);
+    errno = 0;
+    return (1);
+  }
+  if ((void*) (g_jacobi_field = (su3_vector**) malloc(nr * sizeof(su3_vector*)))
+      == NULL ) {
+    printf("malloc errno : %d\n", errno);
+    errno = 0;
+    return (2);
+  }
 
-	g_jacobi_field[0] = jacobi_field;
-	for(i=1; i<nr; i++)
-	{
-		g_jacobi_field[i] = g_jacobi_field[i-1]+V;
-	}
+  g_jacobi_field[0] = jacobi_field;
+  for (i = 1; i < nr; i++) {
+    g_jacobi_field[i] = g_jacobi_field[i - 1] + V;
+  }
 
-	return(0);
+  return (0);
 }
 
+void free_jacobi_field() {
 
-void free_jacobi_field(){
-	
-	free(jacobi_field);
+  free(jacobi_field);
 }
 
+// TODO Fix this function
+void random_gauss_jacobi_field(su3_vector * const k, const int V) {
+  int ix;
+  su3_vector *s;
+  double v[6];
+
+  fprintf(stderr,
+      "function random_gauss_jacobi_field not working at the moment!\nAborting...\n");
+  exit(-1);
+  for (ix = 0; ix < V; ix++) {
+    s = k + ix;
+//    random_su3_vector(s, RN_GAUSS);
+  }
+#ifdef MPI
+  xchange_jacobi(k);
+#endif
+}
+
+void random_jacobi_field(su3_vector * const k, const int V) {
+  int ix, tmp = V % 3;
+  su3 s;
+  for (ix = 0; ix < V; ix += 3) {
+    random_su3(&s);
+    k[3 * ix + 0]->c0 = s.c00;
+    k[3 * ix + 0]->c1 = s.c01;
+    k[3 * ix + 0]->c2 = s.c02;
+    k[3 * ix + 1]->c0 = s.c00;
+    k[3 * ix + 1]->c1 = s.c01;
+    k[3 * ix + 1]->c2 = s.c02;
+    k[3 * ix + 2]->c0 = s.c00;
+    k[3 * ix + 2]->c1 = s.c01;
+    k[3 * ix + 2]->c2 = s.c02;
+  }
+
+  if (tmp == 1) {
+    random_su3(s);
+    k[V - 1]->c0 = s.c00;
+    k[V - 1]->c1 = s.c01;
+    k[V - 1]->c2 = s.c02;
+  } else if (tmp == 2) {
+    random_su3(s);
+    k[V - 2]->c0 = s.c00;
+    k[V - 2]->c1 = s.c01;
+    k[V - 2]->c2 = s.c02;
+    k[V - 1]->c0 = s.c00;
+    k[V - 1]->c1 = s.c01;
+    k[V - 1]->c2 = s.c02;
+  }
+
+#ifdef MPI
+  xchange_jacobi(k);
+#endif
+}
 #endif // WITHLAPH

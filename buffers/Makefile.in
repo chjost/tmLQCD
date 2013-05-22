@@ -29,16 +29,35 @@ COMPILE = ${CC} ${DEFS} ${INCLUDES} ${CFLAGS} ${OPTARGS}
 
 LIBRARIES = libbuffers
 
-libbuffers_TARGETS = 	gauge \
-			gauge_allocate_gauge_buffers \
+libbuffers_TARGETS = 	adjoint \
+			adjoint_allocate_adjoint_buffer \
+			adjoint_finalize_adjoint_buffers \
+			adjoint_free_unused_adjoint_buffers \
+			adjoint_get_adjoint_field \
+			adjoint_get_adjoint_field_annotated \
+			adjoint_initialize_adjoint_buffers \
+			adjoint_return_adjoint_field \
+			alignment_aalloc \
+			alignment_aalloc_annotated \
+			gauge \
+			gauge_allocate_gauge_buffer \
 			gauge_finalize_gauge_buffers \
 			gauge_free_unused_gauge_buffers \
 			gauge_get_gauge_field \
-			gauge_get_gauge_field_array \
+			gauge_get_gauge_field_annotated \
 			gauge_initialize_gauge_buffers \
 			gauge_return_gauge_field \
-			gauge_return_gauge_field_array \
-			utils_generic_exchange
+			spinor \
+			spinor_allocate_spinor_buffer \
+			spinor_finalize_spinor_buffers \
+			spinor_free_unused_spinor_buffers \
+			spinor_get_spinor_field \
+			spinor_get_spinor_field_annotated \
+			spinor_initialize_spinor_buffers \
+			spinor_return_spinor_field \
+			utils_generic_exchange \
+			utils_adjoint_to_gauge \
+			utils_gauge_to_adjoint
 
 libbuffers_OBJECTS = $(addsuffix .o, ${libbuffers_TARGETS})
 

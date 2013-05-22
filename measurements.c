@@ -74,6 +74,7 @@ int init_measurements(){
     }
     
     measurement_list[i].id = i;
+    measurement_list[i].smearing = 0; /* FIXME A placeholder to avoid issues until smearing is properly implemented here. */
  }
 return(0);
 }

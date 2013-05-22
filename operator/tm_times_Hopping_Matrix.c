@@ -74,7 +74,7 @@ void tm_times_Hopping_Matrix(const int ieo, spinor * const l, spinor * const k, 
   
 #  ifdef _GAUGE_COPY
   if(g_update_gauge_copy) {
-    update_backward_gauge(g_gauge_field);
+    update_backward_gauge(_AS_GAUGE_FIELD_T(g_gauge_field));
   }
 #  endif
   
@@ -99,7 +99,7 @@ void tm_times_Hopping_Matrix(const int ieo, spinor * const l, spinor * const k, 
   return;
 }
 
-#elif (!defined _NO_COMM && !defined _USE_HALFSPINOR && !defined _USE_TSPLITPAR)
+#elif (!defined _NO_COMM && !defined _USE_HALFSPINOR)
 #  include "operator/hopping.h"
 #  if ((defined SSE2)||(defined SSE3))
 #    include "sse.h"
@@ -122,7 +122,7 @@ void tm_times_Hopping_Matrix(const int ieo, spinor * const l, spinor * const k, 
 #  endif
 #  ifdef _GAUGE_COPY
   if(g_update_gauge_copy) {
-    update_backward_gauge(g_gauge_field);
+    update_backward_gauge(_AS_GAUGE_FIELD_T(g_gauge_field));
   }
 #  endif
 

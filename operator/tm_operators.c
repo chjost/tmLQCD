@@ -807,6 +807,7 @@ void mul_one_pm_imu_sub_mul(spinor * const l, spinor * const k,
 
   z = 1. + (sign * g_mu) * I;
   w = conj(z);
+
   /************ loop over all lattice sites ************/
 #ifdef OMP
 #pragma omp for

@@ -41,8 +41,6 @@
 #include "read_input.h"
 #include "monomial/monomial.h"
 
-
-
 monomial monomial_list[max_no_monomials];
 int no_monomials = 0;
 int no_gauge_monomials = 0;
@@ -461,6 +459,7 @@ int init_monomials(const int V, const int even_odd_flag) {
       monomial_list[no_monomials-1].derivativefunction = NULL;
       monomial_list[no_monomials-1].timescale = 0;
       monomial_list[no_monomials-1].even_odd_flag = even_odd_flag;
+      monomial_list[no_monomials-1].smearing = monomial_list[clover_monomials[j]].smearing;
       if(g_proc_id == 0 && g_debug_level > 1) {
         printf("# Initialised clover_trlog_monomial, no_monomials= %d\n", no_monomials);
       }
@@ -483,6 +482,7 @@ int init_monomials(const int V, const int even_odd_flag) {
       monomial_list[no_monomials-1].derivativefunction = NULL;
       monomial_list[no_monomials-1].timescale = 0;
       monomial_list[no_monomials-1].even_odd_flag = 1;
+      monomial_list[no_monomials-1].smearing = monomial_list[clover_monomials[j]].smearing;
       if(g_proc_id == 0 && g_debug_level > 1) {
         printf("# Initialised clovernd_trlog_monomial, no_monomials= %d\n", no_monomials);
       }
