@@ -61,7 +61,7 @@
 #include "smearing/hex_3d.h"
 #include "smearing/utils.h"
 
-#define DEBUG 1
+#define DEBUG 0
 #define SMEARING 1
 #define SMEAR_ITER 1
 #define SMEAR_COEFF1 0.2f // should be smaller than 1
@@ -226,8 +226,6 @@ int main(int argc, char* argv[]) {
 
   g_stochastical_run = 1;
 
-
-  // TODO Seeds
 //  add_dilution(D_INTER, D_FULL, D_INTER, 8, 0, 8, 1227, D_UP, D_STOCH);
 //  add_dilution(D_INTER, D_FULL, D_INTER, 8, 0, 8, 1337, D_UP, D_STOCH);
 //  add_dilution(D_INTER, D_FULL, D_INTER, 8, 0, 8, 1447, D_UP, D_STOCH);
@@ -244,9 +242,9 @@ int main(int argc, char* argv[]) {
 //getestet (time, dirac, laph, int, int, int, seed, up/down, stoch/local)
 
   add_dilution(D_FULL, D_FULL, D_FULL, 0, 0, 0, 111111, D_UP, D_STOCH);
-//  add_dilution(D_FULL, D_FULL, D_NONE, 0, 0, 0, 222222, D_UP, D_STOCH);
-//  add_dilution(D_FULL, D_FULL, D_INTER, 0, 0, 2, 333333, D_UP, D_STOCH);
-//  add_dilution(D_FULL, D_FULL, D_BLOCK, 0, 0, 2, 444444, D_UP, D_STOCH);
+  add_dilution(D_FULL, D_FULL, D_NONE, 0, 0, 0, 222222, D_UP, D_STOCH);
+  add_dilution(D_FULL, D_FULL, D_INTER, 0, 0, 2, 333333, D_UP, D_STOCH);
+  add_dilution(D_FULL, D_FULL, D_BLOCK, 0, 0, 2, 444444, D_UP, D_STOCH);
 //
 //  add_dilution(D_NONE, D_FULL, D_FULL, 0, 0, 0, 111111, D_UP, D_STOCH);
 //  add_dilution(D_NONE, D_FULL, D_NONE, 0, 0, 0, 222222, D_UP, D_STOCH);
@@ -255,7 +253,7 @@ int main(int argc, char* argv[]) {
 //
 //  add_dilution(D_INTER, D_FULL, D_FULL, 2, 0, 0, 111111, D_UP, D_STOCH);
 //  add_dilution(D_INTER, D_FULL, D_NONE, 2, 0, 2, 222222, D_UP, D_STOCH);
-//  add_dilution(D_INTER, D_FULL, D_INTER, 2, 0, 2, 333333, D_UP, D_STOCH);
+  add_dilution(D_INTER, D_FULL, D_INTER, 2, 0, 2, 333333, D_UP, D_STOCH);
 //  add_dilution(D_INTER, D_FULL, D_BLOCK, 2, 0, 2, 444444, D_UP, D_STOCH);
 //
 //  add_dilution(D_BLOCK, D_FULL, D_FULL, 2, 0, 0, 111111, D_UP, D_STOCH);
@@ -283,10 +281,10 @@ int main(int argc, char* argv[]) {
 //  add_dilution(D_BLOCK, D_NONE, D_INTER, 2, 0, 2, 333333, D_UP, D_STOCH);
 //  add_dilution(D_BLOCK, D_NONE, D_BLOCK, 2, 0, 2, 444444, D_UP, D_STOCH);
 
-//  add_dilution(D_FULL, D_FULL, D_FULL, 0, 0, 0, 111111, D_DOWN, D_STOCH);
-//  add_dilution(D_FULL, D_FULL, D_NONE, 0, 0, 0, 222222, D_DOWN, D_STOCH);
-//  add_dilution(D_FULL, D_FULL, D_INTER, 0, 0, 2, 333333, D_DOWN, D_STOCH);
-//  add_dilution(D_FULL, D_FULL, D_BLOCK, 0, 0, 2, 444444, D_DOWN, D_STOCH);
+  add_dilution(D_FULL, D_FULL, D_FULL, 0, 0, 0, 111111, D_DOWN, D_STOCH);
+  add_dilution(D_FULL, D_FULL, D_NONE, 0, 0, 0, 222222, D_DOWN, D_STOCH);
+  add_dilution(D_FULL, D_FULL, D_INTER, 0, 0, 2, 333333, D_DOWN, D_STOCH);
+  add_dilution(D_FULL, D_FULL, D_BLOCK, 0, 0, 2, 444444, D_DOWN, D_STOCH);
 //
 //  add_dilution(D_NONE, D_FULL, D_FULL, 0, 0, 0, 111111, D_DOWN, D_STOCH);
 //  add_dilution(D_NONE, D_FULL, D_NONE, 0, 0, 0, 222222, D_DOWN, D_STOCH);
@@ -295,7 +293,7 @@ int main(int argc, char* argv[]) {
 //
 //  add_dilution(D_INTER, D_FULL, D_FULL, 2, 0, 0, 111111, D_DOWN, D_STOCH);
 //  add_dilution(D_INTER, D_FULL, D_NONE, 2, 0, 2, 222222, D_DOWN, D_STOCH);
-//  add_dilution(D_INTER, D_FULL, D_INTER, 2, 0, 2, 333333, D_DOWN, D_STOCH);
+  add_dilution(D_INTER, D_FULL, D_INTER, 2, 0, 2, 333333, D_DOWN, D_STOCH);
 //  add_dilution(D_INTER, D_FULL, D_BLOCK, 2, 0, 2, 444444, D_DOWN, D_STOCH);
 //
 //  add_dilution(D_BLOCK, D_FULL, D_FULL, 2, 0, 0, 111111, D_DOWN, D_STOCH);
@@ -419,7 +417,6 @@ int main(int argc, char* argv[]) {
 //    printf("2KappaMu = %e", g_mu);
     printf("\n# Generating eigensystem for conf %d\n", conf);
     fflush(stdout);
-    start_ranlux(1, dilution_list[j].seed^conf);
     generate_eigensystem(conf);
 
     if (g_stochastical_run != 0) {
@@ -427,6 +424,7 @@ int main(int argc, char* argv[]) {
         //generate the sources
         printf("\n# generating sources (%d of %d)\n", j + 1, no_dilution);
         fflush(stdout);
+        start_ranlux(1, dilution_list[j].seed ^ conf);
         create_invert_sources(conf, j);
 
 // construct the perambulators
@@ -521,7 +519,7 @@ int generate_eigensystem(int const conf) {
     exit(-2);
   }
 //  unit_g_gauge_field();
-//  rnd_gauge_trafo(1, g_gauge_field);
+//  rnd_gauge_trafo(&(_AS_GAUGE_FIELD_T(g_gauge_field)), _AS_GAUGE_FIELD_T(g_gauge_field));
 
   if (g_cart_id == 0) {
     printf("# Finished reading gauge field.\n");
@@ -552,19 +550,18 @@ int generate_eigensystem(int const conf) {
 #endif
 
   for (k = 0; k < 3; k++) {
-    if(g_jacobi_field[k] == NULL) {
+    if (g_jacobi_field[k] == NULL ) {
       fprintf(stderr, "Jacobi field nr %d not initialized!\n", k);
       exit(-1);
     }
-    random_jacobi_field(g_jacobi_field[k], VOLUMEPLUSRAND);
+    random_jacobi_field(g_jacobi_field[k], SPACEVOLUME + SPACERAND);
   }
-
 
   // smearing
 #if SMEARING
   hex_3d_control *mysmearing = NULL;
   mysmearing = construct_hex_3d_control(SMEAR_ITER, SMEAR_COEFF1, SMEAR_COEFF2);
-  hex_3d_smear(mysmearing, (gauge_field_t) g_gauge_field);
+  hex_3d_smear(mysmearing, _AS_GAUGE_FIELD_T(g_gauge_field) );
 #endif
 
   /* Compute LapH Eigensystem */
@@ -653,7 +650,6 @@ int create_invert_sources(int const conf, int const dilution) {
   int index = 0;
 
   if (g_stochastical_run != 0) {
-    start_ranlux(1, dilution_list[dilution].seed^(conf*dilution));
     rnd_vector = (_Complex double*) calloc(rnd_vec_size,
         sizeof(_Complex double));
     if (rnd_vector == NULL ) {

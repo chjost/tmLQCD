@@ -65,51 +65,56 @@ void free_jacobi_field() {
 
 // TODO Fix this function
 void random_gauss_jacobi_field(su3_vector * const k, const int V) {
-  int ix;
-  su3_vector *s;
-  double v[6];
+//  int ix;
+//  su3_vector *s;
+//  double v[6];
 
   fprintf(stderr,
       "function random_gauss_jacobi_field not working at the moment!\nAborting...\n");
   exit(-1);
-  for (ix = 0; ix < V; ix++) {
-    s = k + ix;
+//  for (ix = 0; ix < V; ix++) {
+//    s = k + ix;
 //    random_su3_vector(s, RN_GAUSS);
-  }
-#ifdef MPI
-  xchange_jacobi(k);
-#endif
+//  }
+//#ifdef MPI
+//  xchange_jacobi(k);
+//#endif
 }
 
 void random_jacobi_field(su3_vector * const k, const int V) {
   int ix, tmp = V % 3;
   su3 s;
-  for (ix = 0; ix < V; ix += 3) {
+  su3_vector *t = k;
+  for (ix = 0; 3*ix < V; ix += 3) {
     random_su3(&s);
-    k[3 * ix + 0]->c0 = s.c00;
-    k[3 * ix + 0]->c1 = s.c01;
-    k[3 * ix + 0]->c2 = s.c02;
-    k[3 * ix + 1]->c0 = s.c00;
-    k[3 * ix + 1]->c1 = s.c01;
-    k[3 * ix + 1]->c2 = s.c02;
-    k[3 * ix + 2]->c0 = s.c00;
-    k[3 * ix + 2]->c1 = s.c01;
-    k[3 * ix + 2]->c2 = s.c02;
+    t->c0 = s.c00;
+    t->c1 = s.c01;
+    t->c2 = s.c02;
+    t++;
+    t->c0 = s.c00;
+    t->c1 = s.c01;
+    t->c2 = s.c02;
+    t++;
+    t->c0 = s.c00;
+    t->c1 = s.c01;
+    t->c2 = s.c02;
+    t++;
   }
 
   if (tmp == 1) {
     random_su3(s);
-    k[V - 1]->c0 = s.c00;
-    k[V - 1]->c1 = s.c01;
-    k[V - 1]->c2 = s.c02;
+    t->c0 = s.c00;
+    t->c1 = s.c01;
+    t->c2 = s.c02;
   } else if (tmp == 2) {
     random_su3(s);
-    k[V - 2]->c0 = s.c00;
-    k[V - 2]->c1 = s.c01;
-    k[V - 2]->c2 = s.c02;
-    k[V - 1]->c0 = s.c00;
-    k[V - 1]->c1 = s.c01;
-    k[V - 1]->c2 = s.c02;
+    t->c0 = s.c00;
+    t->c1 = s.c01;
+    t->c2 = s.c02;
+    t++;
+    t->c0 = s.c00;
+    t->c1 = s.c01;
+    t->c2 = s.c02;
   }
 
 #ifdef MPI
