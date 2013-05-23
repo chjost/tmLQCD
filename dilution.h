@@ -74,7 +74,17 @@ void create_source_tf_df_li(const int nr_conf, const int nr_dilution,
 void create_source_tf_df_lb(const int nr_conf, const int nr_dilution,
     char* inverterpath);
 
+void create_source_tf_df_li1(const int nr_conf, const int nr_dilution,
+    char* inverterpath, int *tslices, int nr_tslices);
+
+void create_source_ti_df_lf(const int nr_conf, const int nr_dilution,
+    char* inverterpath);
+void create_source_ti_df_ln(const int nr_conf, const int nr_dilution,
+    char* inverterpath);
 void create_source_ti_df_li(const int nr_conf, const int nr_dilution,
     char* inverterpath);
+void create_source_ti_df_lb(const int nr_conf, const int nr_dilution,
+    char* inverterpath);
+
 
 #endif /* DILUTION_H_ */

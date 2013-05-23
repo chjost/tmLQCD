@@ -102,12 +102,12 @@ void random_jacobi_field(su3_vector * const k, const int V) {
   }
 
   if (tmp == 1) {
-    random_su3(s);
+    random_su3(&s);
     t->c0 = s.c00;
     t->c1 = s.c01;
     t->c2 = s.c02;
   } else if (tmp == 2) {
-    random_su3(s);
+    random_su3(&s);
     t->c0 = s.c00;
     t->c1 = s.c01;
     t->c2 = s.c02;
