@@ -60,15 +60,16 @@
 #include "dilution.h"
 #include "smearing/hex_3d.h"
 #include "smearing/utils.h"
+#include "buffers/utils.h"
 
 #define DEBUG 1
 #define SMEARING 1
-#define SMEAR_ITER 1
-#define SMEAR_COEFF1 0.2f // should be smaller than 1
-#define SMEAR_COEFF2 0.5f // should be smaller than 1
-#define INVERTER "./invert"
+#define SMEAR_ITER 2
+#define SMEAR_COEFF1 0.15f // should be smaller than 1
+#define SMEAR_COEFF2 0.125f // should be smaller than 1
+#define INVERTER "./gpuinvert"
 
-#define REMOVESOURCES 1 // remove all output except for the perambulators
+#define REMOVESOURCES 0 // remove all output except for the perambulators
 #define _vector_one(r) \
   (r).c0 = 1. + 0.*I;\
   (r).c1 = 1. + 0.*I;\
@@ -226,35 +227,27 @@ int main(int argc, char* argv[]) {
 
   g_stochastical_run = 1;
 
-//  add_dilution(D_INTER, D_FULL, D_INTER, 8, 0, 8, 1227, D_UP, D_STOCH);
+  add_dilution(D_INTER, D_FULL, D_INTER, 8, 0, 8, 1227, D_UP, D_STOCH);
 //  add_dilution(D_INTER, D_FULL, D_INTER, 8, 0, 8, 1337, D_UP, D_STOCH);
-//  add_dilution(D_INTER, D_FULL, D_INTER, 8, 0, 8, 1447, D_UP, D_STOCH);
-//  add_dilution(D_INTER, D_FULL, D_INTER, 8, 0, 8, 1557, D_UP, D_STOCH);
-//  add_dilution(D_INTER, D_FULL, D_INTER, 8, 0, 8, 1667, D_UP, D_STOCH);
-//  add_dilution(D_INTER, D_FULL, D_INTER, 8, 0, 8, 1777, D_UP, D_STOCH);
-//  add_dilution(D_INTER, D_FULL, D_INTER, 8, 0, 8, 1887, D_UP, D_STOCH);
-//  add_dilution(D_INTER, D_FULL, D_INTER, 8, 0, 8, 1997, D_UP, D_STOCH);
-//  add_dilution(D_INTER, D_FULL, D_INTER, 8, 0, 8, 1007, D_UP, D_STOCH);
-//  add_dilution(D_INTER, D_FULL, D_INTER, 8, 0, 8, 1117, D_UP, D_STOCH);
 //  add_dilution(D_INTER, D_FULL, D_INTER, 8, 0, 8, 11227, D_DOWN, D_STOCH);
 //  add_dilution(D_INTER, D_FULL, D_INTER, 8, 0, 8, 11337, D_DOWN, D_STOCH);
 
 //getestet (time, dirac, laph, int, int, int, seed, up/down, stoch/local)
 
-  add_dilution(D_FULL, D_FULL, D_FULL, 0, 0, 0, 111111, D_UP, D_STOCH);
-  add_dilution(D_FULL, D_FULL, D_NONE, 0, 0, 0, 222222, D_UP, D_STOCH);
-  add_dilution(D_FULL, D_FULL, D_INTER, 0, 0, 2, 333333, D_UP, D_STOCH);
-  add_dilution(D_FULL, D_FULL, D_BLOCK, 0, 0, 2, 444444, D_UP, D_STOCH);
+//  add_dilution(D_FULL, D_FULL, D_FULL, 0, 0, 0, 111111, D_UP, D_STOCH);
+//  add_dilution(D_FULL, D_FULL, D_NONE, 0, 0, 0, 222222, D_UP, D_STOCH);
+//  add_dilution(D_FULL, D_FULL, D_INTER, 0, 0, 2, 333333, D_UP, D_STOCH);
+//  add_dilution(D_FULL, D_FULL, D_BLOCK, 0, 0, 2, 444444, D_UP, D_STOCH);
 //
 //  add_dilution(D_NONE, D_FULL, D_FULL, 0, 0, 0, 111111, D_UP, D_STOCH);
 //  add_dilution(D_NONE, D_FULL, D_NONE, 0, 0, 0, 222222, D_UP, D_STOCH);
 //  add_dilution(D_NONE, D_FULL, D_INTER, 2, 0, 2, 333333, D_UP, D_STOCH);
 //  add_dilution(D_NONE, D_FULL, D_BLOCK, 0, 0, 2, 444444, D_UP, D_STOCH);
 //
-  add_dilution(D_INTER, D_FULL, D_FULL, 2, 0, 0, 111111, D_UP, D_STOCH);
-  add_dilution(D_INTER, D_FULL, D_NONE, 2, 0, 2, 222222, D_UP, D_STOCH);
-  add_dilution(D_INTER, D_FULL, D_INTER, 2, 0, 2, 333333, D_UP, D_STOCH);
-  add_dilution(D_INTER, D_FULL, D_BLOCK, 2, 0, 2, 444444, D_UP, D_STOCH);
+//  add_dilution(D_INTER, D_FULL, D_FULL, 2, 0, 0, 111111, D_UP, D_STOCH);
+//  add_dilution(D_INTER, D_FULL, D_NONE, 2, 0, 2, 222222, D_UP, D_STOCH);
+//  add_dilution(D_INTER, D_FULL, D_INTER, 2, 0, 2, 333333, D_UP, D_STOCH);
+//  add_dilution(D_INTER, D_FULL, D_BLOCK, 2, 0, 2, 444444, D_UP, D_STOCH);
 //
 //  add_dilution(D_BLOCK, D_FULL, D_FULL, 2, 0, 0, 111111, D_UP, D_STOCH);
 //  add_dilution(D_BLOCK, D_FULL, D_NONE, 2, 0, 0, 222222, D_UP, D_STOCH);
@@ -281,20 +274,20 @@ int main(int argc, char* argv[]) {
 //  add_dilution(D_BLOCK, D_NONE, D_INTER, 2, 0, 2, 333333, D_UP, D_STOCH);
 //  add_dilution(D_BLOCK, D_NONE, D_BLOCK, 2, 0, 2, 444444, D_UP, D_STOCH);
 
-  add_dilution(D_FULL, D_FULL, D_FULL, 0, 0, 0, 111111, D_DOWN, D_STOCH);
-  add_dilution(D_FULL, D_FULL, D_NONE, 0, 0, 0, 222222, D_DOWN, D_STOCH);
-  add_dilution(D_FULL, D_FULL, D_INTER, 0, 0, 2, 333333, D_DOWN, D_STOCH);
-  add_dilution(D_FULL, D_FULL, D_BLOCK, 0, 0, 2, 444444, D_DOWN, D_STOCH);
+//  add_dilution(D_FULL, D_FULL, D_FULL, 0, 0, 0, 111111, D_DOWN, D_STOCH);
+//  add_dilution(D_FULL, D_FULL, D_NONE, 0, 0, 0, 222222, D_DOWN, D_STOCH);
+//  add_dilution(D_FULL, D_FULL, D_INTER, 0, 0, 2, 333333, D_DOWN, D_STOCH);
+//  add_dilution(D_FULL, D_FULL, D_BLOCK, 0, 0, 2, 444444, D_DOWN, D_STOCH);
 //
 //  add_dilution(D_NONE, D_FULL, D_FULL, 0, 0, 0, 111111, D_DOWN, D_STOCH);
 //  add_dilution(D_NONE, D_FULL, D_NONE, 0, 0, 0, 222222, D_DOWN, D_STOCH);
 //  add_dilution(D_NONE, D_FULL, D_INTER, 2, 0, 2, 333333, D_DOWN, D_STOCH);
 //  add_dilution(D_NONE, D_FULL, D_BLOCK, 0, 0, 2, 444444, D_DOWN, D_STOCH);
 //
-  add_dilution(D_INTER, D_FULL, D_FULL, 2, 0, 0, 111111, D_DOWN, D_STOCH);
-  add_dilution(D_INTER, D_FULL, D_NONE, 2, 0, 2, 222222, D_DOWN, D_STOCH);
-  add_dilution(D_INTER, D_FULL, D_INTER, 2, 0, 2, 333333, D_DOWN, D_STOCH);
-  add_dilution(D_INTER, D_FULL, D_BLOCK, 2, 0, 2, 444444, D_DOWN, D_STOCH);
+//  add_dilution(D_INTER, D_FULL, D_FULL, 2, 0, 0, 111111, D_DOWN, D_STOCH);
+//  add_dilution(D_INTER, D_FULL, D_NONE, 2, 0, 2, 222222, D_DOWN, D_STOCH);
+//  add_dilution(D_INTER, D_FULL, D_INTER, 2, 0, 2, 333333, D_DOWN, D_STOCH);
+//  add_dilution(D_INTER, D_FULL, D_BLOCK, 2, 0, 2, 444444, D_DOWN, D_STOCH);
 //
 //  add_dilution(D_BLOCK, D_FULL, D_FULL, 2, 0, 0, 111111, D_DOWN, D_STOCH);
 //  add_dilution(D_BLOCK, D_FULL, D_NONE, 2, 0, 0, 222222, D_DOWN, D_STOCH);
@@ -425,7 +418,7 @@ int main(int argc, char* argv[]) {
         printf("\n# generating sources (%d of %d)\n", j + 1, no_dilution);
         fflush(stdout);
         start_ranlux(1, dilution_list[j].seed ^ conf);
-        create_invert_sources(conf, j);
+//        create_invert_sources(conf, j);
 
 // construct the perambulators
 //        printf("\n# constructing perambulators (%d of %d)\n", j + 1,
@@ -436,7 +429,7 @@ int main(int argc, char* argv[]) {
 // construct the propagators
         printf("\n# constructing propagators (%d of %d)\n", j + 1, no_dilution);
         fflush(stdout);
-        create_propagators(conf, j);
+//        create_propagators(conf, j);
 
 // clean up
         if (REMOVESOURCES) {
@@ -468,6 +461,10 @@ int main(int argc, char* argv[]) {
         system(call);
       }
     }
+    sprintf(call, "tar cf 8x16_eigensystem_C%04d.tar eigenv*.%04d", conf, conf);
+    system(call);
+    sprintf(call, "rm eigenv*.%04d b_eigenvector*.%04d", conf, conf);
+        system(call);
 //    sprintf(call,
 //        "cp perambulator*.%04d /dsk/lattice02-0/jost/data/8times16_d/", conf);
 //    system(call);
@@ -559,9 +556,14 @@ int generate_eigensystem(int const conf) {
 
   // smearing
 #if SMEARING
-  hex_3d_control *mysmearing = NULL;
-  mysmearing = construct_hex_3d_control(SMEAR_ITER, SMEAR_COEFF1, SMEAR_COEFF2);
-  hex_3d_smear(mysmearing, _AS_GAUGE_FIELD_T(g_gauge_field) );
+  smearing_control_t *mysmearing = construct_smearing_control(HEX_3D, 0,
+      SMEAR_ITER, SMEAR_COEFF1, SMEAR_COEFF2);
+  smear(mysmearing, _AS_GAUGE_FIELD_T(g_gauge_field) );
+  copy_gauge_field(&(_AS_GAUGE_FIELD_T(g_gauge_field) ), mysmearing->result);
+#if DEBUG
+  if (mysmearing->smearing_performed)
+    printf("smearing performed\n");
+#endif
 #endif
 
   /* Compute LapH Eigensystem */
@@ -575,6 +577,10 @@ int generate_eigensystem(int const conf) {
     }
 #ifdef OMP
   }
+#endif
+
+#if SMEARING
+  free(mysmearing);
 #endif
 
   eigenvector = (su3_vector*) calloc(volume, sizeof(su3_vector));
