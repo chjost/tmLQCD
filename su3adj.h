@@ -20,6 +20,8 @@
 #ifndef _SU3ADJ_H
 #define _SU3ADJ_H
 
+#include <complex.h>
+
 typedef struct
 {
   double d1, d2, d3, d4, d5, d6, d7, d8;
@@ -43,6 +45,7 @@ typedef struct
  */
 
 #define _make_su3(v,p) \
+{\
 (v).c00 =   0.0   +  (0.5773502691896258 * (p).d8 + (p).d3) * I; \
 (v).c01 =  (p).d2 +  (p).d1 * I; \
 (v).c02 =  (p).d5 +  (p).d4 * I; \
@@ -51,7 +54,8 @@ typedef struct
 (v).c12 =  (p).d7 +  (p).d6 * I; \
 (v).c20 = -(p).d5 +  (p).d4 * I; \
 (v).c21 = -(p).d7 +  (p).d6 * I; \
-(v).c22 =   0.0   -  (1.154700538379252 * (p).d8)           * I;
+(v).c22 =   0.0   -  (1.154700538379252 * (p).d8)           * I; \
+}
 
 /*
  *
@@ -65,6 +69,7 @@ typedef struct
  */
 
 #define _trace_lambda(r,a) \
+{ \
 (r).d1=-cimag((a).c10)-cimag((a).c01); \
 (r).d2=+creal((a).c10)-creal((a).c01); \
 (r).d3=-cimag((a).c00)+cimag((a).c11); \
@@ -72,7 +77,8 @@ typedef struct
 (r).d5=+creal((a).c20)-creal((a).c02); \
 (r).d6=-cimag((a).c21)-cimag((a).c12); \
 (r).d7=+creal((a).c21)-creal((a).c12); \
-(r).d8=(-cimag((a).c00)-cimag((a).c11) + 2.0 * cimag((a).c22))*0.577350269189625;
+(r).d8=(-cimag((a).c00)-cimag((a).c11) + 2.0 * cimag((a).c22))*0.577350269189625; \
+}
 
 #define _add_trace_lambda(r,a) \
 (r).d1+=-cimag((a).c10)-cimag((a).c01); \

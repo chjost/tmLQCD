@@ -33,6 +33,11 @@
  *******************************************************************************/
 
 #include <complex.h>
+#if ((defined SSE2)||(defined SSE3))
+#include "sse.h"
+#endif
+
+
 #if (defined XLC && defined BGL)
 # include "bgl.h"
 #endif

@@ -42,8 +42,12 @@
 #include "global.h"
 #include <io/params.h>
 #include "measure_gauge_action.h"
+#include <buffers/gauge.h>
 
-double measure_gauge_action(const su3 ** const gf) {
+double measure_gauge_action(gauge_field_t const gf) {
+  printf("entering measure_gauge_action\n");
+  fflush(stdout);
+
   static double res;
 #ifdef MPI
   double ALIGN mres;
@@ -52,56 +56,62 @@ double measure_gauge_action(const su3 ** const gf) {
 #ifdef OMP
 #pragma omp parallel
   {
-  int thread_num = omp_get_thread_num();
+    int thread_num = omp_get_thread_num();
 #endif
 
-  int ix,ix1,ix2,mu1,mu2;
-  su3 ALIGN pr1,pr2; 
-  const su3 *v,*w;
-  double ALIGN ac,ks,kc,tr,ts,tt;
+    su3 ALIGN pr1, pr2;
+    const su3 *v, *w;
+    double ALIGN ac, ks, kc, tr, ts, tt;
 
-  if(g_update_gauge_energy) {
-    kc=0.0; ks=0.0;
+    if (g_update_gauge_energy) {
+      kc = 0.0;
+      ks = 0.0;
+      printf("entering measurement loop, volume = %d, volume+rand = %d\n",
+          VOLUME, VOLUMEPLUSRAND);
+      fflush(stdout);
 #ifdef OMP
 #pragma omp for
 #endif
-    for (ix=0;ix<VOLUME;ix++){
-      for (mu1=0;mu1<3;mu1++){ 
-	ix1=g_iup[ix][mu1];
-	for (mu2=mu1+1;mu2<4;mu2++){ 
-	  ix2=g_iup[ix][mu2];
-	  v=&gf[ix][mu1];
-	  w=&gf[ix1][mu2];
-	  _su3_times_su3(pr1,*v,*w);
-	  v=&gf[ix][mu2];
-	  w=&gf[ix2][mu1];
-	  _su3_times_su3(pr2,*v,*w);
-	  _trace_su3_times_su3d(ac,pr1,pr2);
-	  tr=ac+kc;
-	  ts=tr+ks;
-	  tt=ts-ks;
-	  ks=ts;
-	  kc=tr-tt;
-	}
+      for (int ix = 0; ix < VOLUME; ++ix) {
+        for (int mu1 = 0; mu1 < 3; ++mu1) {
+          int ix1 = g_iup[ix][mu1];
+          for (int mu2 = mu1 + 1; mu2 < 4; ++mu2) {
+            int ix2 = g_iup[ix][mu2];
+//            printf("ix = %d, ix1 = %d, ix2 = %d, mu1 = %d, mu2 = %d\t", ix, ix1,
+//                ix2, mu1, mu2);
+//            fflush(stdout);
+            v = &gf[ix][mu1];
+            w = &gf[ix1][mu2];
+            _su3_times_su3(pr1, *v, *w);
+            v = &gf[ix][mu2];
+            w = &gf[ix2][mu1];
+            _su3_times_su3(pr2, *v, *w);
+            _trace_su3_times_su3d(ac, pr1, pr2);
+            tr = ac + kc;
+            ts = tr + ks;
+            tt = ts - ks;
+            ks = ts;
+            kc = tr - tt;
+          }
+        }
       }
-    }
-    kc=(kc+ks)/3.0;
+      kc = (kc + ks) / 3.0;
 #ifdef OMP
-    g_omp_acc_re[thread_num] = kc;
+      g_omp_acc_re[thread_num] = kc;
 #else
-    res = kc;
+      res = kc;
 #endif
-  }
+    }
 
 #ifdef OMP
   } /* OpenMP parallel closing brace */
 
-  if(g_update_gauge_energy) {
+  if (g_update_gauge_energy) {
     res = 0.0;
-    for(int i=0; i < omp_num_threads; ++i)
+    for (int i = 0; i < omp_num_threads; ++i)
       res += g_omp_acc_re[i];
 #else
-  if(g_update_gauge_energy) {
+    if(g_update_gauge_energy) {
 #endif
 #ifdef MPI
     MPI_Allreduce(&res, &mres, 1, MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD);
@@ -112,5 +122,3 @@ double measure_gauge_action(const su3 ** const gf) {
   }
   return res;
 }
-
-

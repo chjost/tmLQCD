@@ -65,8 +65,8 @@
 #define DEBUG 1
 #define SMEARING 1
 #define SMEAR_ITER 2
-#define SMEAR_COEFF1 0.15f // should be smaller than 1
-#define SMEAR_COEFF2 0.125f // should be smaller than 1
+#define SMEAR_COEFF1 0.76f // should be smaller than 1
+#define SMEAR_COEFF2 0.95f // should be smaller than 1
 #define INVERTER "./gpuinvert"
 
 #define REMOVESOURCES 0 // remove all output except for the perambulators
@@ -227,14 +227,14 @@ int main(int argc, char* argv[]) {
 
   g_stochastical_run = 1;
 
-  add_dilution(D_INTER, D_FULL, D_INTER, 8, 0, 8, 1227, D_UP, D_STOCH);
+//  add_dilution(D_INTER, D_FULL, D_INTER, 8, 0, 8, 1227, D_UP, D_STOCH);
 //  add_dilution(D_INTER, D_FULL, D_INTER, 8, 0, 8, 1337, D_UP, D_STOCH);
 //  add_dilution(D_INTER, D_FULL, D_INTER, 8, 0, 8, 11227, D_DOWN, D_STOCH);
 //  add_dilution(D_INTER, D_FULL, D_INTER, 8, 0, 8, 11337, D_DOWN, D_STOCH);
 
 //getestet (time, dirac, laph, int, int, int, seed, up/down, stoch/local)
 
-//  add_dilution(D_FULL, D_FULL, D_FULL, 0, 0, 0, 111111, D_UP, D_STOCH);
+  add_dilution(D_FULL, D_FULL, D_FULL, 0, 0, 0, 111111, D_UP, D_STOCH);
 //  add_dilution(D_FULL, D_FULL, D_NONE, 0, 0, 0, 222222, D_UP, D_STOCH);
 //  add_dilution(D_FULL, D_FULL, D_INTER, 0, 0, 2, 333333, D_UP, D_STOCH);
 //  add_dilution(D_FULL, D_FULL, D_BLOCK, 0, 0, 2, 444444, D_UP, D_STOCH);
@@ -454,17 +454,17 @@ int main(int argc, char* argv[]) {
 //      create_perambulators(conf, 1);
 
 // clean up
-      if (REMOVESOURCES) {
-        printf("\n# removing sources\n");
-        sprintf(call, "rm source?.%04d.* eigenv*.%04d dirac*.input output.para",
-            conf, conf);
-        system(call);
-      }
+//      if (REMOVESOURCES) {
+//        printf("\n# removing sources\n");
+//        sprintf(call, "rm source?.%04d.* eigenv*.%04d dirac*.input output.para",
+//            conf, conf);
+//        system(call);
+//      }
     }
-    sprintf(call, "tar cf 8x16_eigensystem_C%04d.tar eigenv*.%04d", conf, conf);
-    system(call);
-    sprintf(call, "rm eigenv*.%04d b_eigenvector*.%04d", conf, conf);
-        system(call);
+//    sprintf(call, "tar cf 8x16_eigensystem_C%04d.tar eigenv*.%04d", conf, conf);
+//    system(call);
+//    sprintf(call, "rm eigenv*.%04d", conf);
+//    system(call);
 //    sprintf(call,
 //        "cp perambulator*.%04d /dsk/lattice02-0/jost/data/8times16_d/", conf);
 //    system(call);
@@ -583,30 +583,30 @@ int generate_eigensystem(int const conf) {
   free(mysmearing);
 #endif
 
-  eigenvector = (su3_vector*) calloc(volume, sizeof(su3_vector));
-  if (eigenvector == NULL ) {
-    fprintf(stderr, "not enough space to create eigenvector.\nAborting...\n");
-    return (-1);
-  }
-  for (t = 0; t < T; t++) {
-    for (vec = 0; vec < no_eigenvalues; vec++) {
-      sprintf(eigenvectorfile, "eigenvector.%03d.%03d.%04d", vec, t, conf);
-      read_su3_vector(eigenvector, eigenvectorfile, 0, t, 1);
-      // binary dump of the eigenvectors, needed for the operators
-      sprintf(eigenvectorfile, "./b_eigenvector.%03d.%03d.%04d", vec, t, conf);
-      if ((file = fopen(eigenvectorfile, "wb")) == NULL ) {
-        fprintf(stderr, "could not open eigenvector file %s.\nAborting...\n",
-            eigenvectorfile);
-        exit(-1);
-      }
-      count = fwrite(eigenvector, sizeof(su3_vector), volume, file);
-      if (count != volume) {
-        fprintf(stderr, "could not write all data to file %s.\n",
-            eigenvectorfile);
-      }
-      fclose(file);
-    }
-  }
+//  eigenvector = (su3_vector*) calloc(volume, sizeof(su3_vector));
+//  if (eigenvector == NULL ) {
+//    fprintf(stderr, "not enough space to create eigenvector.\nAborting...\n");
+//    return (-1);
+//  }
+//  for (t = 0; t < T; t++) {
+//    for (vec = 0; vec < no_eigenvalues; vec++) {
+//      sprintf(eigenvectorfile, "eigenvector.%03d.%03d.%04d", vec, t, conf);
+//      read_su3_vector(eigenvector, eigenvectorfile, 0, t, 1);
+//      // binary dump of the eigenvectors, needed for the operators
+//      sprintf(eigenvectorfile, "./b_eigenvector.%03d.%03d.%04d", vec, t, conf);
+//      if ((file = fopen(eigenvectorfile, "wb")) == NULL ) {
+//        fprintf(stderr, "could not open eigenvector file %s.\nAborting...\n",
+//            eigenvectorfile);
+//        exit(-1);
+//      }
+//      count = fwrite(eigenvector, sizeof(su3_vector), volume, file);
+//      if (count != volume) {
+//        fprintf(stderr, "could not write all data to file %s.\n",
+//            eigenvectorfile);
+//      }
+//      fclose(file);
+//    }
+//  }
   return (0);
 }
 
