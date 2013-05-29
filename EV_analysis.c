@@ -108,13 +108,11 @@ inline void spinor_times_su3vec(_Complex double *result, spinor const factor1,
 }
 
 int generate_eigensystem(int const conf);
-//int eigensystem_gsl();
 int create_invert_sources(int const conf, int const dilution);
 void create_input_files(int const dirac, int const timeslice, int const conf,
     int const dilution);
 void create_propagators(int const conf, int const dilution);
 void create_perambulators(int const conf, int const dilution);
-void test_system(int const conf);
 
 static void rnd_z2_vector(_Complex double *v, const int N) {
   ranlxd((double*) v, 2 * N);
@@ -454,34 +452,14 @@ int main(int argc, char* argv[]) {
 //      create_perambulators(conf, 1);
 
 // clean up
-//      if (REMOVESOURCES) {
-//        printf("\n# removing sources\n");
-//        sprintf(call, "rm source?.%04d.* eigenv*.%04d dirac*.input output.para",
-//            conf, conf);
-//        system(call);
-//      }
+      if (REMOVESOURCES) {
+        printf("\n# removing sources\n");
+        sprintf(call, "rm source?.%04d.* eigenv*.%04d dirac*.input output.para",
+            conf, conf);
+        system(call);
+      }
     }
-//    sprintf(call, "tar cf 8x16_eigensystem_C%04d.tar eigenv*.%04d", conf, conf);
-//    system(call);
-//    sprintf(call, "rm eigenv*.%04d", conf);
-//    system(call);
-//    sprintf(call,
-//        "cp perambulator*.%04d /dsk/lattice02-0/jost/data/8times16_d/", conf);
-//    system(call);
-//    sprintf(call,
-//        "cp randomvector*.%04d /dsk/lattice02-0/jost/data/8times16_interlace/",
-//        conf);
-//    system(call);
-//    sprintf(call,
-//        "cp b_eigenvector*.%04d /dsk/lattice02-0/jost/data/8times16_d", conf);
-//    system(call);
   }
-//  sprintf(call,
-//      "tar cf 8times16_prop_all.tar b_eigenvector* randomvector* propagator*");
-//  system(call);
-//  sprintf(call, "cp 8times16_prop_all.tar /dsk/lattice01-0/jost/data/");
-//  system(call);
-//  printf("\n# program finished without problems\n# Clearing memory\n");
 
 #ifdef MPI
   MPI_Finalize();
@@ -515,8 +493,6 @@ int generate_eigensystem(int const conf) {
         conf_filename);
     exit(-2);
   }
-//  unit_g_gauge_field();
-//  rnd_gauge_trafo(&(_AS_GAUGE_FIELD_T(g_gauge_field)), _AS_GAUGE_FIELD_T(g_gauge_field));
 
   if (g_cart_id == 0) {
     printf("# Finished reading gauge field.\n");
@@ -547,10 +523,6 @@ int generate_eigensystem(int const conf) {
 #endif
 
   for (k = 0; k < 3; k++) {
-    if (g_jacobi_field[k] == NULL ) {
-      fprintf(stderr, "Jacobi field nr %d not initialized!\n", k);
-      exit(-1);
-    }
     random_jacobi_field(g_jacobi_field[k], SPACEVOLUME + SPACERAND);
   }
 
@@ -580,56 +552,10 @@ int generate_eigensystem(int const conf) {
 #endif
 
 #if SMEARING
-  free(mysmearing);
+  free_smearing_control(mysmearing);
 #endif
-
-//  eigenvector = (su3_vector*) calloc(volume, sizeof(su3_vector));
-//  if (eigenvector == NULL ) {
-//    fprintf(stderr, "not enough space to create eigenvector.\nAborting...\n");
-//    return (-1);
-//  }
-//  for (t = 0; t < T; t++) {
-//    for (vec = 0; vec < no_eigenvalues; vec++) {
-//      sprintf(eigenvectorfile, "eigenvector.%03d.%03d.%04d", vec, t, conf);
-//      read_su3_vector(eigenvector, eigenvectorfile, 0, t, 1);
-//      // binary dump of the eigenvectors, needed for the operators
-//      sprintf(eigenvectorfile, "./b_eigenvector.%03d.%03d.%04d", vec, t, conf);
-//      if ((file = fopen(eigenvectorfile, "wb")) == NULL ) {
-//        fprintf(stderr, "could not open eigenvector file %s.\nAborting...\n",
-//            eigenvectorfile);
-//        exit(-1);
-//      }
-//      count = fwrite(eigenvector, sizeof(su3_vector), volume, file);
-//      if (count != volume) {
-//        fprintf(stderr, "could not write all data to file %s.\n",
-//            eigenvectorfile);
-//      }
-//      fclose(file);
-//    }
-//  }
   return (0);
 }
-
-//void test_ranlux() {
-//  double rnd1 = 0., rnd2 = 0.;
-//  char filename[100];
-//  sprintf(filename, "rng.lime");
-//
-//  write_ranlux(filename, 0);
-//  ranlxd(&rnd1, 1);
-//  //random_seed;
-//  //rlxd_level;
-//  read_ranlux(filename, 0);
-//  ranlxd(&rnd2, 1);
-//
-//  if (fabs(rnd1 - rnd2) < 1e-6) {
-//    fprintf(stdout, "random numbers are the same.\n");
-//  } else {
-//    fprintf(stderr, "random numbers are not the same.\n");
-//  }
-//
-//  return;
-//}
 
 /*
  * create and invert new sources
@@ -1560,7 +1486,6 @@ int create_invert_sources(int const conf, int const dilution) {
                 _vector_add_mul( dirac0[block*t+point].s3, rnd_vector[index+3],
                     eigenvector[point]);
               }
-
             }
 
             // write spinor field with entries at dirac 0
@@ -2175,21 +2100,8 @@ void create_propagators(int const conf, int const dilution) {
  * create the perambulators
  */
 void create_perambulators(int const conf, int const dilution) {
-// local parameters
-  int tsource, tsink;
-  int nvsource, ndsource, nvsink, point1, count;
+  // set the correct parameters for the loops
   int t_end = -1, l_end = -1, d_end = 4;
-  int blockwidth, blocksize, blockheigth = 4 * no_eigenvalues;
-  int timeblock = LX * LY * LZ;
-  spinor *inverted, *even, *odd, *tmp;
-  su3_vector* eigenvector = NULL;
-  _Complex double *tmpeigenvector = NULL;
-  int counter = 0;
-  char eigenvectorfile[200], invertedfile[200], perambulatorfile[200];
-  FILE *file = NULL;
-  _Complex double *block;
-
-// set the correct parameters for the loops
   if (g_stochastical_run == 0) {
     t_end = T;
     d_end = 4;
@@ -2219,257 +2131,125 @@ void create_perambulators(int const conf, int const dilution) {
       l_end = 1;
     }
   }
-  blockwidth = d_end * l_end;
-  blocksize = blockheigth * blockwidth;
-
-// allocate the needed memory for spinors, eigenvectors and peramulator
-  tmp = (spinor*) calloc(VOLUMEPLUSRAND + 1, sizeof(spinor));
-#if (defined SSE || defined SSE2 || defined SSE3)
-  inverted = (spinor*) (((unsigned long int) (tmp) + ALIGN_BASE) & ~ALIGN_BASE);
-#else
-  inverted = tmp;
-#endif
-  tmp = (spinor*) calloc(VOLUMEPLUSRAND + 1, sizeof(spinor));
-#if (defined SSE || defined SSE2 || defined SSE3)
-  even = (spinor*) (((unsigned long int) (tmp) + ALIGN_BASE) & ~ALIGN_BASE);
-#else
-  even = tmp;
-#endif
-  tmp = (spinor*) calloc(VOLUMEPLUSRAND + 1, sizeof(spinor));
-#if (defined SSE || defined SSE2 || defined SSE3)
-  odd = (spinor*) (((unsigned long int) (tmp) + ALIGN_BASE) & ~ALIGN_BASE);
-#else
-  odd = tmp;
+#if DEBUG
+  printf("\nparameters for propagator: t %d, d %d, l %d\n", t_end, d_end,
+      l_end);
 #endif
 
-  eigenvector = (su3_vector*) calloc(timeblock, sizeof(su3_vector));
-  if (eigenvector == NULL ) {
-    fprintf(stderr, "not enough space to create eigenvector.\nAborting...\n");
-    return;
-  }
-  if (dilution_list[dilution].smearing == D_LOCAL) {
-    tmpeigenvector = (_Complex double*) eigenvector;
-  }
+#ifdef OMP
+#pragma omp parallel \
+    shared(t_end, l_end, d_end)
+  {
+#endif
+    int time = 0, count = 0, vec = 0, dirac = 0;
+    spinor *inverted = NULL, *even = NULL, *odd = NULL, *tmp = NULL;
+    char invertedfile[200], propagatorfile[200];
+    FILE *file = NULL;
+    // allocate the needed memory for spinors, eigenvectors and peramulator
+    tmp = (spinor*) calloc(VOLUMEPLUSRAND + 1, sizeof(spinor));
+    if (tmp == NULL ) {
+      fprintf(stderr, "Could not allocate spinor!\nAborting...\n");
+      exit(-1);
+    }
+#if (defined SSE || defined SSE2 || defined SSE3)
+    inverted =
+        (spinor*) (((unsigned long int) (tmp) + ALIGN_BASE) & ~ALIGN_BASE);
+#else
+    inverted = tmp;
+#endif
+    tmp = (spinor*) calloc(VOLUMEPLUSRAND + 1, sizeof(spinor));
+    if (tmp == NULL ) {
+      free(inverted);
+      fprintf(stderr, "Could not allocate spinor!\nAborting...\n");
+      exit(-1);
+    }
+#if (defined SSE || defined SSE2 || defined SSE3)
+    even = (spinor*) (((unsigned long int) (tmp) + ALIGN_BASE) & ~ALIGN_BASE);
+#else
+    even = tmp;
+#endif
+    tmp = (spinor*) calloc(VOLUMEPLUSRAND + 1, sizeof(spinor));
+    if (tmp == NULL ) {
+      free(inverted);
+      free(even);
+      fprintf(stderr, "Could not allocate spinor!\nAborting...\n");
+      exit(-1);
+    }
+#if (defined SSE || defined SSE2 || defined SSE3)
+    odd = (spinor*) (((unsigned long int) (tmp) + ALIGN_BASE) & ~ALIGN_BASE);
+#else
+    odd = tmp;
+#endif
 
-  block = (_Complex double*) calloc(blocksize, sizeof(_Complex double));
-  if (block == NULL ) {
-    fprintf(stderr, "not enough space to create perambulator.\nAborting...\n");
-    return;
-  }
+    // save each propagator into new file
+    // iterate over time
+#ifdef OMP
+#pragma omp for private(time)
+#endif
+    for (time = 0; time < t_end; time++) {
+      // iterate over the LapH space
+      for (vec = 0; vec < l_end; vec++) {
+        // iterate over the dirac space
+        for (dirac = 0; dirac < d_end; dirac++) {
 
-// iterate through the blocks of the perambulator
-  for (tsource = 0; tsource < t_end; tsource++) {
-    for (tsink = 0; tsink < T; tsink++) {
-      // set the entries of the block to zero
-      memset(block, 0, sizeof(_Complex double) * blocksize);
-
-      // iterate through the inverted source
-      for (nvsource = 0; nvsource < l_end; nvsource++) {
-        for (ndsource = 0; ndsource < d_end; ndsource++) {
-          sprintf(invertedfile, "source%d.%04d.%02d.%02d.inverted", ndsource,
-              conf, tsource, nvsource);
+          // read in inverted source
+          sprintf(invertedfile, "source%d.%04d.%02d.%02d.inverted", dirac, conf,
+              time, vec);
+#if DEBUG
+#ifdef OMP
+          printf("thread %d reading file %s\n", omp_get_thread_num(),
+              invertedfile);
+#else
+          printf("reading file %s\n", invertedfile);
+#endif
+#endif
           read_spinor(even, odd, invertedfile, 0);
           convert_eo_to_lexic(inverted, even, odd);
-          counter = 0;
 
-          // iterate through the eigenvectors
-          for (nvsink = 0; nvsink < no_eigenvalues; nvsink++) {
-            if (dilution_list[dilution].smearing == D_STOCH) {
-              sprintf(eigenvectorfile, "eigenvector.%03d.%03d.%04d", nvsink,
-                  tsink, conf);
-              read_su3_vector(eigenvector, eigenvectorfile, 0, tsink, 1);
-            } else {
-              memset(eigenvector, 0, sizeof(su3_vector) * timeblock);
-              if (nvsink < 3 * timeblock)
-                tmpeigenvector[nvsink] = 1.0;
-            }
+          // save to file
+          if (g_stochastical_run == 0) {
+            sprintf(propagatorfile, "propagator.T%03d.D%01d.V%03d.%04d", time,
+                dirac, vec, conf);
+          } else {
+            sprintf(propagatorfile,
+                "propagator.%s.R%03d.T%03d.D%01d.V%03d.%04d",
+                (dilution_list[dilution].quark == D_UP) ? "u" : "d", dilution,
+                time, dirac, vec, conf);
+          }
+#if DEBUG
+#ifdef OMP
+          printf("thread %d writing file %s\n", omp_get_thread_num(),
+              propagatorfile);
+#else
+          printf("writing file %s\n", propagatorfile);
+#endif
+#endif
+          if ((file = fopen(propagatorfile, "wb")) == NULL ) {
+            fprintf(stderr, "could not open propagator file %s.\nAborting...\n",
+                propagatorfile);
+            exit(-1);
+          }
+          count = fwrite(inverted, sizeof(spinor), VOLUMEPLUSRAND, file);
+          if (count != VOLUMEPLUSRAND) {
+            fprintf(stderr, "could not write all data to file %s.\n",
+                propagatorfile);
+          }
+          fflush(file);
+          fclose(file);
 
-            for (point1 = 0; point1 < timeblock; point1++) {
-              spinor_times_su3vec(
-                  &(block[blockwidth * (nvsink * d_end) + nvsource * d_end
-                      + ndsource]), inverted[timeblock * tsink + point1],
-                  eigenvector[point1], blockwidth);
-            }
-          } // iterate through the eigenvectors
-        }
-      } // iterate through the "propagator"
+        } // dirac
+      } // LapH
+    } // time
 
-      // save the perambulator
-      // naming convention: perambulator[_i(dilution)].(tsource).(tsink).(configuration)
-      if (g_stochastical_run == 0) {
-        sprintf(perambulatorfile, "perambulator.%03d.%03d.%04d", tsource, tsink,
-            conf);
-      } else {
-        sprintf(perambulatorfile, "perambulator_i.%02d.%03d.%03d.%04d",
-            dilution, tsource, tsink, conf);
-      }
-      if ((file = fopen(perambulatorfile, "wb")) == NULL ) {
-        fprintf(stderr, "could not open perambulator file %s.\nAborting...\n",
-            perambulatorfile);
-        exit(-1);
-      }
-      count = fwrite(block, sizeof(_Complex double), blocksize, file);
-      if (count != blocksize) {
-        fprintf(stderr, "could not write all data to file %s.\n",
-            perambulatorfile);
-      }
-      fflush(file);
-      fclose(file);
+    free(even);
+    free(odd);
+    free(inverted);
 
-    } // iteration through the blocks of the perambulator
+#ifdef OMP
   }
-
-  free(even);
-  free(odd);
-  free(inverted);
-  free(eigenvector);
-  free(block);
-
+#endif
   return;
 }
-
-//int eigensystem_gsl() {
-//  int i, k;
-//  FILE* file = NULL;
-//
-//  gsl_vector * vector_ev = gsl_vector_calloc(192);
-//  gsl_matrix_complex * matrix_op = gsl_matrix_complex_calloc(192, 192);
-//  gsl_matrix_complex * matrix_ev = gsl_matrix_complex_calloc(192, 192);
-//  gsl_eigen_hermv_workspace * workspace_ev = gsl_eigen_hermv_alloc(192);
-//
-////		unit_g_gauge_field();
-//
-//// construct operator according to paper 1104.3870v1, eq. (5)
-//  gsl_complex compl, compl1; // GSL complex number
-//// coordinates of point y and neighbors in configuration:
-//  int ix, ix_x, ix_y, ix_z, ix_xd, ix_yd, ix_zd;
-//
-//  int x2 = 0, y2 = 0, z2 = 0; // coordinates of point y
-//  double *tmp_entry1u, *tmp_entry2u, *tmp_entry3u; // su3 entries of the "upper" neighbors
-//  double *tmp_entry1d, *tmp_entry2d, *tmp_entry3d; // su3 entries of the "lower" neighbors
-//
-//  for (x2 = 0; x2 < LX; x2++) {
-//    for (y2 = 0; y2 < LY; y2++) {
-//      for (z2 = 0; z2 < LZ; z2++) {
-//        // get point y and neighbors
-//        ix = g_ipt[0][x2][y2][z2];
-//        ix_x = g_iup[ix][1]; // +x-direction
-//        ix_y = g_iup[ix][2]; // +y-direction
-//        ix_z = g_iup[ix][3]; // +z-direction
-//        ix_xd = g_idn[ix][1]; // -x-direction
-//        ix_yd = g_idn[ix][2]; // -y-direction
-//        ix_zd = g_idn[ix][3]; // -z-direction
-//
-//        GSL_SET_COMPLEX(&compl, -6.0, 0.0);
-//        GSL_SET_COMPLEX(&compl1, 1.0, 0.0);
-//        tmp_entry1u = (double *) &(g_gauge_field[ix][1]);
-//        tmp_entry2u = (double *) &(g_gauge_field[ix][2]);
-//        tmp_entry3u = (double *) &(g_gauge_field[ix][3]);
-//
-//        tmp_entry1d = (double *) &(g_gauge_field[ix_xd][1]);
-//        tmp_entry2d = (double *) &(g_gauge_field[ix_yd][2]);
-//        tmp_entry3d = (double *) &(g_gauge_field[ix_zd][3]);
-//        for (i = 0; i < 3; i++) {
-//          gsl_matrix_complex_set(matrix_op, 3 * ix + i, 3 * ix + i, compl);
-//        }
-//        for (i = 0; i < 3; i++) {
-//          for (k = 0; k < 3; k++) {
-//
-//            GSL_SET_COMPLEX(&compl, *(tmp_entry1u+6*i+2*k),
-//                *(tmp_entry1u+6*i+2*k+1));
-//            gsl_matrix_complex_set(matrix_op, 3 * ix + k, 3 * ix_x + i, compl);
-//            GSL_SET_COMPLEX(&compl, *(tmp_entry2u+6*i+2*k),
-//                *(tmp_entry2u+6*i+2*k+1));
-//            gsl_matrix_complex_set(matrix_op, 3 * ix + k, 3 * ix_y + i, compl);
-//            GSL_SET_COMPLEX(&compl, *(tmp_entry3u+6*i+2*k),
-//                *(tmp_entry3u+6*i+2*k+1));
-//            gsl_matrix_complex_set(matrix_op, 3 * ix + k, 3 * ix_z + i, compl);
-//
-//            GSL_SET_COMPLEX(&compl, *(tmp_entry1u+6*i+2*k),
-//                -*(tmp_entry1u+6*i+2*k+1));
-//            gsl_matrix_complex_set(matrix_op, 3 * ix_x + i, 3 * ix + k, compl);
-//            GSL_SET_COMPLEX(&compl, *(tmp_entry2u+6*i+2*k),
-//                -*(tmp_entry2u+6*i+2*k+1));
-//            gsl_matrix_complex_set(matrix_op, 3 * ix_y + i, 3 * ix + k, compl);
-//            GSL_SET_COMPLEX(&compl, *(tmp_entry3u+6*i+2*k),
-//                -*(tmp_entry3u+6*i+2*k+1));
-//            gsl_matrix_complex_set(matrix_op, 3 * ix_z + i, 3 * ix + k, compl);
-//
-//            GSL_SET_COMPLEX(&compl, *(tmp_entry1d+6*i+2*k),
-//                -*(tmp_entry1d+6*i+2*k+1));
-//            gsl_matrix_complex_set(matrix_op, 3 * ix + i, 3 * ix_xd + k, compl);
-//            GSL_SET_COMPLEX(&compl, *(tmp_entry2d+6*i+2*k),
-//                -*(tmp_entry2d+6*i+2*k+1));
-//            gsl_matrix_complex_set(matrix_op, 3 * ix + i, 3 * ix_yd + k, compl);
-//            GSL_SET_COMPLEX(&compl, *(tmp_entry3d+6*i+2*k),
-//                -*(tmp_entry3d+6*i+2*k+1));
-//            gsl_matrix_complex_set(matrix_op, 3 * ix + i, 3 * ix_zd + k, compl);
-//
-//            GSL_SET_COMPLEX(&compl, *(tmp_entry1d+6*i+2*k),
-//                *(tmp_entry1d+6*i+2*k+1));
-//            gsl_matrix_complex_set(matrix_op, 3 * ix_xd + k, 3 * ix + i, compl);
-//            GSL_SET_COMPLEX(&compl, *(tmp_entry2d+6*i+2*k),
-//                *(tmp_entry2d+6*i+2*k+1));
-//            gsl_matrix_complex_set(matrix_op, 3 * ix_yd + k, 3 * ix + i, compl);
-//            GSL_SET_COMPLEX(&compl, *(tmp_entry3d+6*i+2*k),
-//                *(tmp_entry3d+6*i+2*k+1));
-//            gsl_matrix_complex_set(matrix_op, 3 * ix_zd + k, 3 * ix + i, compl);
-//          }
-//        }
-//      }
-//    }
-//  }
-//
-//  for (k = 0; k < 192; k++) {
-//    for (i = k; k < 192; k++) {
-//      if ((gsl_matrix_complex_get(matrix_op, i, k).dat[0])
-//          != (gsl_matrix_complex_get(matrix_op, k, i).dat[0])) {
-//        printf("re not hermitian: i = %i, k = %i\n", i, k);
-//      }
-//      if ((gsl_matrix_complex_get(matrix_op, i, k).dat[1])
-//          != -(gsl_matrix_complex_get(matrix_op, k, i).dat[1])) {
-//        printf("im not hermitian: i = %i, k = %i\n", i, k);
-//      }
-//    }
-//  }
-//// construction of the lower triangle of the matrix
-//  for (k = 0; k < 192; k++) {
-//    for (i = k; i < 192; i++) {
-//      compl = gsl_matrix_complex_get(matrix_op, i, k);
-//      compl1 = gsl_complex_conjugate(compl);
-//      gsl_matrix_complex_set(matrix_op, k, i, compl1);
-//    }
-//  }
-//
-//// print the non-zero (real) parts of the operator matrix
-//  if (DEBUG) {
-//    file = fopen("test.dat", "w");
-//    if (file == NULL ) {
-//      fprintf(stderr, "Could not open file \"test.dat\"\n");
-//    } else {
-//      for (i = 0; i < 192; i++) {
-//        for (k = 0; k < 192; k++) {
-//          if ((gsl_matrix_complex_get(matrix_op, i, k)).dat[0] != 0.0)
-//            fprintf(file, "%i %i %lf\n", i, k,
-//                (gsl_matrix_complex_get(matrix_op, i, k)).dat[0]);
-//        }
-//      }
-//      fclose(file);
-//    }
-//  }
-//// end construction of the operator
-//
-//// calculate eigensystem
-//  gsl_eigen_hermv(matrix_op, vector_ev, matrix_ev, workspace_ev);
-//  gsl_sort_vector(vector_ev);
-//  for (i = 0; i < 192; i++) {
-//    printf("eigenvalue %i: %f\n", i, gsl_vector_get(vector_ev, i));
-//  }
-//  gsl_vector_free(vector_ev);
-//  gsl_matrix_complex_free(matrix_ev);
-//  gsl_matrix_complex_free(matrix_op);
-//  return 0;
-//}
 
 void create_input_files(int const dirac, int const timeslice, int const conf,
     int const dilution) {
@@ -2597,76 +2377,6 @@ void create_input_files(int const dirac, int const timeslice, int const conf,
     fflush(file);
     fclose(file);
   }
-  return;
-}
-
-void test_system(int const conf) {
-  char filename[150];
-  spinor *inverted;
-  spinor *even;
-  spinor *odd;
-  spinor *tmp;
-  su3_vector *eigenvector;
-  int vol = LX * LY * LZ;
-  WRITER *writer;
-  double one = 1.0;
-
-  tmp = (spinor*) calloc(VOLUMEPLUSRAND + 1, sizeof(spinor));
-#if (defined SSE || defined SSE2 || defined SSE3)
-  inverted = (spinor*) (((unsigned long int) (tmp) + ALIGN_BASE) & ~ALIGN_BASE);
-#else
-  inverted = tmp;
-#endif
-  tmp = (spinor*) calloc(VOLUMEPLUSRAND + 1, sizeof(spinor));
-#if (defined SSE || defined SSE2 || defined SSE3)
-  even = (spinor*) (((unsigned long int) (tmp) + ALIGN_BASE) & ~ALIGN_BASE);
-#else
-  even = tmp;
-#endif
-  tmp = (spinor*) calloc(VOLUMEPLUSRAND + 1, sizeof(spinor));
-#if (defined SSE || defined SSE2 || defined SSE3)
-  odd = (spinor*) (((unsigned long int) (tmp) + ALIGN_BASE) & ~ALIGN_BASE);
-#else
-  odd = tmp;
-#endif
-
-  eigenvector = (su3_vector*) calloc(vol, sizeof(su3_vector));
-
-  for (int i = 0; i < vol; i++) {
-    _vector_I_one(eigenvector[i]);
-  }
-  for (int vec = 0; vec < no_eigenvalues; vec++) {
-    for (int t = 0; t < T; t++) {
-      sprintf(filename, "eigenvector.%03d.%03d.%04d", vec, t, conf);
-      construct_writer(&writer, filename, 0);
-      write_su3_vector(writer, &one, eigenvector, 64, t, 1);
-      destruct_writer(writer);
-    }
-  }
-
-  for (int i = 0; i < vol * T; i++) {
-    _vector_I_one(inverted[i].s0);
-    _vector_I_one(inverted[i].s1);
-    _vector_I_one(inverted[i].s2);
-    _vector_I_one(inverted[i].s3);
-  }
-  convert_lexic_to_eo(even, odd, inverted);
-  for (int dir = 0; dir < 4; dir++) {
-    for (int t = 0; t < T; t++) {
-      for (int vec = 0; vec < no_eigenvalues; vec++) {
-        sprintf(filename, "source%d.%04d.%02d.%02d.inverted", dir, conf, t,
-            vec);
-        construct_writer(&writer, filename, 0);
-        write_spinor(writer, &even, &odd, 1, 64);
-        destruct_writer(writer);
-      }
-    }
-  }
-
-  free(inverted);
-  free(even);
-  free(odd);
-  free(eigenvector);
   return;
 }
 
