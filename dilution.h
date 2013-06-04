@@ -65,6 +65,9 @@ void add_dilution(const int d_type_t, const int d_type_d, const int d_type_l,
     const int d_t, const int d_d, const int d_l, const int d_seed,
     const int quark_type, const int smearing);
 
+void create_input_files(int const dirac, int const timeslice, int const conf,
+    int const nr_dilution, int const thread);
+
 void create_source_tf_df_lf(const int nr_conf, const int nr_dilution,
     char* inverterpath);
 void create_source_tf_df_ln(const int nr_conf, const int nr_dilution,
@@ -77,6 +80,15 @@ void create_source_tf_df_lb(const int nr_conf, const int nr_dilution,
 void create_source_tf_df_li1(const int nr_conf, const int nr_dilution,
     char* inverterpath, int *tslices, int nr_tslices);
 
+void create_source_tn_df_lf(const int nr_conf, const int nr_dilution,
+    char* inverterpath);
+void create_source_tn_df_ln(const int nr_conf, const int nr_dilution,
+    char* inverterpath);
+void create_source_tn_df_li(const int nr_conf, const int nr_dilution,
+    char* inverterpath);
+void create_source_tn_df_lb(const int nr_conf, const int nr_dilution,
+    char* inverterpath);
+
 void create_source_ti_df_lf(const int nr_conf, const int nr_dilution,
     char* inverterpath);
 void create_source_ti_df_ln(const int nr_conf, const int nr_dilution,
@@ -85,6 +97,5 @@ void create_source_ti_df_li(const int nr_conf, const int nr_dilution,
     char* inverterpath);
 void create_source_ti_df_lb(const int nr_conf, const int nr_dilution,
     char* inverterpath);
-
 
 #endif /* DILUTION_H_ */

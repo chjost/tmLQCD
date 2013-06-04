@@ -107,13 +107,6 @@ inline static void vectorcjg_times_spinor(_Complex double *result,
       + conj(factor1.c1) * factor2.s3.c1 + conj(factor1.c2) * factor2.s3.c2;
 }
 
-int generate_eigensystem(int const conf);
-int create_invert_sources(int const conf, int const dilution);
-void create_input_files(int const dirac, int const timeslice, int const conf,
-    int const dilution);
-void create_propagators(int const conf, int const dilution);
-void create_perambulators(int const conf, int const dilution);
-
 static void rnd_z2_vector(_Complex double *v, const int N) {
   ranlxd((double*) v, 2 * N);
   for (int i = 0; i < N; ++i) {
@@ -128,6 +121,11 @@ static void rnd_z2_vector(_Complex double *v, const int N) {
   }
   return;
 }
+
+int generate_eigensystem(int const conf);
+int create_invert_sources(int const conf, int const dilution);
+void create_propagators(int const conf, int const dilution);
+void create_perambulators(int const conf, int const dilution);
 
 int main(int argc, char* argv[]) {
   int status = 0, c, j, conf;
@@ -233,20 +231,20 @@ int main(int argc, char* argv[]) {
 //getestet (time, dirac, laph, int, int, int, seed, up/down, stoch/local)
 
   add_dilution(D_FULL, D_FULL, D_FULL, 0, 0, 0, 111111, D_UP, D_STOCH);
-//  add_dilution(D_FULL, D_FULL, D_NONE, 0, 0, 0, 222222, D_UP, D_STOCH);
-//  add_dilution(D_FULL, D_FULL, D_INTER, 0, 0, 2, 333333, D_UP, D_STOCH);
-//  add_dilution(D_FULL, D_FULL, D_BLOCK, 0, 0, 2, 444444, D_UP, D_STOCH);
-//
-//  add_dilution(D_NONE, D_FULL, D_FULL, 0, 0, 0, 111111, D_UP, D_STOCH);
-//  add_dilution(D_NONE, D_FULL, D_NONE, 0, 0, 0, 222222, D_UP, D_STOCH);
-//  add_dilution(D_NONE, D_FULL, D_INTER, 2, 0, 2, 333333, D_UP, D_STOCH);
-//  add_dilution(D_NONE, D_FULL, D_BLOCK, 0, 0, 2, 444444, D_UP, D_STOCH);
-//
-//  add_dilution(D_INTER, D_FULL, D_FULL, 2, 0, 0, 111111, D_UP, D_STOCH);
-//  add_dilution(D_INTER, D_FULL, D_NONE, 2, 0, 2, 222222, D_UP, D_STOCH);
-//  add_dilution(D_INTER, D_FULL, D_INTER, 2, 0, 2, 333333, D_UP, D_STOCH);
-//  add_dilution(D_INTER, D_FULL, D_BLOCK, 2, 0, 2, 444444, D_UP, D_STOCH);
-//
+  add_dilution(D_FULL, D_FULL, D_NONE, 0, 0, 0, 222222, D_UP, D_STOCH);
+  add_dilution(D_FULL, D_FULL, D_INTER, 0, 0, 2, 333333, D_UP, D_STOCH);
+  add_dilution(D_FULL, D_FULL, D_BLOCK, 0, 0, 2, 444444, D_UP, D_STOCH);
+
+  add_dilution(D_NONE, D_FULL, D_FULL, 0, 0, 0, 111111, D_UP, D_STOCH);
+  add_dilution(D_NONE, D_FULL, D_NONE, 0, 0, 0, 222222, D_UP, D_STOCH);
+  add_dilution(D_NONE, D_FULL, D_INTER, 2, 0, 2, 333333, D_UP, D_STOCH);
+  add_dilution(D_NONE, D_FULL, D_BLOCK, 0, 0, 2, 444444, D_UP, D_STOCH);
+
+  add_dilution(D_INTER, D_FULL, D_FULL, 2, 0, 0, 111111, D_UP, D_STOCH);
+  add_dilution(D_INTER, D_FULL, D_NONE, 2, 0, 2, 222222, D_UP, D_STOCH);
+  add_dilution(D_INTER, D_FULL, D_INTER, 2, 0, 2, 333333, D_UP, D_STOCH);
+  add_dilution(D_INTER, D_FULL, D_BLOCK, 2, 0, 2, 444444, D_UP, D_STOCH);
+
 //  add_dilution(D_BLOCK, D_FULL, D_FULL, 2, 0, 0, 111111, D_UP, D_STOCH);
 //  add_dilution(D_BLOCK, D_FULL, D_NONE, 2, 0, 0, 222222, D_UP, D_STOCH);
 //  add_dilution(D_BLOCK, D_FULL, D_INTER, 2, 0, 2, 333333, D_UP, D_STOCH);
@@ -689,7 +687,7 @@ int create_invert_sources(int const conf, int const dilution) {
         status = write_spinor(writer, &even, &odd, 1, 64);
         destruct_writer(writer);
 
-        create_input_files(4, tslice, conf, -1);
+        create_input_files(4, tslice, conf, -1, 0);
         for (j = 0; j < 4; j++) {
           sprintf(call, "%s -f dirac%d-cg.input", INVERTER, j);
           printf("\n\ntrying: %s for conf %d, t %d\n", call, conf, tslice);
@@ -700,7 +698,6 @@ int create_invert_sources(int const conf, int const dilution) {
     }
     // stochastic part
   } else {
-    // TODO check the block dilution!!!
     // full spin dilution
     if (dilution_list[dilution].type[1] == D_FULL) {
       // full time dilution
@@ -727,244 +724,21 @@ int create_invert_sources(int const conf, int const dilution) {
       } else if (dilution_list[dilution].type[0] == D_NONE) {
         // full LapH dilution
         if (dilution_list[dilution].type[2] == D_FULL) {
-          for (vec = 0; vec < no_eigenvalues; vec++) {
-            zero_spinor_field(dirac0, VOLUMEPLUSRAND);
-            zero_spinor_field(dirac1, VOLUMEPLUSRAND);
-            zero_spinor_field(dirac2, VOLUMEPLUSRAND);
-            zero_spinor_field(dirac3, VOLUMEPLUSRAND);
-
-            for (t = 0; t < T; t++) {
-              sprintf(filename, "./eigenvector.%03d.%03d.%04d", vec, t, conf);
-              read_su3_vector(eigenvector, filename, 0, t, 1);
-              index = t * no_eigenvalues * 4 + vec * 4;
-              for (point = 0; point < block; point++) {
-                _vector_add_mul( dirac0[block*t+point].s0, rnd_vector[index+0],
-                    eigenvector[point]);
-                _vector_add_mul( dirac1[block*t+point].s1, rnd_vector[index+1],
-                    eigenvector[point]);
-                _vector_add_mul( dirac2[block*t+point].s2, rnd_vector[index+2],
-                    eigenvector[point]);
-                _vector_add_mul( dirac3[block*t+point].s3, rnd_vector[index+3],
-                    eigenvector[point]);
-              }
-            }
-
-            // write spinor field with entries at dirac 0
-            convert_lexic_to_eo(even, odd, dirac0);
-            sprintf(filename, "%s.%04d.%02d.%02d", "source0", conf, 0, vec);
-            construct_writer(&writer, filename, 0);
-            status = write_spinor(writer, &even, &odd, 1, 64);
-            destruct_writer(writer);
-            // write spinor field with entries at dirac 1
-            convert_lexic_to_eo(even, odd, dirac1);
-            sprintf(filename, "%s.%04d.%02d.%02d", "source1", conf, 0, vec);
-            construct_writer(&writer, filename, 0);
-            status = write_spinor(writer, &even, &odd, 1, 64);
-            destruct_writer(writer);
-            // write spinor field with entries at dirac 2
-            convert_lexic_to_eo(even, odd, dirac2);
-            sprintf(filename, "%s.%04d.%02d.%02d", "source2", conf, 0, vec);
-            construct_writer(&writer, filename, 0);
-            status = write_spinor(writer, &even, &odd, 1, 64);
-            destruct_writer(writer);
-            // write spinor field with entries at dirac 3
-            convert_lexic_to_eo(even, odd, dirac3);
-            sprintf(filename, "%s.%04d.%02d.%02d", "source3", conf, 0, vec);
-            construct_writer(&writer, filename, 0);
-            status = write_spinor(writer, &even, &odd, 1, 64);
-            destruct_writer(writer);
-
-            create_input_files(4, 0, conf, dilution);
-            for (j = 0; j < 4; j++) {
-              sprintf(call, "%s -f dirac%d-cg.input", INVERTER, j);
-              printf("\n\ntrying: %s for conf %d, no t dilution\n", call, conf);
-              fflush(stdout);
-              system(call);
-            }
-          }
+          create_source_tn_df_lf(conf, dilution, INVERTER);
 
           // no LapH dilution
         } else if (dilution_list[dilution].type[2] == D_NONE) {
-          zero_spinor_field(dirac0, VOLUMEPLUSRAND);
-          zero_spinor_field(dirac1, VOLUMEPLUSRAND);
-          zero_spinor_field(dirac2, VOLUMEPLUSRAND);
-          zero_spinor_field(dirac3, VOLUMEPLUSRAND);
-          for (v = 0; v < no_eigenvalues; v++) {
-            for (t = 0; t < T; t++) {
-              sprintf(filename, "./eigenvector.%03d.%03d.%04d", vec, t, conf);
-              read_su3_vector(eigenvector, filename, 0, t, 1);
-              index = t * no_eigenvalues * 4 + v * 4;
-              for (point = 0; point < block; point++) {
-                _vector_add_mul( dirac0[block*t+point].s0, rnd_vector[index+0],
-                    eigenvector[point]);
-                _vector_add_mul( dirac1[block*t+point].s1, rnd_vector[index+1],
-                    eigenvector[point]);
-                _vector_add_mul( dirac2[block*t+point].s2, rnd_vector[index+2],
-                    eigenvector[point]);
-                _vector_add_mul( dirac3[block*t+point].s3, rnd_vector[index+3],
-                    eigenvector[point]);
-              }
-            }
-
-            // write spinor field with entries at dirac 0
-            convert_lexic_to_eo(even, odd, dirac0);
-            sprintf(filename, "%s.%04d.%02d.%02d", "source0", conf, 0, 0);
-            construct_writer(&writer, filename, 0);
-            status = write_spinor(writer, &even, &odd, 1, 64);
-            destruct_writer(writer);
-            // write spinor field with entries at dirac 1
-            convert_lexic_to_eo(even, odd, dirac1);
-            sprintf(filename, "%s.%04d.%02d.%02d", "source1", conf, 0, 0);
-            construct_writer(&writer, filename, 0);
-            status = write_spinor(writer, &even, &odd, 1, 64);
-            destruct_writer(writer);
-            // write spinor field with entries at dirac 2
-            convert_lexic_to_eo(even, odd, dirac2);
-            sprintf(filename, "%s.%04d.%02d.%02d", "source2", conf, 0, 0);
-            construct_writer(&writer, filename, 0);
-            status = write_spinor(writer, &even, &odd, 1, 64);
-            destruct_writer(writer);
-            // write spinor field with entries at dirac 3
-            convert_lexic_to_eo(even, odd, dirac3);
-            sprintf(filename, "%s.%04d.%02d.%02d", "source3", conf, 0, 0);
-            construct_writer(&writer, filename, 0);
-            status = write_spinor(writer, &even, &odd, 1, 64);
-            destruct_writer(writer);
-
-            create_input_files(4, 0, conf, dilution);
-            for (j = 0; j < 4; j++) {
-              sprintf(call, "%s -f dirac%d-cg.input", INVERTER, j);
-              printf("\n\ntrying: %s for conf %d, no t dilution\n", call, conf);
-              fflush(stdout);
-              system(call);
-            }
-          }
+          create_source_tn_df_ln(conf, dilution, INVERTER);
 
           // interlace LapH dilution
         } else if (dilution_list[dilution].type[2] == D_INTER) {
-          for (vec = 0; vec < dilution_list[dilution].size[2]; vec++) {
-            // zero the spinor fields
-            zero_spinor_field(dirac0, VOLUMEPLUSRAND);
-            zero_spinor_field(dirac1, VOLUMEPLUSRAND);
-            zero_spinor_field(dirac2, VOLUMEPLUSRAND);
-            zero_spinor_field(dirac3, VOLUMEPLUSRAND);
-
-            for (v = vec; v < no_eigenvalues; v +=
-                dilution_list[dilution].size[2]) {
-              for (t = 0; t < T; t++) {
-                // read in eigenvector and distribute it to the sources
-                sprintf(filename, "./eigenvector.%03d.%03d.%04d", v, t, conf);
-                read_su3_vector(eigenvector, filename, 0, t, 1);
-                index = t * no_eigenvalues * 4 + v * 4;
-                for (point = 0; point < block; point++) {
-                  _vector_add_mul( dirac0[block*t + point].s0,
-                      rnd_vector[index+0], eigenvector[point]);
-                  _vector_add_mul( dirac1[block*t + point].s1,
-                      rnd_vector[index+1], eigenvector[point]);
-                  _vector_add_mul( dirac2[block*t + point].s2,
-                      rnd_vector[index+2], eigenvector[point]);
-                  _vector_add_mul( dirac3[block*t + point].s3,
-                      rnd_vector[index+3], eigenvector[point]);
-                }
-              }
-            }
-
-            // write spinor field with entries at dirac 0
-            convert_lexic_to_eo(even, odd, dirac0);
-            sprintf(filename, "%s.%04d.%02d.%02d", "source0", conf, 0, vec);
-            construct_writer(&writer, filename, 0);
-            status = write_spinor(writer, &even, &odd, 1, 64);
-            destruct_writer(writer);
-            // write spinor field with entries at dirac 1
-            convert_lexic_to_eo(even, odd, dirac1);
-            sprintf(filename, "%s.%04d.%02d.%02d", "source1", conf, 0, vec);
-            construct_writer(&writer, filename, 0);
-            status = write_spinor(writer, &even, &odd, 1, 64);
-            destruct_writer(writer);
-            // write spinor field with entries at dirac 2
-            convert_lexic_to_eo(even, odd, dirac2);
-            sprintf(filename, "%s.%04d.%02d.%02d", "source2", conf, 0, vec);
-            construct_writer(&writer, filename, 0);
-            status = write_spinor(writer, &even, &odd, 1, 64);
-            destruct_writer(writer);
-            // write spinor field with entries at dirac 3
-            convert_lexic_to_eo(even, odd, dirac3);
-            sprintf(filename, "%s.%04d.%02d.%02d", "source3", conf, 0, vec);
-            construct_writer(&writer, filename, 0);
-            status = write_spinor(writer, &even, &odd, 1, 64);
-            destruct_writer(writer);
-
-            create_input_files(4, 0, conf, dilution);
-            for (j = 0; j < 4; j++) {
-              sprintf(call, "%s -f dirac%d-cg.input", INVERTER, j);
-              printf("\n\ntrying: %s for conf %d, no t dilution\n", call, conf);
-              fflush(stdout);
-              system(call);
-            }
-          }
+          create_source_tn_df_li(conf, dilution, INVERTER);
 
           // block LapH dilution
         } else if (dilution_list[dilution].type[2] == D_BLOCK) {
-          for (vec = 0; vec < dilution_list[dilution].size[2]; vec++) {
-            // zero the spinor fields
-            zero_spinor_field(dirac0, VOLUMEPLUSRAND);
-            zero_spinor_field(dirac1, VOLUMEPLUSRAND);
-            zero_spinor_field(dirac2, VOLUMEPLUSRAND);
-            zero_spinor_field(dirac3, VOLUMEPLUSRAND);
+          create_source_tn_df_lb(conf, dilution, INVERTER);
 
-            for (v = vec; v < vec + dilution_list[dilution].size[2]; v++) {
-              for (t = 0; t < T; t++) {
-                // read in eigenvector and distribute it to the sources
-                sprintf(filename, "./eigenvector.%03d.%03d.%04d", v, t, conf);
-                read_su3_vector(eigenvector, filename, 0, t, 1);
-                index = t * no_eigenvalues * 4 + v * 4;
-                for (point = 0; point < block; point++) {
-                  _vector_add_mul( dirac0[block*t + point].s0,
-                      rnd_vector[index+0], eigenvector[point]);
-                  _vector_add_mul( dirac1[block*t + point].s1,
-                      rnd_vector[index+1], eigenvector[point]);
-                  _vector_add_mul( dirac2[block*t + point].s2,
-                      rnd_vector[index+2], eigenvector[point]);
-                  _vector_add_mul( dirac3[block*t + point].s3,
-                      rnd_vector[index+3], eigenvector[point]);
-                }
-              }
-            }
-
-            // write spinor field with entries at dirac 0
-            convert_lexic_to_eo(even, odd, dirac0);
-            sprintf(filename, "%s.%04d.%02d.%02d", "source0", conf, 0, vec);
-            construct_writer(&writer, filename, 0);
-            status = write_spinor(writer, &even, &odd, 1, 64);
-            destruct_writer(writer);
-            // write spinor field with entries at dirac 1
-            convert_lexic_to_eo(even, odd, dirac1);
-            sprintf(filename, "%s.%04d.%02d.%02d", "source1", conf, 0, vec);
-            construct_writer(&writer, filename, 0);
-            status = write_spinor(writer, &even, &odd, 1, 64);
-            destruct_writer(writer);
-            // write spinor field with entries at dirac 2
-            convert_lexic_to_eo(even, odd, dirac2);
-            sprintf(filename, "%s.%04d.%02d.%02d", "source2", conf, 0, vec);
-            construct_writer(&writer, filename, 0);
-            status = write_spinor(writer, &even, &odd, 1, 64);
-            destruct_writer(writer);
-            // write spinor field with entries at dirac 3
-            convert_lexic_to_eo(even, odd, dirac3);
-            sprintf(filename, "%s.%04d.%02d.%02d", "source3", conf, 0, vec);
-            construct_writer(&writer, filename, 0);
-            status = write_spinor(writer, &even, &odd, 1, 64);
-            destruct_writer(writer);
-
-            create_input_files(4, 0, conf, dilution);
-            for (j = 0; j < 4; j++) {
-              sprintf(call, "%s -f dirac%d-cg.input", INVERTER, j);
-              printf("\n\ntrying: %s for conf %d, no t dilution\n", call, conf);
-              fflush(stdout);
-              system(call);
-            }
-          }
-        }
+        } // LapH dilution end
 
         // interlace time dilution
       } else if (dilution_list[dilution].type[0] == D_INTER) {
@@ -1044,7 +818,7 @@ int create_invert_sources(int const conf, int const dilution) {
               status = write_spinor(writer, &even, &odd, 1, 64);
               destruct_writer(writer);
 
-              create_input_files(4, tslice, conf, dilution);
+              create_input_files(4, tslice, conf, dilution, 0);
               for (j = 0; j < 4; j++) {
                 sprintf(call, "%s -f dirac%d-cg.input", INVERTER, j);
                 printf("\n\ntrying: %s for conf %d, t %d (block)\n", call, conf,
@@ -1107,7 +881,7 @@ int create_invert_sources(int const conf, int const dilution) {
             status = write_spinor(writer, &even, &odd, 1, 64);
             destruct_writer(writer);
 
-            create_input_files(4, tslice, conf, dilution);
+            create_input_files(4, tslice, conf, dilution, 0);
             for (j = 0; j < 4; j++) {
               sprintf(call, "%s -f dirac%d-cg.input", INVERTER, j);
               printf("\n\ntrying: %s for conf %d, t %d (block)\n", call, conf,
@@ -1176,7 +950,7 @@ int create_invert_sources(int const conf, int const dilution) {
               status = write_spinor(writer, &even, &odd, 1, 64);
               destruct_writer(writer);
 
-              create_input_files(4, tslice, conf, dilution);
+              create_input_files(4, tslice, conf, dilution, 0);
               for (j = 0; j < 4; j++) {
                 sprintf(call, "%s -f dirac%d-cg.input", INVERTER, j);
                 printf("\n\ntrying: %s for conf %d, t %d (block)\n", call, conf,
@@ -1245,7 +1019,7 @@ int create_invert_sources(int const conf, int const dilution) {
               status = write_spinor(writer, &even, &odd, 1, 64);
               destruct_writer(writer);
 
-              create_input_files(4, tslice, conf, dilution);
+              create_input_files(4, tslice, conf, dilution, 0);
               for (j = 0; j < 4; j++) {
                 sprintf(call, "%s -f dirac%d-cg.input", INVERTER, j);
                 printf("\n\ntrying: %s for conf %d, t %d (block)\n", call, conf,
@@ -1294,7 +1068,7 @@ int create_invert_sources(int const conf, int const dilution) {
               status = write_spinor(writer, &even, &odd, 1, 64);
               destruct_writer(writer);
 
-              create_input_files(1, tslice, conf, dilution);
+              create_input_files(1, tslice, conf, dilution, 0);
               sprintf(call, "%s -f dirac0-cg.input", INVERTER);
               printf("\n\ntrying: %s for conf %d, t %d (full)\n", call, conf,
                   tslice);
@@ -1334,7 +1108,7 @@ int create_invert_sources(int const conf, int const dilution) {
             status = write_spinor(writer, &even, &odd, 1, 64);
             destruct_writer(writer);
 
-            create_input_files(1, tslice, conf, dilution);
+            create_input_files(1, tslice, conf, dilution, 0);
             sprintf(call, "%s -f dirac0-cg.input", INVERTER);
             printf("\n\ntrying: %s for conf %d, t %d (full)\n", call, conf,
                 tslice);
@@ -1376,7 +1150,7 @@ int create_invert_sources(int const conf, int const dilution) {
               status = write_spinor(writer, &even, &odd, 1, 64);
               destruct_writer(writer);
 
-              create_input_files(1, tslice, conf, dilution);
+              create_input_files(1, tslice, conf, dilution, 0);
               sprintf(call, "%s -f dirac0-cg.input", INVERTER);
               printf("\n\ntrying: %s for conf %d, t %d (full)\n", call, conf,
                   tslice);
@@ -1418,7 +1192,7 @@ int create_invert_sources(int const conf, int const dilution) {
               status = write_spinor(writer, &even, &odd, 1, 64);
               destruct_writer(writer);
 
-              create_input_files(1, tslice, conf, dilution);
+              create_input_files(1, tslice, conf, dilution, 0);
               sprintf(call, "%s -f dirac0-cg.input", INVERTER);
               printf("\n\ntrying: %s for conf %d, t %d (full)\n", call, conf,
                   tslice);
@@ -1457,7 +1231,7 @@ int create_invert_sources(int const conf, int const dilution) {
             status = write_spinor(writer, &even, &odd, 1, 64);
             destruct_writer(writer);
 
-            create_input_files(1, 0, conf, dilution);
+            create_input_files(1, 0, conf, dilution, 0);
             sprintf(call, "%s -f dirac0-cg.input", INVERTER);
             printf("\n\ntrying: %s for conf %d, no t dilution\n", call, conf);
             fflush(stdout);
@@ -1492,7 +1266,7 @@ int create_invert_sources(int const conf, int const dilution) {
             status = write_spinor(writer, &even, &odd, 1, 64);
             destruct_writer(writer);
 
-            create_input_files(1, tslice, conf, dilution);
+            create_input_files(1, tslice, conf, dilution, 0);
             sprintf(call, "%s -f dirac0-cg.input", INVERTER);
             printf("\n\ntrying: %s for conf %d, no t dilution\n", call, conf);
             fflush(stdout);
@@ -1532,7 +1306,7 @@ int create_invert_sources(int const conf, int const dilution) {
             status = write_spinor(writer, &even, &odd, 1, 64);
             destruct_writer(writer);
 
-            create_input_files(1, tslice, conf, dilution);
+            create_input_files(1, tslice, conf, dilution, 0);
             sprintf(call, "%s -f dirac0-cg.input", INVERTER);
             printf("\n\ntrying: %s for conf %d, no t dilution\n", call, conf);
             fflush(stdout);
@@ -1572,7 +1346,7 @@ int create_invert_sources(int const conf, int const dilution) {
             status = write_spinor(writer, &even, &odd, 1, 64);
             destruct_writer(writer);
 
-            create_input_files(1, tslice, conf, dilution);
+            create_input_files(1, tslice, conf, dilution, 0);
             sprintf(call, "%s -f dirac0-cg.input", INVERTER);
             printf("\n\ntrying: %s for conf %d, no t dilution\n", call, conf);
             fflush(stdout);
@@ -1613,7 +1387,7 @@ int create_invert_sources(int const conf, int const dilution) {
               status = write_spinor(writer, &even, &odd, 1, 64);
               destruct_writer(writer);
 
-              create_input_files(1, tslice, conf, dilution);
+              create_input_files(1, tslice, conf, dilution, 0);
               sprintf(call, "%s -f dirac0-cg.input", INVERTER);
               printf("\n\ntrying: %s for conf %d, t %d (interlace)\n", call,
                   conf, tslice);
@@ -1652,7 +1426,7 @@ int create_invert_sources(int const conf, int const dilution) {
             status = write_spinor(writer, &even, &odd, 1, 64);
             destruct_writer(writer);
 
-            create_input_files(1, tslice, conf, dilution);
+            create_input_files(1, tslice, conf, dilution, 0);
             sprintf(call, "%s -f dirac0-cg.input", INVERTER);
             printf("\n\ntrying: %s for conf %d, t %d (interlace)\n", call, conf,
                 tslice);
@@ -1695,7 +1469,7 @@ int create_invert_sources(int const conf, int const dilution) {
               status = write_spinor(writer, &even, &odd, 1, 64);
               destruct_writer(writer);
 
-              create_input_files(1, tslice, conf, dilution);
+              create_input_files(1, tslice, conf, dilution, 0);
               sprintf(call, "%s -f dirac0-cg.input", INVERTER);
               printf("\n\ntrying: %s for conf %d, t %d (interlace)\n", call,
                   conf, tslice);
@@ -1738,7 +1512,7 @@ int create_invert_sources(int const conf, int const dilution) {
               status = write_spinor(writer, &even, &odd, 1, 64);
               destruct_writer(writer);
 
-              create_input_files(1, tslice, conf, dilution);
+              create_input_files(1, tslice, conf, dilution, 0);
               sprintf(call, "%s -f dirac0-cg.input", INVERTER);
               printf("\n\ntrying: %s for conf %d, t %d (interlace)\n", call,
                   conf, tslice);
@@ -1783,7 +1557,7 @@ int create_invert_sources(int const conf, int const dilution) {
               status = write_spinor(writer, &even, &odd, 1, 64);
               destruct_writer(writer);
 
-              create_input_files(1, tslice, conf, dilution);
+              create_input_files(1, tslice, conf, dilution, 0);
               sprintf(call, "%s -f dirac0-cg.input", INVERTER);
               printf("\n\ntrying: %s for conf %d, t %d (block)\n", call, conf,
                   tslice);
@@ -1823,7 +1597,7 @@ int create_invert_sources(int const conf, int const dilution) {
             status = write_spinor(writer, &even, &odd, 1, 64);
             destruct_writer(writer);
 
-            create_input_files(1, tslice, conf, dilution);
+            create_input_files(1, tslice, conf, dilution, 0);
             sprintf(call, "%s -f dirac0-cg.input", INVERTER);
             printf("\n\ntrying: %s for conf %d, t %d (block)\n", call, conf,
                 tslice);
@@ -1867,7 +1641,7 @@ int create_invert_sources(int const conf, int const dilution) {
               status = write_spinor(writer, &even, &odd, 1, 64);
               destruct_writer(writer);
 
-              create_input_files(1, tslice, conf, dilution);
+              create_input_files(1, tslice, conf, dilution, 0);
               sprintf(call, "%s -f dirac0-cg.input", INVERTER);
               printf("\n\ntrying: %s for conf %d, t %d (block)\n", call, conf,
                   tslice);
@@ -1910,7 +1684,7 @@ int create_invert_sources(int const conf, int const dilution) {
               status = write_spinor(writer, &even, &odd, 1, 64);
               destruct_writer(writer);
 
-              create_input_files(1, tslice, conf, dilution);
+              create_input_files(1, tslice, conf, dilution, 0);
               sprintf(call, "%s -f dirac0-cg.input", INVERTER);
               printf("\n\ntrying: %s for conf %d, t %d (block)\n", call, conf,
                   tslice);
@@ -2301,134 +2075,5 @@ void create_perambulators(int const conf, int const dilution) {
 #ifdef OMP
   }
 #endif
-  return;
-}
-
-void create_input_files(int const dirac, int const timeslice, int const conf,
-    int const dilution) {
-  char filename[150];
-  FILE* file = NULL;
-  int j = 0, n_op = 0;
-  for (j = 0; j < dirac; j++) {
-    sprintf(filename, "dirac%d-cg.input", j);
-    file = fopen(filename, "w");
-    if (file == NULL ) {
-      fprintf(stderr,
-          "could not open file %s in create_input_files.\nAborting...\n",
-          filename);
-      exit(-1);
-    }
-    fprintf(file, "# automatic generated file for invert\n");
-    fprintf(file, "L=%d\nT=%d\n\n", L, T);
-    fprintf(file, "DebugLevel = 0\n");
-    fprintf(file, "InitialStoreCounter = %d\n", conf);
-    fprintf(file, "Measurements = %d\n", 1);
-    fprintf(file, "2kappamu = %f\n", g_mu);
-    fprintf(file, "kappa = %f\n", g_kappa);
-    fprintf(file, "BCAngleT = %f\n", 1.0);
-    fprintf(file, "GaugeConfigInputFile = %s\n", gauge_input_filename);
-    fprintf(file, "UseEvenOdd = yes\n\n");
-    fprintf(file, "SourceType = timeslice\n");
-    fprintf(file, "ReadSource = yes\n");
-    fprintf(file, "SourceTimeslice = %d\n", timeslice);
-    fprintf(file, "SourceFileName = source%d\n", j);
-    fprintf(file, "NoSamples = %d\n", 1);
-    if (g_stochastical_run == 0) {
-      fprintf(file, "Indices = 0-%d\n\n", no_eigenvalues - 1);
-    } else {
-      if (dilution_list[dilution].type[2] == D_FULL) {
-        fprintf(file, "Indices = 0-%d\n\n", no_eigenvalues - 1);
-      } else if (dilution_list[dilution].type[2] == D_NONE) {
-        fprintf(file, "Indices = 0\n\n");
-      } else if (dilution_list[dilution].type[2] == D_INTER) {
-        fprintf(file, "Indices = 0-%d\n\n",
-            dilution_list[dilution].size[2] - 1);
-      } else if (dilution_list[dilution].type[2] == D_BLOCK) {
-        fprintf(file, "Indices = 0-%d\n\n",
-            dilution_list[dilution].size[2] - 1);
-      }
-    }
-    for (n_op = 0; n_op < no_operators; n_op++) {
-      switch (operator_list[n_op].type) {
-      case 0:
-        fprintf(file, "BeginOperator TMWILSON\n");
-        break;
-      case 1:
-        fprintf(file, "BeginOperator OVERLAP\n");
-        break;
-      case 2:
-        fprintf(file, "BeginOperator WILSON\n");
-        break;
-      case 3:
-        fprintf(file, "BeginOperator DBTMWILSON\n");
-        break;
-      case 4:
-        fprintf(file, "BeginOperator CLOVER\n");
-        break;
-      case 5:
-        fprintf(file, "BeginOperator DBCLOVER\n");
-        break;
-      }
-      fprintf(file, "  2kappamu = %6f\n", operator_list[n_op].mu);
-      fprintf(file, "  kappa = %6f\n", operator_list[n_op].kappa);
-      fprintf(file, "  UseEvenOdd = %s\n",
-          (operator_list[n_op].even_odd_flag) ? "yes" : "no");
-      switch (operator_list[n_op].solver) {
-      case 0:
-        fprintf(file, "  Solver = BICGSTAB\n");
-        break;
-      case 1:
-        fprintf(file, "  Solver = CG\n");
-        break;
-      case 2:
-        fprintf(file, "  Solver = GMRES\n");
-        break;
-      case 3:
-        fprintf(file, "  Solver = CGS\n");
-        break;
-      case 4:
-        fprintf(file, "  Solver = MR\n");
-        break;
-      case 5:
-        fprintf(file, "  Solver = BICGSTABELL\n");
-        break;
-      case 6:
-        fprintf(file, "  Solver = FGMRES\n");
-        break;
-      case 7:
-        fprintf(file, "  Solver = GCR\n");
-        break;
-      case 8:
-        fprintf(file, "  Solver = GMRESDR\n");
-        break;
-      case 9:
-        fprintf(file, "  Solver = PCG\n");
-        break;
-      case 10:
-        fprintf(file, "  Solver = DFLGCR\n");
-        break;
-      case 11:
-        fprintf(file, "  Solver = DFLFGMRES\n");
-        break;
-      case 12:
-        fprintf(file, "  Solver = CGMMS\n");
-        break;
-      case 13:
-        fprintf(file, "  Solver = MIXEDCG\n");
-        break;
-      default:
-        break;
-      }
-      fprintf(file, "  SolverPrecision = %g\n", operator_list[n_op].eps_sq);
-      fprintf(file, "  MaxSolverIterations = %d\n",
-          operator_list[n_op].maxiter);
-      fprintf(file, "  AddDownPropagator = %s\n",
-          operator_list[n_op].DownProp ? "yes" : "no");
-      fprintf(file, "EndOperator\n");
-    }
-
-    fflush(file);
-    fclose(file);
-  }
   return;
 }
