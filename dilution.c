@@ -83,6 +83,7 @@ void static create_input_files(int const dirac, int const timeslice,
     fprintf(file, "# automatic generated file for invert\n");
     fprintf(file, "L=%d\nT=%d\n\n", L, T);
     fprintf(file, "DebugLevel = 0\n");
+    fprintf(file, "DisableIOChecks = yes\n");
     fprintf(file, "InitialStoreCounter = %d\n", conf);
     fprintf(file, "Measurements = %d\n", 1);
     fprintf(file, "2kappamu = %f\n", g_mu);

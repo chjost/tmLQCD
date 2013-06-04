@@ -67,9 +67,9 @@
 #define SMEAR_ITER 2
 #define SMEAR_COEFF1 0.76f // should be smaller than 1
 #define SMEAR_COEFF2 0.95f // should be smaller than 1
-#define INVERTER "./gpuinvert"
+#define INVERTER "./invert"
 
-#define REMOVESOURCES 0 // remove all output except for the perambulators
+#define REMOVESOURCES 1 // remove all output except for the perambulators
 #define _vector_one(r) \
   (r).c0 = 1. + 0.*I;\
   (r).c1 = 1. + 0.*I;\
@@ -95,16 +95,16 @@ void usage() {
   exit(0);
 }
 
-inline void spinor_times_su3vec(_Complex double *result, spinor const factor1,
-    su3_vector const factor2, int const blocklength) {
-  result[0 * blocklength] += factor1.s0.c0 * conj(factor2.c0)
-      + factor1.s0.c1 * conj(factor2.c1) + factor1.s0.c2 * conj(factor2.c2);
-  result[1 * blocklength] += factor1.s1.c0 * conj(factor2.c0)
-      + factor1.s1.c1 * conj(factor2.c1) + factor1.s1.c2 * conj(factor2.c2);
-  result[2 * blocklength] += factor1.s2.c0 * conj(factor2.c0)
-      + factor1.s2.c1 * conj(factor2.c1) + factor1.s2.c2 * conj(factor2.c2);
-  result[3 * blocklength] += factor1.s3.c0 * conj(factor2.c0)
-      + factor1.s3.c1 * conj(factor2.c1) + factor1.s3.c2 * conj(factor2.c2);
+inline static void vectorcjg_times_spinor(_Complex double *result,
+    su3_vector const factor1, spinor const factor2, int const blocklength) {
+  result[0 * blocklength] += conj(factor1.c0) * factor2.s0.c0
+      + conj(factor1.c1) * factor2.s0.c1 + conj(factor1.c2) * factor2.s0.c2;
+  result[1 * blocklength] += conj(factor1.c0) * factor2.s1.c0
+      + conj(factor1.c1) * factor2.s1.c1 + conj(factor1.c2) * factor2.s1.c2;
+  result[2 * blocklength] += conj(factor1.c0) * factor2.s2.c0
+      + conj(factor1.c1) * factor2.s2.c1 + conj(factor1.c2) * factor2.s2.c2;
+  result[3 * blocklength] += conj(factor1.c0) * factor2.s3.c0
+      + conj(factor1.c1) * factor2.s3.c1 + conj(factor1.c2) * factor2.s3.c2;
 }
 
 int generate_eigensystem(int const conf);
@@ -416,17 +416,17 @@ int main(int argc, char* argv[]) {
         printf("\n# generating sources (%d of %d)\n", j + 1, no_dilution);
         fflush(stdout);
         start_ranlux(1, dilution_list[j].seed ^ conf);
-//        create_invert_sources(conf, j);
+        create_invert_sources(conf, j);
 
 // construct the perambulators
-//        printf("\n# constructing perambulators (%d of %d)\n", j + 1,
-//            no_dilution);
-//        fflush(stdout);
-//        create_perambulators(conf, j);
+        printf("\n# constructing perambulators (%d of %d)\n", j + 1,
+            no_dilution);
+        fflush(stdout);
+        create_perambulators(conf, j);
 
 // construct the propagators
-        printf("\n# constructing propagators (%d of %d)\n", j + 1, no_dilution);
-        fflush(stdout);
+//        printf("\n# constructing propagators (%d of %d)\n", j + 1, no_dilution);
+//        fflush(stdout);
 //        create_propagators(conf, j);
 
 // clean up
@@ -475,10 +475,6 @@ int main(int argc, char* argv[]) {
 int generate_eigensystem(int const conf) {
   int tslice, j, k;
   char conf_filename[50];
-  char eigenvectorfile[100];
-  FILE* file = NULL;
-  su3_vector* eigenvector = NULL;
-  int count = 0, vec, t, volume = LX * LY * LZ;
 
   /* Read Gauge field */
   sprintf(conf_filename, "%s.%.4d", gauge_input_filename, conf);
@@ -535,6 +531,7 @@ int generate_eigensystem(int const conf) {
 #if DEBUG
   if (mysmearing->smearing_performed)
     printf("smearing performed\n");
+  fflush(stdout);
 #endif
 #endif
 
@@ -2101,7 +2098,7 @@ void create_propagators(int const conf, int const dilution) {
  */
 void create_perambulators(int const conf, int const dilution) {
   // set the correct parameters for the loops
-  int t_end = -1, l_end = -1, d_end = 4;
+  int t_end = -1, l_end = -1, d_end = 4, pwidth = 0;
   if (g_stochastical_run == 0) {
     t_end = T;
     d_end = 4;
@@ -2131,23 +2128,62 @@ void create_perambulators(int const conf, int const dilution) {
       l_end = 1;
     }
   }
+  pwidth = t_end * l_end * d_end;
 #if DEBUG
-  printf("\nparameters for propagator: t %d, d %d, l %d\n", t_end, d_end,
+  printf("\nparameters for perambulator: t %d, d %d, l %d\n", t_end, d_end,
       l_end);
 #endif
 
+  // read the eigenvectors
+  char eigenvectorfile[200];
+  su3_vector *eigenvectors = NULL;
+  eigenvectors = calloc(VOLUME * no_eigenvalues, sizeof(su3_vector));
+  if (eigenvectors == NULL ) {
+    fprintf(stderr, "Could not allocate eigenvectors!\nAborting...\n");
+    exit(-1);
+  }
+
+  for (int t = 0; t < T; t++) {
+    for (int v = 0; v < no_eigenvalues; v++) {
+      sprintf(eigenvectorfile, "eigenvector.%03d.%03d.%04d", v, t, conf);
+#if DEBUG
+      printf("reading file %s\n", eigenvectorfile);
+#endif
+      read_su3_vector(&(eigenvectors[t * v * SPACEVOLUME]), eigenvectorfile, 0,
+          t, 1);
+    }
+  }
+
 #ifdef OMP
 #pragma omp parallel \
-    shared(t_end, l_end, d_end)
+    shared(t_end, l_end, d_end, pwidth, eigenvectors)
   {
 #endif
-    int time = 0, count = 0, vec = 0, dirac = 0;
+    int count = 0, tid = 0, x = 0;
+    int tsource = 0, tsink = 0, dsource = 0, dsink = 0, lsource = 0, lsink = 0;
     spinor *inverted = NULL, *even = NULL, *odd = NULL, *tmp = NULL;
-    char invertedfile[200], propagatorfile[200];
+    _Complex double *perambulator = NULL;
+    char invertedfile[200], perambulatorfile[200];
     FILE *file = NULL;
+
+#ifdef OMP
+    tid = omp_get_thread_num();
+#endif
+
     // allocate the needed memory for spinors, eigenvectors and peramulator
+    perambulator = (_Complex double*) calloc(
+        no_eigenvalues * T * 4 * t_end * l_end * d_end,
+        sizeof(_Complex double));
+    if (perambulator == NULL ) {
+      free(eigenvectors);
+      fprintf(stderr, "Could not allocate perambulator!\nAborting...\n");
+      exit(-1);
+    }
+
     tmp = (spinor*) calloc(VOLUMEPLUSRAND + 1, sizeof(spinor));
     if (tmp == NULL ) {
+      free(perambulator);
+      free(eigenvectors);
       fprintf(stderr, "Could not allocate spinor!\nAborting...\n");
       exit(-1);
     }
@@ -2159,6 +2195,8 @@ void create_perambulators(int const conf, int const dilution) {
 #endif
     tmp = (spinor*) calloc(VOLUMEPLUSRAND + 1, sizeof(spinor));
     if (tmp == NULL ) {
+      free(perambulator);
+      free(eigenvectors);
       free(inverted);
       fprintf(stderr, "Could not allocate spinor!\nAborting...\n");
       exit(-1);
@@ -2170,6 +2208,8 @@ void create_perambulators(int const conf, int const dilution) {
 #endif
     tmp = (spinor*) calloc(VOLUMEPLUSRAND + 1, sizeof(spinor));
     if (tmp == NULL ) {
+      free(perambulator);
+      free(eigenvectors);
       free(inverted);
       free(even);
       fprintf(stderr, "Could not allocate spinor!\nAborting...\n");
@@ -2181,24 +2221,22 @@ void create_perambulators(int const conf, int const dilution) {
     odd = tmp;
 #endif
 
-    // save each propagator into new file
+    // save each perambulator into new file
     // iterate over time
 #ifdef OMP
 #pragma omp for private(time)
 #endif
-    for (time = 0; time < t_end; time++) {
+    for (tsource = 0; tsource < t_end; tsource++) {
       // iterate over the LapH space
-      for (vec = 0; vec < l_end; vec++) {
+      for (lsource = 0; lsource < l_end; lsource++) {
         // iterate over the dirac space
-        for (dirac = 0; dirac < d_end; dirac++) {
-
+        for (dsource = 0; dsource < d_end; dsource++) {
           // read in inverted source
-          sprintf(invertedfile, "source%d.%04d.%02d.%02d.inverted", dirac, conf,
-              time, vec);
+          sprintf(invertedfile, "source%d.%04d.%02d.%02d.inverted", dsource,
+              conf, tsource, lsource);
 #if DEBUG
 #ifdef OMP
-          printf("thread %d reading file %s\n", omp_get_thread_num(),
-              invertedfile);
+          printf("thread %d reading file %s\n", tid, invertedfile);
 #else
           printf("reading file %s\n", invertedfile);
 #endif
@@ -2206,44 +2244,59 @@ void create_perambulators(int const conf, int const dilution) {
           read_spinor(even, odd, invertedfile, 0);
           convert_eo_to_lexic(inverted, even, odd);
 
-          // save to file
-          if (g_stochastical_run == 0) {
-            sprintf(propagatorfile, "propagator.T%03d.D%01d.V%03d.%04d", time,
-                dirac, vec, conf);
-          } else {
-            sprintf(propagatorfile,
-                "propagator.%s.R%03d.T%03d.D%01d.V%03d.%04d",
-                (dilution_list[dilution].quark == D_UP) ? "u" : "d", dilution,
-                time, dirac, vec, conf);
+          // multiply propagator with eigenvectors
+          for (tsink = 0; tsink < T; tsink++) {
+            for (lsink = 0; lsink < no_eigenvalues; lsink++) {
+              for (x = 0; x < SPACEVOLUME; x++) {
+                int xhelp = tsource * d_end * l_end + lsource * d_end + dsource;
+                int yhelp = tsink * 4 * no_eigenvalues + lsink * 4 + dsink;
+                vectorcjg_times_spinor(&(perambulator[xhelp + pwidth * yhelp]),
+                    eigenvectors[tsink * lsink * SPACEVOLUME + x],
+                    inverted[tsource * SPACEVOLUME + x], pwidth);
+              }
+            }
           }
-#if DEBUG
-#ifdef OMP
-          printf("thread %d writing file %s\n", omp_get_thread_num(),
-              propagatorfile);
-#else
-          printf("writing file %s\n", propagatorfile);
-#endif
-#endif
-          if ((file = fopen(propagatorfile, "wb")) == NULL ) {
-            fprintf(stderr, "could not open propagator file %s.\nAborting...\n",
-                propagatorfile);
-            exit(-1);
-          }
-          count = fwrite(inverted, sizeof(spinor), VOLUMEPLUSRAND, file);
-          if (count != VOLUMEPLUSRAND) {
-            fprintf(stderr, "could not write all data to file %s.\n",
-                propagatorfile);
-          }
-          fflush(file);
-          fclose(file);
 
         } // dirac
       } // LapH
     } // time
 
+    // save to file
+    if (g_stochastical_run == 0) {
+      sprintf(perambulatorfile,
+          "perambulator.Tso%03d.Dso%01d.Vso%03d.Tsi%03d.Dsi%01d.Vsi%03d.%04d",
+          t_end, d_end, l_end, T, 4, no_eigenvalues, conf);
+    } else {
+      sprintf(perambulatorfile,
+          "perambulator.dil%02d.%s.Tso%03d.Dso%01d.Vso%03d.Tsi%03d.Dsi%01d.Vsi%03d.%04d",
+          dilution, (dilution_list[dilution].quark == D_UP) ? "u" : "d", t_end,
+          d_end, l_end, T, 4, no_eigenvalues, conf);
+    }
+#if DEBUG
+#ifdef OMP
+    printf("thread %d writing file %s\n", tid, perambulatorfile);
+#else
+    printf("writing file %s\n", perambulatorfile);
+#endif
+#endif
+    if ((file = fopen(perambulatorfile, "wb")) == NULL ) {
+      fprintf(stderr, "could not open propagator file %s.\nAborting...\n",
+          perambulatorfile);
+      exit(-1);
+    }
+    count = fwrite(inverted, sizeof(spinor), VOLUMEPLUSRAND, file);
+    if (count != VOLUMEPLUSRAND) {
+      fprintf(stderr, "could not write all data to file %s.\n",
+          perambulatorfile);
+    }
+    fflush(file);
+    fclose(file);
+
     free(even);
     free(odd);
     free(inverted);
+    free(eigenvectors);
+    free(perambulator);
 
 #ifdef OMP
   }
@@ -2379,282 +2432,3 @@ void create_input_files(int const dirac, int const timeslice, int const conf,
   }
   return;
 }
-
-inline void fill_unit_matrix(_Complex double *matrix, int const blockwidth) {
-  matrix[0 * blockwidth + 0] = 1.;
-  matrix[1 * blockwidth + 1] = 1.;
-  matrix[2 * blockwidth + 2] = 1.;
-  matrix[3 * blockwidth + 3] = 1.;
-
-  matrix[0 * blockwidth + 1] = 0.;
-  matrix[0 * blockwidth + 2] = 0.;
-  matrix[0 * blockwidth + 3] = 0.;
-
-  matrix[1 * blockwidth + 0] = 0.;
-  matrix[1 * blockwidth + 2] = 0.;
-  matrix[1 * blockwidth + 3] = 0.;
-
-  matrix[2 * blockwidth + 0] = 0.;
-  matrix[2 * blockwidth + 1] = 0.;
-  matrix[2 * blockwidth + 3] = 0.;
-
-  matrix[3 * blockwidth + 0] = 0.;
-  matrix[3 * blockwidth + 1] = 0.;
-  matrix[3 * blockwidth + 2] = 0.;
-}
-
-inline void fill_vector_one(_Complex double *matrix, int const blockwidth) {
-  matrix[0 * blockwidth] = 1.;
-  matrix[1 * blockwidth] = 1.;
-  matrix[2 * blockwidth] = 1.;
-  matrix[3 * blockwidth] = 1.;
-}
-
-void create_perambulator_matrix(const int dil) {
-  if (g_stochastical_run == 0)
-    return;
-  int t_end = 0;
-  int l_end = 0;
-  int d_end = (dilution_list[dil].type[1] == D_FULL) ? 4 : 1;
-  int t1 = 0, t2 = 0, l1 = 0, l2 = 0;
-  int blocklength, size = 4 * T * no_eigenvalues;
-
-  if (dilution_list[dil].type[0] == D_FULL) {
-    t_end = T;
-  } else if (dilution_list[dil].type[0] == D_INTER) {
-    t_end = dilution_list[dil].size[0];
-  } else if (dilution_list[dil].type[0] == D_BLOCK) {
-    t_end = dilution_list[dil].size[0];
-  } else if (dilution_list[dil].type[0] == D_NONE) {
-    t_end = 1;
-  }
-
-  if (dilution_list[dil].type[2] == D_FULL) {
-    l_end = no_eigenvalues;
-  } else if (dilution_list[dil].type[2] == D_INTER) {
-    l_end = dilution_list[dil].size[2];
-  } else if (dilution_list[dil].type[2] == D_BLOCK) {
-    l_end = dilution_list[dil].size[2];
-  } else if (dilution_list[dil].type[2] == D_NONE) {
-    l_end = 1;
-  }
-  blocklength = t_end * l_end * d_end;
-
-  _Complex double *matrix;
-  matrix = (_Complex double*) calloc(size * blocklength,
-      sizeof(_Complex double));
-  if (matrix == NULL ) {
-    fprintf(stderr,
-        "Could not allocate matrix in create_perambulator_matrix.\nAborting...");
-    exit(-1);
-  }
-
-  for (t2 = 0; t2 < T; t2++) {
-    for (l2 = 0; l2 < no_eigenvalues; l2++) {
-//**********************************************************************************
-      if (dilution_list[dil].type[0] == D_FULL) { // full time dilution
-        for (t1 = 0; t1 < T; t1++) {
-          if (dilution_list[dil].type[1] == D_FULL) { // full laph dilution
-            for (l1 = 0; l1 < no_eigenvalues; l1++) {
-              if (dilution_list[dil].type[2] == D_FULL) { // full spin dilution
-                fill_unit_matrix(
-                    &(matrix[(t2 * no_eigenvalues * 4 + l2 * 4) * blocklength
-                        + t1 * no_eigenvalues * 4 + l1 * 4]), blocklength);
-              } else {                                     // no spin dilution
-                fill_vector_one(
-                    &(matrix[(t2 * no_eigenvalues * 4 + l2 * 4) * blocklength
-                        + t1 * no_eigenvalues + l1]), blocklength);
-              }
-            }
-          } else if (dilution_list[dil].type[1] == D_NONE) { // no laph dilution
-            if (dilution_list[dil].type[2] == D_FULL) {  // full spin dilution
-              fill_unit_matrix(
-                  &(matrix[(t2 * no_eigenvalues * 4) * blocklength + t1 * 4]),
-                  blocklength);
-            } else {                                       // no spin dilution
-              fill_vector_one(
-                  &(matrix[(t2 * no_eigenvalues * 4 + l2 * 4) * blocklength + t1]),
-                  blocklength);
-            }
-          } else if (dilution_list[dil].type[1] == D_INTER) { // interlacing laph dilution
-            for (l1 = l2; l1 < no_eigenvalues; l1 += l_end) {
-              if (dilution_list[dil].type[2] == D_FULL) { // full spin dilution
-                fill_unit_matrix(
-                    &(matrix[(t2 * no_eigenvalues * 4 + l2 * 4) * blocklength
-                        + t1 * no_eigenvalues * 4 + l1 * 4]), blocklength);
-              } else {                                     // no spin dilution
-                fill_vector_one(
-                    &(matrix[(t2 * no_eigenvalues * 4 + l2 * 4) * blocklength
-                        + t1 * no_eigenvalues + l1]), blocklength);
-              }
-            }
-          } else if (dilution_list[dil].type[1] == D_BLOCK) { // block laph dilution
-            for (l1 = l2; l1 < l2 + no_eigenvalues / l_end; l1++) {
-              if (dilution_list[dil].type[2] == D_FULL) { // full spin dilution
-                fill_unit_matrix(
-                    &(matrix[(t2 * no_eigenvalues * 4 + l2 * 4) * blocklength
-                        + t1 * no_eigenvalues * 4 + l1 * 4]), blocklength);
-              } else {                                     // no spin dilution
-                fill_vector_one(
-                    &(matrix[(t2 * no_eigenvalues * 4 + l2 * 4) * blocklength
-                        + t1 * no_eigenvalues + l1]), blocklength);
-              }
-            }
-          }
-        }
-//**********************************************************************************
-      } else if (dilution_list[dil].type[0] == D_NONE) { // no time dilution
-        if (dilution_list[dil].type[1] == D_FULL) { // full laph dilution
-          for (l1 = 0; l1 < no_eigenvalues; l1++) {
-            if (dilution_list[dil].type[2] == D_FULL) {  // full spin dilution
-              fill_unit_matrix(
-                  &(matrix[(t2 * no_eigenvalues * 4 + l2 * 4) * blocklength
-                      + l1 * 4]), blocklength);
-            } else {                                       // no spin dilution
-              fill_vector_one(
-                  &(matrix[(t2 * no_eigenvalues * 4 + l2 * 4) * blocklength + l1]),
-                  blocklength);
-            }
-          }
-        } else if (dilution_list[dil].type[1] == D_NONE) { // no laph dilution
-          if (dilution_list[dil].type[2] == D_FULL) {  // full spin dilution
-            fill_unit_matrix(
-                &(matrix[(t2 * no_eigenvalues * 4) * blocklength + t1 * 4]),
-                blocklength);
-          } else {                                       // no spin dilution
-            fill_vector_one(
-                &(matrix[(t2 * no_eigenvalues * 4 + l2 * 4) * blocklength + t1]),
-                blocklength);
-          }
-        } else if (dilution_list[dil].type[1] == D_INTER) { // interlacing laph dilution
-          for (l1 = l2; l1 < no_eigenvalues; l1 += l_end) {
-            if (dilution_list[dil].type[2] == D_FULL) {  // full spin dilution
-              fill_unit_matrix(
-                  &(matrix[(t2 * no_eigenvalues * 4 + l2 * 4) * blocklength
-                      + l1 * 4]), blocklength);
-            } else {                                       // no spin dilution
-              fill_vector_one(
-                  &(matrix[(t2 * no_eigenvalues * 4 + l2 * 4) * blocklength + l1]),
-                  blocklength);
-            }
-          }
-        } else if (dilution_list[dil].type[1] == D_BLOCK) { // block laph dilution
-          for (l1 = l2; l1 < l2 + no_eigenvalues / l_end; l1++) {
-            if (dilution_list[dil].type[2] == D_FULL) {  // full spin dilution
-              fill_unit_matrix(
-                  &(matrix[(t2 * no_eigenvalues * 4 + l2 * 4) * blocklength
-                      + l1 * 4]), blocklength);
-            } else {                                       // no spin dilution
-              fill_vector_one(
-                  &(matrix[(t2 * no_eigenvalues * 4 + l2 * 4) * blocklength + l1]),
-                  blocklength);
-            }
-          }
-        }
-//**********************************************************************************
-      } else if (dilution_list[dil].type[0] == D_INTER) { // interlace time dilution
-        for (t1 = t2; t1 < T; t1 += t_end) {
-          if (dilution_list[dil].type[1] == D_FULL) { // full laph dilution
-            for (l1 = 0; l1 < no_eigenvalues; l1++) {
-              if (dilution_list[dil].type[2] == D_FULL) { // full spin dilution
-                fill_unit_matrix(
-                    &(matrix[(t2 * no_eigenvalues * 4 + l2 * 4) * blocklength
-                        + t1 * no_eigenvalues * 4 + l1 * 4]), blocklength);
-              } else {                                     // no spin dilution
-                fill_vector_one(
-                    &(matrix[(t2 * no_eigenvalues * 4 + l2 * 4) * blocklength
-                        + t1 * no_eigenvalues + l1]), blocklength);
-              }
-            }
-          } else if (dilution_list[dil].type[1] == D_NONE) { // no laph dilution
-            if (dilution_list[dil].type[2] == D_FULL) {  // full spin dilution
-              fill_unit_matrix(
-                  &(matrix[(t2 * no_eigenvalues * 4) * blocklength + t1 * 4]),
-                  blocklength);
-            } else {                                       // no spin dilution
-              fill_vector_one(
-                  &(matrix[(t2 * no_eigenvalues * 4 + l2 * 4) * blocklength + t1]),
-                  blocklength);
-            }
-          } else if (dilution_list[dil].type[1] == D_INTER) { // interlacing laph dilution
-            for (l1 = l2; l1 < no_eigenvalues; l1 += l_end) {
-              if (dilution_list[dil].type[2] == D_FULL) { // full spin dilution
-                fill_unit_matrix(
-                    &(matrix[(t2 * no_eigenvalues * 4 + l2 * 4) * blocklength
-                        + t1 * no_eigenvalues * 4 + l1 * 4]), blocklength);
-              } else {                                     // no spin dilution
-                fill_vector_one(
-                    &(matrix[(t2 * no_eigenvalues * 4 + l2 * 4) * blocklength
-                        + t1 * no_eigenvalues + l1]), blocklength);
-              }
-            }
-          } else if (dilution_list[dil].type[1] == D_BLOCK) { // block laph dilution
-            for (l1 = l2; l1 < l2 + no_eigenvalues / l_end; l1++) {
-              if (dilution_list[dil].type[2] == D_FULL) { // full spin dilution
-                fill_unit_matrix(
-                    &(matrix[(t2 * no_eigenvalues * 4 + l2 * 4) * blocklength
-                        + t1 * no_eigenvalues * 4 + l1 * 4]), blocklength);
-              } else {                                     // no spin dilution
-                fill_vector_one(
-                    &(matrix[(t2 * no_eigenvalues * 4 + l2 * 4) * blocklength
-                        + t1 * no_eigenvalues + l1]), blocklength);
-              }
-            }
-          }
-        }
-//**********************************************************************************
-      } else if (dilution_list[dil].type[0] == D_BLOCK) { // block time dilution
-        for (t1 = t2; t1 < t2 + T / t_end; t1++) {
-          if (dilution_list[dil].type[1] == D_FULL) { // full laph dilution
-            for (l1 = 0; l1 < no_eigenvalues; l1++) {
-              if (dilution_list[dil].type[2] == D_FULL) { // full spin dilution
-                fill_unit_matrix(
-                    &(matrix[(t2 * no_eigenvalues * 4 + l2 * 4) * blocklength
-                        + t1 * no_eigenvalues * 4 + l1 * 4]), blocklength);
-              } else {                                     // no spin dilution
-                fill_vector_one(
-                    &(matrix[(t2 * no_eigenvalues * 4 + l2 * 4) * blocklength
-                        + t1 * no_eigenvalues + l1]), blocklength);
-              }
-            }
-          } else if (dilution_list[dil].type[1] == D_NONE) { // no laph dilution
-            if (dilution_list[dil].type[2] == D_FULL) {  // full spin dilution
-              fill_unit_matrix(
-                  &(matrix[(t2 * no_eigenvalues * 4) * blocklength + t1 * 4]),
-                  blocklength);
-            } else {                                       // no spin dilution
-              fill_vector_one(
-                  &(matrix[(t2 * no_eigenvalues * 4 + l2 * 4) * blocklength + t1]),
-                  blocklength);
-            }
-          } else if (dilution_list[dil].type[1] == D_INTER) { // interlacing laph dilution
-            for (l1 = l2; l1 < no_eigenvalues; l1 += l_end) {
-              if (dilution_list[dil].type[2] == D_FULL) { // full spin dilution
-                fill_unit_matrix(
-                    &(matrix[(t2 * no_eigenvalues * 4 + l2 * 4) * blocklength
-                        + t1 * no_eigenvalues * 4 + l1 * 4]), blocklength);
-              } else {                                     // no spin dilution
-                fill_vector_one(
-                    &(matrix[(t2 * no_eigenvalues * 4 + l2 * 4) * blocklength
-                        + t1 * no_eigenvalues + l1]), blocklength);
-              }
-            }
-          } else if (dilution_list[dil].type[1] == D_BLOCK) { // block laph dilution
-            for (l1 = l2; l1 < l2 + no_eigenvalues / l_end; l1++) {
-              if (dilution_list[dil].type[2] == D_FULL) { // full spin dilution
-                fill_unit_matrix(
-                    &(matrix[(t2 * no_eigenvalues * 4 + l2 * 4) * blocklength
-                        + t1 * no_eigenvalues * 4 + l1 * 4]), blocklength);
-              } else {                                     // no spin dilution
-                fill_vector_one(
-                    &(matrix[(t2 * no_eigenvalues * 4 + l2 * 4) * blocklength
-                        + t1 * no_eigenvalues + l1]), blocklength);
-              }
-            }
-          }
-        }
-      }
-    }
-  }
-}
-
