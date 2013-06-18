@@ -223,32 +223,36 @@ int main(int argc, char* argv[]) {
 
   g_stochastical_run = 1;
 
-//  add_dilution(D_INTER, D_FULL, D_INTER, 8, 0, 8, 1227, D_UP, D_STOCH);
-//  add_dilution(D_INTER, D_FULL, D_INTER, 8, 0, 8, 1337, D_UP, D_STOCH);
-//  add_dilution(D_INTER, D_FULL, D_INTER, 8, 0, 8, 11227, D_DOWN, D_STOCH);
-//  add_dilution(D_INTER, D_FULL, D_INTER, 8, 0, 8, 11337, D_DOWN, D_STOCH);
+  add_dilution(D_FULL, D_FULL, D_INTER, 0, 0, 8, 3771, D_UP, D_STOCH);
+//  add_dilution(D_FULL, D_FULL, D_INTER, 0, 0, 8, 989898, D_UP, D_STOCH);
+//  add_dilution(D_FULL, D_FULL, D_INTER, 0, 0, 8, 2134, D_DOWN, D_STOCH);
+//  add_dilution(D_FULL, D_FULL, D_INTER, 0, 0, 8, 595959, D_DOWN, D_STOCH);
+//  add_dilution(D_INTER, D_FULL, D_INTER, 16, 0, 8, 1227, D_UP, D_STOCH);
+//  add_dilution(D_INTER, D_FULL, D_INTER, 16, 0, 8, 1337, D_UP, D_STOCH);
+//  add_dilution(D_INTER, D_FULL, D_INTER, 16, 0, 8, 11227, D_DOWN, D_STOCH);
+//  add_dilution(D_INTER, D_FULL, D_INTER, 16, 0, 8, 11337, D_DOWN, D_STOCH);
 
 //getestet (time, dirac, laph, int, int, int, seed, up/down, stoch/local)
 
-  add_dilution(D_FULL, D_FULL, D_FULL, 0, 0, 0, 111111, D_UP, D_STOCH);
-  add_dilution(D_FULL, D_FULL, D_NONE, 0, 0, 0, 222222, D_UP, D_STOCH);
-  add_dilution(D_FULL, D_FULL, D_INTER, 0, 0, 2, 333333, D_UP, D_STOCH);
-  add_dilution(D_FULL, D_FULL, D_BLOCK, 0, 0, 2, 444444, D_UP, D_STOCH);
-
-  add_dilution(D_NONE, D_FULL, D_FULL, 0, 0, 0, 111111, D_UP, D_STOCH);
-  add_dilution(D_NONE, D_FULL, D_NONE, 0, 0, 0, 222222, D_UP, D_STOCH);
-  add_dilution(D_NONE, D_FULL, D_INTER, 2, 0, 2, 333333, D_UP, D_STOCH);
-  add_dilution(D_NONE, D_FULL, D_BLOCK, 0, 0, 2, 444444, D_UP, D_STOCH);
-
-  add_dilution(D_INTER, D_FULL, D_FULL, 2, 0, 0, 111111, D_UP, D_STOCH);
-  add_dilution(D_INTER, D_FULL, D_NONE, 2, 0, 2, 222222, D_UP, D_STOCH);
-  add_dilution(D_INTER, D_FULL, D_INTER, 2, 0, 2, 333333, D_UP, D_STOCH);
-  add_dilution(D_INTER, D_FULL, D_BLOCK, 2, 0, 2, 444444, D_UP, D_STOCH);
-
-  add_dilution(D_BLOCK, D_FULL, D_FULL, 2, 0, 0, 111111, D_UP, D_STOCH);
-  add_dilution(D_BLOCK, D_FULL, D_NONE, 2, 0, 0, 222222, D_UP, D_STOCH);
-  add_dilution(D_BLOCK, D_FULL, D_INTER, 2, 0, 2, 333333, D_UP, D_STOCH);
-  add_dilution(D_BLOCK, D_FULL, D_BLOCK, 2, 0, 2, 444444, D_UP, D_STOCH);
+//  add_dilution(D_FULL, D_FULL, D_FULL, 0, 0, 0, 111111, D_UP, D_STOCH);
+//  add_dilution(D_FULL, D_FULL, D_NONE, 0, 0, 0, 222222, D_UP, D_STOCH);
+//  add_dilution(D_FULL, D_FULL, D_INTER, 0, 0, 2, 333333, D_UP, D_STOCH);
+//  add_dilution(D_FULL, D_FULL, D_BLOCK, 0, 0, 2, 444444, D_UP, D_STOCH);
+//
+//  add_dilution(D_NONE, D_FULL, D_FULL, 0, 0, 0, 111111, D_UP, D_STOCH);
+//  add_dilution(D_NONE, D_FULL, D_NONE, 0, 0, 0, 222222, D_UP, D_STOCH);
+//  add_dilution(D_NONE, D_FULL, D_INTER, 2, 0, 2, 333333, D_UP, D_STOCH);
+//  add_dilution(D_NONE, D_FULL, D_BLOCK, 0, 0, 2, 444444, D_UP, D_STOCH);
+//
+//  add_dilution(D_INTER, D_FULL, D_FULL, 2, 0, 0, 111111, D_UP, D_STOCH);
+//  add_dilution(D_INTER, D_FULL, D_NONE, 2, 0, 2, 222222, D_UP, D_STOCH);
+//  add_dilution(D_INTER, D_FULL, D_INTER, 2, 0, 2, 333333, D_UP, D_STOCH);
+//  add_dilution(D_INTER, D_FULL, D_BLOCK, 2, 0, 2, 444444, D_UP, D_STOCH);
+//
+//  add_dilution(D_BLOCK, D_FULL, D_FULL, 2, 0, 0, 111111, D_UP, D_STOCH);
+//  add_dilution(D_BLOCK, D_FULL, D_NONE, 2, 0, 0, 222222, D_UP, D_STOCH);
+//  add_dilution(D_BLOCK, D_FULL, D_INTER, 2, 0, 2, 333333, D_UP, D_STOCH);
+//  add_dilution(D_BLOCK, D_FULL, D_BLOCK, 2, 0, 2, 444444, D_UP, D_STOCH);
 //
 //  add_dilution(D_FULL, D_NONE, D_FULL, 0, 0, 0, 111111, D_UP, D_STOCH);
 //  add_dilution(D_FULL, D_NONE, D_NONE, 0, 0, 0, 222222, D_UP, D_STOCH);
