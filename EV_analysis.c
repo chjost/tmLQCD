@@ -1811,7 +1811,7 @@ void create_perambulators(int const conf, int const dilution) {
           perambulatorfile);
       exit(-1);
     }
-    count = fwrite(inverted, sizeof(spinor), pwidth*T*4*no_eigenvalues, file);
+    count = fwrite(inverted, sizeof(_Complex double), pwidth*T*4*no_eigenvalues, file);
     if (count != (pwidth*T*4*no_eigenvalues)) {
       fprintf(stderr, "could not write all data to file %s.\n",
           perambulatorfile);
