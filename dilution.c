@@ -688,9 +688,8 @@ void create_source_tf_df_li(const int nr_conf, const int nr_dilution,
     exit(-1);
   }
   rnd_z2_vector(rnd_vector, rnd_vec_size);
-  sprintf(filename, "%srandomvector.%03d.%s.Tf.%04d", EIGENSYSTEMPATH,
-      nr_dilution, (dilution_list[nr_dilution].quark == D_UP) ? "u" : "d",
-      nr_conf);
+  sprintf(filename, "randomvector.%03d.%s.Tf.%04d", nr_dilution,
+      (dilution_list[nr_dilution].quark == D_UP) ? "u" : "d", nr_conf);
 #if DEBUG
   printf("\nwriting random vector to file %s\n", filename);
 #endif
@@ -815,7 +814,8 @@ void create_source_tf_df_li(const int nr_conf, const int nr_dilution,
       for (v = vec; v < no_eigenvalues; v +=
           dilution_list[nr_dilution].size[2]) {
         // read in eigenvector and distribute it to the sources
-        sprintf(filename, "./eigenvector.%03d.%03d.%04d", v, tslice, nr_conf);
+        sprintf(filename, "%seigenvector.%03d.%03d.%04d", EIGENSYSTEMPATH, v,
+            tslice, nr_conf);
 #if DEBUG
         printf("reading file %s\n", filename);
 #endif
@@ -2760,9 +2760,8 @@ void create_source_ti_df_li(const int nr_conf, const int nr_dilution,
     exit(-1);
   }
   rnd_z2_vector(rnd_vector, rnd_vec_size);
-  sprintf(filename, "%srandomvector.%03d.%s.Ti.%04d", EIGENSYSTEMPATH,
-      nr_dilution, (dilution_list[nr_dilution].quark == D_UP) ? "u" : "d",
-      nr_conf);
+  sprintf(filename, "randomvector.%03d.%s.Ti.%04d", nr_dilution,
+      (dilution_list[nr_dilution].quark == D_UP) ? "u" : "d", nr_conf);
 #if DEBUG
   printf("\nwriting random vector to file %s\n", filename);
 #endif
@@ -2887,7 +2886,8 @@ void create_source_ti_df_li(const int nr_conf, const int nr_dilution,
           dilution_list[nr_dilution].size[2]) {
         for (t = tslice; t < T; t += dilution_list[nr_dilution].size[0]) {
           // read in eigenvector and distribute it to the sources
-          sprintf(filename, "./eigenvector.%03d.%03d.%04d", v, t, nr_conf);
+          sprintf(filename, "%seigenvector.%03d.%03d.%04d", EIGENSYSTEMPATH, v,
+              t, nr_conf);
 #if DEBUG
           printf("reading file %s\n", filename);
 #endif
