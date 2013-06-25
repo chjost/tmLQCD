@@ -107,4 +107,40 @@ void create_source_tb_df_li(const int nr_conf, const int nr_dilution,
 void create_source_tb_df_lb(const int nr_conf, const int nr_dilution,
     char* inverterpath);
 
+void create_source_tf_dn_lf(const int nr_conf, const int nr_dilution,
+    char* inverterpath);
+void create_source_tf_dn_ln(const int nr_conf, const int nr_dilution,
+    char* inverterpath);
+void create_source_tf_dn_li(const int nr_conf, const int nr_dilution,
+    char* inverterpath);
+void create_source_tf_dn_lb(const int nr_conf, const int nr_dilution,
+    char* inverterpath);
+
+void create_source_tn_dn_lf(const int nr_conf, const int nr_dilution,
+    char* inverterpath);
+void create_source_tn_dn_ln(const int nr_conf, const int nr_dilution,
+    char* inverterpath);
+void create_source_tn_dn_li(const int nr_conf, const int nr_dilution,
+    char* inverterpath);
+void create_source_tn_dn_lb(const int nr_conf, const int nr_dilution,
+    char* inverterpath);
+
+void create_source_ti_dn_lf(const int nr_conf, const int nr_dilution,
+    char* inverterpath);
+void create_source_ti_dn_ln(const int nr_conf, const int nr_dilution,
+    char* inverterpath);
+void create_source_ti_dn_li(const int nr_conf, const int nr_dilution,
+    char* inverterpath);
+void create_source_ti_dn_lb(const int nr_conf, const int nr_dilution,
+    char* inverterpath);
+
+void create_source_tb_dn_lf(const int nr_conf, const int nr_dilution,
+    char* inverterpath);
+void create_source_tb_dn_ln(const int nr_conf, const int nr_dilution,
+    char* inverterpath);
+void create_source_tb_dn_li(const int nr_conf, const int nr_dilution,
+    char* inverterpath);
+void create_source_tb_dn_lb(const int nr_conf, const int nr_dilution,
+    char* inverterpath);
+
 #endif /* DILUTION_H_ */
