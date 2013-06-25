@@ -47,6 +47,8 @@
 #include "ranlxd.h"
 
 #define DEBUG 1
+#define EIGENSYSTEMPATH "../"
+#define SELFINVERSION 0
 int g_stochastical_run = 1;
 int g_gpu_flag = 1;
 int no_dilution = 0;
@@ -100,16 +102,13 @@ void create_input_files(int const dirac, int const timeslice, int const conf,
     if (g_stochastical_run == 0) {
       fprintf(file, "Indices = 0-%d\n\n", no_eigenvalues - 1);
     } else {
-      if (dilution_list[nr_dilution].type[2] == D_FULL) {
-        fprintf(file, "Indices = 0-%d\n\n", no_eigenvalues - 1);
+      if (dilution_list[nr_dilution].type[2] == D_FULL
+          || dilution_list[nr_dilution].type[2] == D_INTER
+          || dilution_list[nr_dilution].type[2] == D_BLOCK) {
+        fprintf(file, "Indices = 0-%d\n\n",
+            dilution_list[nr_dilution].size[2] - 1);
       } else if (dilution_list[nr_dilution].type[2] == D_NONE) {
         fprintf(file, "Indices = 0\n\n");
-      } else if (dilution_list[nr_dilution].type[2] == D_INTER) {
-        fprintf(file, "Indices = 0-%d\n\n",
-            dilution_list[nr_dilution].size[2] - 1);
-      } else if (dilution_list[nr_dilution].type[2] == D_BLOCK) {
-        fprintf(file, "Indices = 0-%d\n\n",
-            dilution_list[nr_dilution].size[2] - 1);
       }
     }
     for (n_op = 0; n_op < no_operators; n_op++) {
@@ -410,6 +409,7 @@ void create_source_tf_df_lf(const int nr_conf, const int nr_dilution,
       status = write_spinor(writer, &even, &odd, 1, 64);
       destruct_writer(writer);
     }
+#ifdef SELFINVERSION
     create_input_files(4, tslice, nr_conf, nr_dilution, 0);
     for (j = 0; j < 4; j++) {
       sprintf(call, "%s -f dirac%d.%d-cg.input 1> /dev/null", inverterpath, j,
@@ -422,6 +422,7 @@ void create_source_tf_df_lf(const int nr_conf, const int nr_dilution,
       fflush(stdout);
       system(call);
     }
+#endif
   }
   free(eigenvector);
   free(dirac0);
@@ -687,8 +688,9 @@ void create_source_tf_df_li(const int nr_conf, const int nr_dilution,
     exit(-1);
   }
   rnd_z2_vector(rnd_vector, rnd_vec_size);
-  sprintf(filename, "randomvector.%03d.%s.Tf.%04d", nr_dilution,
-      (dilution_list[nr_dilution].quark == D_UP) ? "u" : "d", nr_conf);
+  sprintf(filename, "%srandomvector.%03d.%s.Tf.%04d", EIGENSYSTEMPATH,
+      nr_dilution, (dilution_list[nr_dilution].quark == D_UP) ? "u" : "d",
+      nr_conf);
 #if DEBUG
   printf("\nwriting random vector to file %s\n", filename);
 #endif
@@ -868,18 +870,19 @@ void create_source_tf_df_li(const int nr_conf, const int nr_dilution,
       status = write_spinor(writer, &even, &odd, 1, 64);
       destruct_writer(writer);
     }
-
-//    create_input_files(4, tslice, nr_conf, nr_dilution, 0);
-//    for (j = 0; j < 4; j++) {
-//      sprintf(call, "%s -f dirac%d.%d-cg.input 1> /dev/null", inverterpath, j,
-//          0);
-//#if DEBUG
-//      printf("\n\ntrying: %s for conf %d, t %d (full)\n", call, nr_conf,
-//          tslice);
-//#endif
-//      fflush(stdout);
-//      system(call);
-//    }
+#ifdef SELFINVERSION
+    create_input_files(4, tslice, nr_conf, nr_dilution, 0);
+    for (j = 0; j < 4; j++) {
+      sprintf(call, "%s -f dirac%d.%d-cg.input 1> /dev/null", inverterpath, j,
+          0);
+#if DEBUG
+      printf("\n\ntrying: %s for conf %d, t %d (full)\n", call, nr_conf,
+          tslice);
+#endif
+      fflush(stdout);
+      system(call);
+    }
+#endif
   }
   free(eigenvector);
   free(dirac0);
@@ -2757,8 +2760,9 @@ void create_source_ti_df_li(const int nr_conf, const int nr_dilution,
     exit(-1);
   }
   rnd_z2_vector(rnd_vector, rnd_vec_size);
-  sprintf(filename, "randomvector.%03d.%s.Ti.%04d", nr_dilution,
-      (dilution_list[nr_dilution].quark == D_UP) ? "u" : "d", nr_conf);
+  sprintf(filename, "%srandomvector.%03d.%s.Ti.%04d", EIGENSYSTEMPATH,
+      nr_dilution, (dilution_list[nr_dilution].quark == D_UP) ? "u" : "d",
+      nr_conf);
 #if DEBUG
   printf("\nwriting random vector to file %s\n", filename);
 #endif
@@ -2940,6 +2944,7 @@ void create_source_ti_df_li(const int nr_conf, const int nr_dilution,
       destruct_writer(writer);
     }
 
+#ifdef SELFINVERSION
     create_input_files(4, tslice, nr_conf, nr_dilution, 0);
     for (j = 0; j < 4; j++) {
       sprintf(call, "%s -f dirac%d.%d-cg.input 1> /dev/null", inverterpath, j,
@@ -2950,8 +2955,8 @@ void create_source_ti_df_li(const int nr_conf, const int nr_dilution,
 #endif
       fflush(stdout);
       system(call);
-
     }
+#endif
   }
   free(eigenvector);
   free(dirac0);
@@ -6428,8 +6433,10 @@ void add_dilution(const int d_type_t, const int d_type_d, const int d_type_l,
       }
       dptr->size[0] = d_t;
     }
-  } else if (dptr->type[0] == D_FULL || dptr->type[0] == D_NONE) {
-    dptr->size[0] = -1;
+  } else if (dptr->type[0] == D_FULL) {
+    dptr->size[0] = T;
+  } else if (dptr->type[0] == D_NONE) {
+    dptr->size[0] = 1;
   } else {
     fprintf(stderr, "Dilution scheme for time not recognized!\nAborting...\n");
     exit(-2);
@@ -6462,7 +6469,9 @@ void add_dilution(const int d_type_t, const int d_type_d, const int d_type_l,
       }
       dptr->size[2] = d_l;
     }
-  } else if (dptr->type[2] == D_FULL || dptr->type[2] == D_NONE) {
+  } else if (dptr->type[2] == D_FULL) {
+    dptr->size[2] = no_eigenvalues;
+  } else if (dptr->type[2] == D_NONE) {
     dptr->size[2] = -1;
   } else {
     fprintf(stderr, "Dilution scheme for LapH not recognized!\nAborting...\n");
