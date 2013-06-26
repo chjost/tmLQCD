@@ -68,6 +68,7 @@
 #define SMEAR_COEFF1 0.76f // should be smaller than 1
 #define SMEAR_COEFF2 0.95f // should be smaller than 1
 #define INVERTER "./invert"
+#define EIGENSYSTEMPATH "../"
 
 #define REMOVESOURCES 1 // remove all output except for the perambulators
 #define _vector_one(r) \
@@ -1042,7 +1043,7 @@ void create_perambulators(int const conf, int const dilution) {
 
   for (int t = 0; t < T; t++) {
     for (int v = 0; v < no_eigenvalues; v++) {
-      sprintf(eigenvectorfile, "eigenvector.%03d.%03d.%04d", v, t, conf);
+      sprintf(eigenvectorfile, "%seigenvector.%03d.%03d.%04d", EIGENSYSTEMPATH, v, t, conf);
 #if DEBUG
       printf("reading file %s\n", eigenvectorfile);
 #endif
