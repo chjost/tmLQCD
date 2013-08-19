@@ -18,11 +18,6 @@
 #include <limits.h>
 #include "getopt.h"
 #include "git_hash.h"
-//#include <gsl/gsl_math.h>
-//#include <gsl/gsl_eigen.h>
-//#include <gsl/gsl_complex.h>
-//#include <gsl/gsl_complex_math.h>
-//#include <gsl/gsl_sort_vector.h>
 
 #include "global.h"
 #include "start.h"
@@ -69,7 +64,6 @@
 #define SMEAR_COEFF2 0.95f // should be smaller than 1
 #define INVERTER "./invert"
 #define EIGENSYSTEMPATH "../"
-
 #define REMOVESOURCES 1 // remove all output except for the perambulators
 #define _vector_one(r) \
   (r).c0 = 1. + 0.*I;\
@@ -150,7 +144,6 @@ int main(int argc, char* argv[]) {
 
   /* Read the input file */
   read_input(input_filename);
-
   tmlqcd_mpi_init(argc, argv);
 
   //initialise OMP
@@ -162,11 +155,9 @@ int main(int argc, char* argv[]) {
     if (g_proc_id == 0)
       printf(
           "# No value provided for OmpNumThreads, running in single-threaded mode!\n");
-
     omp_num_threads = 1;
     omp_set_num_threads(omp_num_threads);
   }
-
   init_omp_accumulators(omp_num_threads);
 #endif
 
@@ -206,180 +197,27 @@ int main(int argc, char* argv[]) {
     exit(-1);
   }
   init_operators();
-
   g_stochastical_run = 1;
 
+// up quarks
 //  add_dilution(D_FULL, D_FULL, D_INTER, 0, 0, 8, 3771, D_UP, D_STOCH);
 //  add_dilution(D_FULL, D_FULL, D_INTER, 0, 0, 8, 989898, D_UP, D_STOCH);
-//  add_dilution(D_FULL, D_FULL, D_INTER, 0, 0, 8, 2134, D_DOWN, D_STOCH);
-//  add_dilution(D_FULL, D_FULL, D_INTER, 0, 0, 8, 595959, D_DOWN, D_STOCH);
 //  add_dilution(D_INTER, D_FULL, D_INTER, 16, 0, 8, 1227, D_UP, D_STOCH);
 //  add_dilution(D_INTER, D_FULL, D_INTER, 16, 0, 8, 1337, D_UP, D_STOCH);
+
+// charm quarks
+//  add_dilution(D_FULL, D_FULL, D_INTER, 0, 0, 8, 2536, D_UP, D_STOCH);
+//  add_dilution(D_FULL, D_FULL, D_INTER, 0, 0, 8, 456354, D_UP, D_STOCH);
+//  add_dilution(D_INTER, D_FULL, D_INTER, 16, 0, 8, 9762, D_UP, D_STOCH);
+//  add_dilution(D_INTER, D_FULL, D_INTER, 16, 0, 8, 812934, D_UP, D_STOCH);
+
+//  add_dilution(D_FULL, D_FULL, D_INTER, 0, 0, 8, 2134, D_DOWN, D_STOCH);
+//  add_dilution(D_FULL, D_FULL, D_INTER, 0, 0, 8, 595959, D_DOWN, D_STOCH);
 //  add_dilution(D_INTER, D_FULL, D_INTER, 16, 0, 8, 11227, D_DOWN, D_STOCH);
 //  add_dilution(D_INTER, D_FULL, D_INTER, 16, 0, 8, 11337, D_DOWN, D_STOCH);
 
 //getestet (time, dirac, laph, int, int, int, seed, up/down, stoch/local)
-
   add_dilution(D_FULL, D_FULL, D_FULL, 0, 0, 0, 111111, D_UP, D_STOCH);
-//  add_dilution(D_FULL, D_FULL, D_NONE, 0, 0, 0, 222222, D_UP, D_STOCH);
-//  add_dilution(D_FULL, D_FULL, D_INTER, 0, 0, 2, 333333, D_UP, D_STOCH);
-//  add_dilution(D_FULL, D_FULL, D_BLOCK, 0, 0, 2, 444444, D_UP, D_STOCH);
-//
-//  add_dilution(D_NONE, D_FULL, D_FULL, 0, 0, 0, 111111, D_UP, D_STOCH);
-//  add_dilution(D_NONE, D_FULL, D_NONE, 0, 0, 0, 222222, D_UP, D_STOCH);
-//  add_dilution(D_NONE, D_FULL, D_INTER, 2, 0, 2, 333333, D_UP, D_STOCH);
-//  add_dilution(D_NONE, D_FULL, D_BLOCK, 0, 0, 2, 444444, D_UP, D_STOCH);
-//
-//  add_dilution(D_INTER, D_FULL, D_FULL, 2, 0, 0, 111111, D_UP, D_STOCH);
-//  add_dilution(D_INTER, D_FULL, D_NONE, 2, 0, 2, 222222, D_UP, D_STOCH);
-//  add_dilution(D_INTER, D_FULL, D_INTER, 2, 0, 2, 333333, D_UP, D_STOCH);
-//  add_dilution(D_INTER, D_FULL, D_BLOCK, 2, 0, 2, 444444, D_UP, D_STOCH);
-//
-//  add_dilution(D_BLOCK, D_FULL, D_FULL, 2, 0, 0, 111111, D_UP, D_STOCH);
-//  add_dilution(D_BLOCK, D_FULL, D_NONE, 2, 0, 0, 222222, D_UP, D_STOCH);
-//  add_dilution(D_BLOCK, D_FULL, D_INTER, 2, 0, 2, 333333, D_UP, D_STOCH);
-//  add_dilution(D_BLOCK, D_FULL, D_BLOCK, 2, 0, 2, 444444, D_UP, D_STOCH);
-//
-//  add_dilution(D_FULL, D_NONE, D_FULL, 0, 0, 0, 111111, D_UP, D_STOCH);
-//  add_dilution(D_FULL, D_NONE, D_NONE, 0, 0, 0, 222222, D_UP, D_STOCH);
-//  add_dilution(D_FULL, D_NONE, D_INTER, 0, 0, 2, 333333, D_UP, D_STOCH);
-//  add_dilution(D_FULL, D_NONE, D_BLOCK, 0, 0, 2, 444444, D_UP, D_STOCH);
-//
-//  add_dilution(D_NONE, D_NONE, D_FULL, 0, 0, 0, 111111, D_UP, D_STOCH);
-//  add_dilution(D_NONE, D_NONE, D_NONE, 0, 0, 0, 222222, D_UP, D_STOCH);
-//  add_dilution(D_NONE, D_NONE, D_INTER, 2, 0, 2, 333333, D_UP, D_STOCH);
-//  add_dilution(D_NONE, D_NONE, D_BLOCK, 0, 0, 2, 444444, D_UP, D_STOCH);
-//
-//  add_dilution(D_INTER, D_NONE, D_FULL, 2, 0, 0, 111111, D_UP, D_STOCH);
-//  add_dilution(D_INTER, D_NONE, D_NONE, 2, 0, 2, 222222, D_UP, D_STOCH);
-//  add_dilution(D_INTER, D_NONE, D_INTER, 2, 0, 2, 333333, D_UP, D_STOCH);
-//  add_dilution(D_INTER, D_NONE, D_BLOCK, 2, 0, 2, 444444, D_UP, D_STOCH);
-//
-//  add_dilution(D_BLOCK, D_NONE, D_FULL, 2, 0, 0, 111111, D_UP, D_STOCH);
-//  add_dilution(D_BLOCK, D_NONE, D_NONE, 2, 0, 0, 222222, D_UP, D_STOCH);
-//  add_dilution(D_BLOCK, D_NONE, D_INTER, 2, 0, 2, 333333, D_UP, D_STOCH);
-//  add_dilution(D_BLOCK, D_NONE, D_BLOCK, 2, 0, 2, 444444, D_UP, D_STOCH);
-
-//  add_dilution(D_FULL, D_FULL, D_FULL, 0, 0, 0, 111111, D_DOWN, D_STOCH);
-//  add_dilution(D_FULL, D_FULL, D_NONE, 0, 0, 0, 222222, D_DOWN, D_STOCH);
-//  add_dilution(D_FULL, D_FULL, D_INTER, 0, 0, 2, 333333, D_DOWN, D_STOCH);
-//  add_dilution(D_FULL, D_FULL, D_BLOCK, 0, 0, 2, 444444, D_DOWN, D_STOCH);
-//
-//  add_dilution(D_NONE, D_FULL, D_FULL, 0, 0, 0, 111111, D_DOWN, D_STOCH);
-//  add_dilution(D_NONE, D_FULL, D_NONE, 0, 0, 0, 222222, D_DOWN, D_STOCH);
-//  add_dilution(D_NONE, D_FULL, D_INTER, 2, 0, 2, 333333, D_DOWN, D_STOCH);
-//  add_dilution(D_NONE, D_FULL, D_BLOCK, 0, 0, 2, 444444, D_DOWN, D_STOCH);
-//
-//  add_dilution(D_INTER, D_FULL, D_FULL, 2, 0, 0, 111111, D_DOWN, D_STOCH);
-//  add_dilution(D_INTER, D_FULL, D_NONE, 2, 0, 2, 222222, D_DOWN, D_STOCH);
-//  add_dilution(D_INTER, D_FULL, D_INTER, 2, 0, 2, 333333, D_DOWN, D_STOCH);
-//  add_dilution(D_INTER, D_FULL, D_BLOCK, 2, 0, 2, 444444, D_DOWN, D_STOCH);
-//
-//  add_dilution(D_BLOCK, D_FULL, D_FULL, 2, 0, 0, 111111, D_DOWN, D_STOCH);
-//  add_dilution(D_BLOCK, D_FULL, D_NONE, 2, 0, 0, 222222, D_DOWN, D_STOCH);
-//  add_dilution(D_BLOCK, D_FULL, D_INTER, 2, 0, 2, 333333, D_DOWN, D_STOCH);
-//  add_dilution(D_BLOCK, D_FULL, D_BLOCK, 2, 0, 2, 444444, D_DOWN, D_STOCH);
-//
-//  add_dilution(D_FULL, D_NONE, D_FULL, 0, 0, 0, 111111, D_DOWN, D_STOCH);
-//  add_dilution(D_FULL, D_NONE, D_NONE, 0, 0, 0, 222222, D_DOWN, D_STOCH);
-//  add_dilution(D_FULL, D_NONE, D_INTER, 0, 0, 2, 333333, D_DOWN, D_STOCH);
-//  add_dilution(D_FULL, D_NONE, D_BLOCK, 0, 0, 2, 444444, D_DOWN, D_STOCH);
-//
-//  add_dilution(D_NONE, D_NONE, D_FULL, 0, 0, 0, 111111, D_DOWN, D_STOCH);
-//  add_dilution(D_NONE, D_NONE, D_NONE, 0, 0, 0, 222222, D_DOWN, D_STOCH);
-//  add_dilution(D_NONE, D_NONE, D_INTER, 2, 0, 2, 333333, D_DOWN, D_STOCH);
-//  add_dilution(D_NONE, D_NONE, D_BLOCK, 0, 0, 2, 444444, D_DOWN, D_STOCH);
-//
-//  add_dilution(D_INTER, D_NONE, D_FULL, 2, 0, 0, 111111, D_DOWN, D_STOCH);
-//  add_dilution(D_INTER, D_NONE, D_NONE, 2, 0, 2, 222222, D_DOWN, D_STOCH);
-//  add_dilution(D_INTER, D_NONE, D_INTER, 2, 0, 2, 333333, D_DOWN, D_STOCH);
-//  add_dilution(D_INTER, D_NONE, D_BLOCK, 2, 0, 2, 444444, D_DOWN, D_STOCH);
-//
-//  add_dilution(D_BLOCK, D_NONE, D_FULL, 2, 0, 0, 111111, D_DOWN, D_STOCH);
-//  add_dilution(D_BLOCK, D_NONE, D_NONE, 2, 0, 0, 222222, D_DOWN, D_STOCH);
-//  add_dilution(D_BLOCK, D_NONE, D_INTER, 2, 0, 2, 333333, D_DOWN, D_STOCH);
-//  add_dilution(D_BLOCK, D_NONE, D_BLOCK, 2, 0, 2, 444444, D_DOWN, D_STOCH);
-
-//  add_dilution(D_FULL, D_FULL, D_FULL, 0, 0, 0, 111111, D_UP, D_LOCAL);
-//  add_dilution(D_FULL, D_FULL, D_NONE, 0, 0, 0, 222222, D_UP, D_LOCAL);
-//  add_dilution(D_FULL, D_FULL, D_INTER, 0, 0, 2, 333333, D_UP, D_LOCAL);
-//  add_dilution(D_FULL, D_FULL, D_BLOCK, 0, 0, 2, 444444, D_UP, D_LOCAL);
-//
-//  add_dilution(D_NONE, D_FULL, D_FULL, 0, 0, 0, 111111, D_UP, D_LOCAL);
-//  add_dilution(D_NONE, D_FULL, D_NONE, 0, 0, 0, 222222, D_UP, D_LOCAL);
-//  add_dilution(D_NONE, D_FULL, D_INTER, 2, 0, 2, 333333, D_UP, D_LOCAL);
-//  add_dilution(D_NONE, D_FULL, D_BLOCK, 0, 0, 2, 444444, D_UP, D_LOCAL);
-//
-//  add_dilution(D_INTER, D_FULL, D_FULL, 2, 0, 0, 111111, D_UP, D_LOCAL);
-//  add_dilution(D_INTER, D_FULL, D_NONE, 2, 0, 2, 222222, D_UP, D_LOCAL);
-//  add_dilution(D_INTER, D_FULL, D_INTER, 2, 0, 2, 333333, D_UP, D_LOCAL);
-//  add_dilution(D_INTER, D_FULL, D_BLOCK, 2, 0, 2, 444444, D_UP, D_LOCAL);
-//
-//  add_dilution(D_BLOCK, D_FULL, D_FULL, 2, 0, 0, 111111, D_UP, D_LOCAL);
-//  add_dilution(D_BLOCK, D_FULL, D_NONE, 2, 0, 0, 222222, D_UP, D_LOCAL);
-//  add_dilution(D_BLOCK, D_FULL, D_INTER, 2, 0, 2, 333333, D_UP, D_LOCAL);
-//  add_dilution(D_BLOCK, D_FULL, D_BLOCK, 2, 0, 2, 444444, D_UP, D_LOCAL);
-//
-//  add_dilution(D_FULL, D_NONE, D_FULL, 0, 0, 0, 111111, D_UP, D_LOCAL);
-//  add_dilution(D_FULL, D_NONE, D_NONE, 0, 0, 0, 222222, D_UP, D_LOCAL);
-//  add_dilution(D_FULL, D_NONE, D_INTER, 0, 0, 2, 333333, D_UP, D_LOCAL);
-//  add_dilution(D_FULL, D_NONE, D_BLOCK, 0, 0, 2, 444444, D_UP, D_LOCAL);
-//
-//  add_dilution(D_NONE, D_NONE, D_FULL, 0, 0, 0, 111111, D_UP, D_LOCAL);
-//  add_dilution(D_NONE, D_NONE, D_NONE, 0, 0, 0, 222222, D_UP, D_LOCAL);
-//  add_dilution(D_NONE, D_NONE, D_INTER, 2, 0, 2, 333333, D_UP, D_LOCAL);
-//  add_dilution(D_NONE, D_NONE, D_BLOCK, 0, 0, 2, 444444, D_UP, D_LOCAL);
-//
-//  add_dilution(D_INTER, D_NONE, D_FULL, 2, 0, 0, 111111, D_UP, D_LOCAL);
-//  add_dilution(D_INTER, D_NONE, D_NONE, 2, 0, 2, 222222, D_UP, D_LOCAL);
-//  add_dilution(D_INTER, D_NONE, D_INTER, 2, 0, 2, 333333, D_UP, D_LOCAL);
-//  add_dilution(D_INTER, D_NONE, D_BLOCK, 2, 0, 2, 444444, D_UP, D_LOCAL);
-//
-//  add_dilution(D_BLOCK, D_NONE, D_FULL, 2, 0, 0, 111111, D_UP, D_LOCAL);
-//  add_dilution(D_BLOCK, D_NONE, D_NONE, 2, 0, 0, 222222, D_UP, D_LOCAL);
-//  add_dilution(D_BLOCK, D_NONE, D_INTER, 2, 0, 2, 333333, D_UP, D_LOCAL);
-//  add_dilution(D_BLOCK, D_NONE, D_BLOCK, 2, 0, 2, 444444, D_UP, D_LOCAL);
-//
-//  add_dilution(D_FULL, D_FULL, D_FULL, 0, 0, 0, 111111, D_DOWN, D_LOCAL);
-//  add_dilution(D_FULL, D_FULL, D_NONE, 0, 0, 0, 222222, D_DOWN, D_LOCAL);
-//  add_dilution(D_FULL, D_FULL, D_INTER, 0, 0, 2, 333333, D_DOWN, D_LOCAL);
-//  add_dilution(D_FULL, D_FULL, D_BLOCK, 0, 0, 2, 444444, D_DOWN, D_LOCAL);
-//
-//  add_dilution(D_NONE, D_FULL, D_FULL, 0, 0, 0, 111111, D_DOWN, D_LOCAL);
-//  add_dilution(D_NONE, D_FULL, D_NONE, 0, 0, 0, 222222, D_DOWN, D_LOCAL);
-//  add_dilution(D_NONE, D_FULL, D_INTER, 2, 0, 2, 333333, D_DOWN, D_LOCAL);
-//  add_dilution(D_NONE, D_FULL, D_BLOCK, 0, 0, 2, 444444, D_DOWN, D_LOCAL);
-//
-//  add_dilution(D_INTER, D_FULL, D_FULL, 2, 0, 0, 111111, D_DOWN, D_LOCAL);
-//  add_dilution(D_INTER, D_FULL, D_NONE, 2, 0, 2, 222222, D_DOWN, D_LOCAL);
-//  add_dilution(D_INTER, D_FULL, D_INTER, 2, 0, 2, 333333, D_DOWN, D_LOCAL);
-//  add_dilution(D_INTER, D_FULL, D_BLOCK, 2, 0, 2, 444444, D_DOWN, D_LOCAL);
-//
-//  add_dilution(D_BLOCK, D_FULL, D_FULL, 2, 0, 0, 111111, D_DOWN, D_LOCAL);
-//  add_dilution(D_BLOCK, D_FULL, D_NONE, 2, 0, 0, 222222, D_DOWN, D_LOCAL);
-//  add_dilution(D_BLOCK, D_FULL, D_INTER, 2, 0, 2, 333333, D_DOWN, D_LOCAL);
-//  add_dilution(D_BLOCK, D_FULL, D_BLOCK, 2, 0, 2, 444444, D_DOWN, D_LOCAL);
-//
-//  add_dilution(D_FULL, D_NONE, D_FULL, 0, 0, 0, 111111, D_DOWN, D_LOCAL);
-//  add_dilution(D_FULL, D_NONE, D_NONE, 0, 0, 0, 222222, D_DOWN, D_LOCAL);
-//  add_dilution(D_FULL, D_NONE, D_INTER, 0, 0, 2, 333333, D_DOWN, D_LOCAL);
-//  add_dilution(D_FULL, D_NONE, D_BLOCK, 0, 0, 2, 444444, D_DOWN, D_LOCAL);
-//
-//  add_dilution(D_NONE, D_NONE, D_FULL, 0, 0, 0, 111111, D_DOWN, D_LOCAL);
-//  add_dilution(D_NONE, D_NONE, D_NONE, 0, 0, 0, 222222, D_DOWN, D_LOCAL);
-//  add_dilution(D_NONE, D_NONE, D_INTER, 2, 0, 2, 333333, D_DOWN, D_LOCAL);
-//  add_dilution(D_NONE, D_NONE, D_BLOCK, 0, 0, 2, 444444, D_DOWN, D_LOCAL);
-//
-//  add_dilution(D_INTER, D_NONE, D_FULL, 2, 0, 0, 111111, D_DOWN, D_LOCAL);
-//  add_dilution(D_INTER, D_NONE, D_NONE, 2, 0, 2, 222222, D_DOWN, D_LOCAL);
-//  add_dilution(D_INTER, D_NONE, D_INTER, 2, 0, 2, 333333, D_DOWN, D_LOCAL);
-//  add_dilution(D_INTER, D_NONE, D_BLOCK, 2, 0, 2, 444444, D_DOWN, D_LOCAL);
-//
-//  add_dilution(D_BLOCK, D_NONE, D_FULL, 2, 0, 0, 111111, D_DOWN, D_LOCAL);
-//  add_dilution(D_BLOCK, D_NONE, D_NONE, 2, 0, 0, 222222, D_DOWN, D_LOCAL);
-//  add_dilution(D_BLOCK, D_NONE, D_INTER, 2, 0, 2, 333333, D_DOWN, D_LOCAL);
-//  add_dilution(D_BLOCK, D_NONE, D_BLOCK, 2, 0, 2, 444444, D_DOWN, D_LOCAL);
-//nicht getestet
 
   /* define the boundary conditions for the fermion fields */
   boundary(g_kappa);
@@ -1043,7 +881,8 @@ void create_perambulators(int const conf, int const dilution) {
 
   for (int t = 0; t < T; t++) {
     for (int v = 0; v < no_eigenvalues; v++) {
-      sprintf(eigenvectorfile, "%seigenvector.%03d.%03d.%04d", EIGENSYSTEMPATH, v, t, conf);
+      sprintf(eigenvectorfile, "%seigenvector.%03d.%03d.%04d", EIGENSYSTEMPATH,
+          v, t, conf);
 #if DEBUG
       printf("reading file %s\n", eigenvectorfile);
 #endif
