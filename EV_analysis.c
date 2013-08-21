@@ -102,10 +102,27 @@ inline static void vectorcjg_times_spinor(_Complex double *result,
       + conj(factor1.c1) * factor2.s3.c1 + conj(factor1.c2) * factor2.s3.c2;
 }
 
+inline static void spinor_times_spinor(spinor result, spinor const factor1,
+    spinor const factor2) {
+  result.s0.c0 += factor1.s0.c0 * factor2.s0.c0;
+  result.s0.c1 += factor1.s0.c1 * factor2.s0.c1;
+  result.s0.c2 += factor1.s0.c2 * factor2.s0.c2;
+  result.s1.c0 += factor1.s1.c0 * factor2.s1.c0;
+  result.s1.c1 += factor1.s1.c1 * factor2.s1.c1;
+  result.s1.c2 += factor1.s1.c2 * factor2.s1.c2;
+  result.s2.c0 += factor1.s2.c0 * factor2.s2.c0;
+  result.s2.c1 += factor1.s2.c1 * factor2.s2.c1;
+  result.s2.c2 += factor1.s2.c2 * factor2.s2.c2;
+  result.s3.c0 += factor1.s3.c0 * factor2.s3.c0;
+  result.s3.c1 += factor1.s3.c1 * factor2.s3.c1;
+  result.s3.c2 += factor1.s3.c2 * factor2.s3.c2;
+}
+
 int generate_eigensystem(int const conf);
 int create_invert_sources(int const conf, int const dilution);
 void create_propagators(int const conf, int const dilution);
 void create_perambulators(int const conf, int const dilution);
+void create_stochastic_perambulators(int const conf, int const dilution);
 
 int main(int argc, char* argv[]) {
   int status = 0, c, j, conf;
@@ -250,6 +267,11 @@ int main(int argc, char* argv[]) {
 //        fflush(stdout);
 //        create_perambulators(conf, j);
 
+// construct stochastic perambulators
+        printf("\n# constructing stochastic perambulators (%d of %d)\n", j + 1,
+            no_dilution);
+        fflush(stdout);
+        create_stochastic_perambulators(conf, j);
 // construct the propagators
 //        printf("\n# constructing propagators (%d of %d)\n", j + 1, no_dilution);
 //        fflush(stdout);
@@ -509,19 +531,19 @@ int create_invert_sources(int const conf, int const dilution) {
       if (dilution_list[dilution].type[0] == D_FULL) {
         // full LapH dilution
         if (dilution_list[dilution].type[2] == D_FULL) {
-          create_source_tf_df_lf(conf, dilution, INVERTER);
+          create_source_ti_df_li(conf, dilution, INVERTER);
 
           // no LapH dilution
         } else if (dilution_list[dilution].type[2] == D_NONE) {
-          create_source_tf_df_ln(conf, dilution, INVERTER);
+          create_source_ti_df_li(conf, dilution, INVERTER);
 
           // interlace LapH dilution
         } else if (dilution_list[dilution].type[2] == D_INTER) {
-          create_source_tf_df_li(conf, dilution, INVERTER);
+          create_source_ti_df_li(conf, dilution, INVERTER);
 
           // block LapH dilution
         } else if (dilution_list[dilution].type[2] == D_BLOCK) {
-          create_source_tf_df_lb(conf, dilution, INVERTER);
+          create_source_ti_df_lb(conf, dilution, INVERTER);
 
         } // LapH dilution end
 
@@ -529,19 +551,19 @@ int create_invert_sources(int const conf, int const dilution) {
       } else if (dilution_list[dilution].type[0] == D_NONE) {
         // full LapH dilution
         if (dilution_list[dilution].type[2] == D_FULL) {
-          create_source_tn_df_lf(conf, dilution, INVERTER);
+          create_source_ti_df_li(conf, dilution, INVERTER);
 
           // no LapH dilution
         } else if (dilution_list[dilution].type[2] == D_NONE) {
-          create_source_tn_df_ln(conf, dilution, INVERTER);
+          create_source_ti_df_li(conf, dilution, INVERTER);
 
           // interlace LapH dilution
         } else if (dilution_list[dilution].type[2] == D_INTER) {
-          create_source_tn_df_li(conf, dilution, INVERTER);
+          create_source_ti_df_li(conf, dilution, INVERTER);
 
           // block LapH dilution
         } else if (dilution_list[dilution].type[2] == D_BLOCK) {
-          create_source_tn_df_lb(conf, dilution, INVERTER);
+          create_source_ti_df_lb(conf, dilution, INVERTER);
 
         } // LapH dilution end
 
@@ -549,11 +571,11 @@ int create_invert_sources(int const conf, int const dilution) {
       } else if (dilution_list[dilution].type[0] == D_INTER) {
         // full LapH dilution
         if (dilution_list[dilution].type[2] == D_FULL) {
-          create_source_ti_df_lf(conf, dilution, INVERTER);
+          create_source_ti_df_li(conf, dilution, INVERTER);
 
           // no LapH dilution
         } else if (dilution_list[dilution].type[2] == D_NONE) {
-          create_source_ti_df_ln(conf, dilution, INVERTER);
+          create_source_ti_df_li(conf, dilution, INVERTER);
 
           // interlace LapH dilution
         } else if (dilution_list[dilution].type[2] == D_INTER) {
@@ -569,11 +591,11 @@ int create_invert_sources(int const conf, int const dilution) {
       } else if (dilution_list[dilution].type[0] == D_BLOCK) {
         // full LapH dilution
         if (dilution_list[dilution].type[2] == D_FULL) {
-          create_source_tb_df_lf(conf, dilution, INVERTER);
+          create_source_tb_df_li(conf, dilution, INVERTER);
 
           // no LapH dilution
         } else if (dilution_list[dilution].type[2] == D_NONE) {
-          create_source_tb_df_ln(conf, dilution, INVERTER);
+          create_source_tb_df_li(conf, dilution, INVERTER);
 
           // interlace LapH dilution
         } else if (dilution_list[dilution].type[2] == D_INTER) {
@@ -592,19 +614,19 @@ int create_invert_sources(int const conf, int const dilution) {
       if (dilution_list[dilution].type[0] == D_FULL) {
         // full LapH dilution
         if (dilution_list[dilution].type[2] == D_FULL) {
-          create_source_tf_dn_lf(conf, dilution, INVERTER);
+          create_source_ti_dn_li(conf, dilution, INVERTER);
 
           // no LapH dilution
         } else if (dilution_list[dilution].type[2] == D_NONE) {
-          create_source_tf_dn_ln(conf, dilution, INVERTER);
+          create_source_ti_dn_li(conf, dilution, INVERTER);
 
           // interlace LapH dilution
         } else if (dilution_list[dilution].type[2] == D_INTER) {
-          create_source_tf_dn_li(conf, dilution, INVERTER);
+          create_source_ti_dn_li(conf, dilution, INVERTER);
 
           // block LapH dilution
         } else if (dilution_list[dilution].type[2] == D_BLOCK) {
-          create_source_tf_df_lb(conf, dilution, INVERTER);
+          create_source_ti_df_lb(conf, dilution, INVERTER);
 
         } // LapH dilution end
 
@@ -612,19 +634,19 @@ int create_invert_sources(int const conf, int const dilution) {
       } else if (dilution_list[dilution].type[0] == D_NONE) {
         // full LapH dilution
         if (dilution_list[dilution].type[2] == D_FULL) {
-          create_source_tn_dn_lf(conf, dilution, INVERTER);
+          create_source_ti_dn_li(conf, dilution, INVERTER);
 
           // no LapH dilution
         } else if (dilution_list[dilution].type[2] == D_NONE) {
-          create_source_tn_dn_ln(conf, dilution, INVERTER);
+          create_source_ti_dn_li(conf, dilution, INVERTER);
 
           // interlace LapH dilution
         } else if (dilution_list[dilution].type[2] == D_INTER) {
-          create_source_tn_dn_li(conf, dilution, INVERTER);
+          create_source_ti_dn_li(conf, dilution, INVERTER);
 
           // block LapH dilution
         } else if (dilution_list[dilution].type[2] == D_BLOCK) {
-          create_source_tn_dn_lb(conf, dilution, INVERTER);
+          create_source_ti_dn_lb(conf, dilution, INVERTER);
 
         } // LapH dilution end
 
@@ -632,11 +654,11 @@ int create_invert_sources(int const conf, int const dilution) {
       } else if (dilution_list[dilution].type[0] == D_INTER) {
         // full LapH dilution
         if (dilution_list[dilution].type[2] == D_FULL) {
-          create_source_ti_dn_lf(conf, dilution, INVERTER);
+          create_source_ti_dn_li(conf, dilution, INVERTER);
 
           // no LapH dilution
         } else if (dilution_list[dilution].type[2] == D_NONE) {
-          create_source_ti_dn_ln(conf, dilution, INVERTER);
+          create_source_ti_dn_li(conf, dilution, INVERTER);
 
           // interlace LapH dilution
         } else if (dilution_list[dilution].type[2] == D_INTER) {
@@ -652,11 +674,11 @@ int create_invert_sources(int const conf, int const dilution) {
       } else if (dilution_list[dilution].type[0] == D_BLOCK) {
         // full LapH dilution
         if (dilution_list[dilution].type[2] == D_FULL) {
-          create_source_tb_dn_lf(conf, dilution, INVERTER);
+          create_source_tb_dn_li(conf, dilution, INVERTER);
 
           // no LapH dilution
         } else if (dilution_list[dilution].type[2] == D_NONE) {
-          create_source_tb_dn_ln(conf, dilution, INVERTER);
+          create_source_tb_dn_li(conf, dilution, INVERTER);
 
           // interlace LapH dilution
         } else if (dilution_list[dilution].type[2] == D_INTER) {
@@ -961,7 +983,7 @@ void create_perambulators(int const conf, int const dilution) {
     // save each perambulator into new file
     // iterate over time
 #ifdef OMP
-#pragma omp for private(time)
+#pragma omp for private(tsource)
 #endif
     for (tsource = 0; tsource < t_end; tsource++) {
       // iterate over the LapH space
@@ -1043,5 +1065,200 @@ void create_perambulators(int const conf, int const dilution) {
 #ifdef OMP
   }
 #endif
+  return;
+}
+
+/*
+ * create the perambulators with stochastic sink
+ */
+void create_stochastic_perambulators(int const conf, int const dilution) {
+  // set the correct parameters for the loops
+  int t_end = -1, l_end = -1, d_end = 4, pwidth = 0;
+  if (g_stochastical_run == 0) {
+    t_end = T;
+    d_end = 4;
+    l_end = no_eigenvalues;
+  } else { // dilution in spin space not implemented!
+    if (dilution_list[dilution].type[0] == D_FULL) {
+      t_end = T;
+    } else if (dilution_list[dilution].type[0] == D_INTER
+        || dilution_list[dilution].type[0] == D_BLOCK) {
+      t_end = dilution_list[dilution].size[0];
+    } else if (dilution_list[dilution].type[0] == D_NONE) {
+      t_end = 1;
+    }
+
+    if (dilution_list[dilution].type[1] == D_FULL) {
+      d_end = 4;
+    } else if (dilution_list[dilution].type[1] == D_NONE) {
+      d_end = 1;
+    }
+
+    if (dilution_list[dilution].type[2] == D_FULL) {
+      l_end = no_eigenvalues;
+    } else if (dilution_list[dilution].type[2] == D_INTER
+        || dilution_list[dilution].type[2] == D_BLOCK) {
+      l_end = dilution_list[dilution].size[2];
+    } else if (dilution_list[dilution].type[2] == D_NONE) {
+      l_end = 1;
+    }
+  }
+  pwidth = t_end * l_end * d_end;
+#if DEBUG
+  printf("\nparameters for perambulator: t %d, d %d, l %d\n", t_end, d_end,
+      l_end);
+#endif
+
+  spinor *randomvectors = NULL;
+  int count = 0, x = 0, thelp;
+  int tsource = 0, tsink = 0, dsource = 0, lsource = 0, xsink = 0;
+  spinor *inverted = NULL, *even = NULL, *odd = NULL, *tmp = NULL;
+  spinor *perambulator = NULL;
+  char invertedfile[200], perambulatorfile[200];
+  FILE *file = NULL;
+  int xblockmax = 32, xblock = 0;
+  int xhelp = 0, yhelp = 0;
+
+  // allocate the needed memory for spinors
+  tmp = (spinor*) calloc(no_eigenvalues * T * 4 * xblockmax * T + 1,
+      sizeof(spinor));
+  if (tmp == NULL ) {
+    fprintf(stderr,
+        "Could not allocate spinor perambulator in create_stochastic_perambulator!\nAborting...\n");
+    exit(-1);
+  }
+#if (defined SSE || defined SSE2 || defined SSE3)
+  perambulator = (spinor*) (((unsigned long int) (tmp) + ALIGN_BASE)
+      & ~ALIGN_BASE);
+#else
+  perambulator = tmp;
+#endif
+  tmp = (spinor*) calloc(VOLUMEPLUSRAND + 1, sizeof(spinor));
+  if (tmp == NULL ) {
+    free(perambulator);
+    fprintf(stderr,
+        "Could not allocate spinor randomvectors in create_stochastic_perambulator!\nAborting...\n");
+    exit(-1);
+  }
+#if (defined SSE || defined SSE2 || defined SSE3)
+  randomvectors = (spinor*) (((unsigned long int) (tmp) + ALIGN_BASE)
+      & ~ALIGN_BASE);
+#else
+  randomvectors = tmp;
+#endif
+  tmp = (spinor*) calloc(VOLUMEPLUSRAND + 1, sizeof(spinor));
+  if (tmp == NULL ) {
+    free(perambulator);
+    free(randomvectors);
+    fprintf(stderr,
+        "Could not allocate spinor inverted in create_stochastic_perambulator!\nAborting...\n");
+    exit(-1);
+  }
+#if (defined SSE || defined SSE2 || defined SSE3)
+  inverted = (spinor*) (((unsigned long int) (tmp) + ALIGN_BASE) & ~ALIGN_BASE);
+#else
+  inverted = tmp;
+#endif
+  tmp = (spinor*) calloc(VOLUMEPLUSRAND + 1, sizeof(spinor));
+  if (tmp == NULL ) {
+    free(perambulator);
+    free(randomvectors);
+    free(inverted);
+    fprintf(stderr,
+        "Could not allocate spinor even in create_stochastic_perambulator!\nAborting...\n");
+    exit(-1);
+  }
+#if (defined SSE || defined SSE2 || defined SSE3)
+  even = (spinor*) (((unsigned long int) (tmp) + ALIGN_BASE) & ~ALIGN_BASE);
+#else
+  even = tmp;
+#endif
+  tmp = (spinor*) calloc(VOLUMEPLUSRAND + 1, sizeof(spinor));
+  if (tmp == NULL ) {
+    free(perambulator);
+    free(randomvectors);
+    free(inverted);
+    free(even);
+    fprintf(stderr,
+        "Could not allocate spinor odd in create_stochastic_perambulator!\nAborting...\n");
+    exit(-1);
+  }
+#if (defined SSE || defined SSE2 || defined SSE3)
+  odd = (spinor*) (((unsigned long int) (tmp) + ALIGN_BASE) & ~ALIGN_BASE);
+#else
+  odd = tmp;
+#endif
+
+  for (xblock = xblockmax; xblock >= 8; xblock /= 2) {
+    ranlxd((double*) randomvectors, 24 * VOLUMEPLUSRAND); // spinor has 24 doubles
+    for (tsource = 0; tsource < t_end; tsource++) {
+      // iterate over the LapH space
+      for (lsource = 0; lsource < l_end; lsource++) {
+        // iterate over the dirac space
+        for (dsource = 0; dsource < d_end; dsource++) {
+          // read in inverted source
+          sprintf(invertedfile, "source%d.%04d.%02d.%02d.inverted", dsource,
+              conf, tsource, lsource);
+#if DEBUG
+          printf("reading file %s\n", invertedfile);
+#endif
+          read_spinor(even, odd, invertedfile, 0);
+          convert_eo_to_lexic(inverted, even, odd);
+
+          // multiply propagator with randomvectors
+          for (tsink = 0; tsink < T; tsink++) {
+            for (xsink = 0; xsink < xblock; xsink++) {
+              // helper variables
+              xhelp = tsource * d_end * l_end + lsource * d_end + dsource;
+              yhelp = tsink * xblock + xsink;
+
+//            for (x = xsink; x < SPACEVOLUME; x += xblock) { // interlace structure
+              for (x = xsink * xblock; x < (xsink + 1) * xblock; x++) { // block structure
+                spinor_times_spinor(perambulator[xhelp + pwidth * yhelp],
+                    randomvectors[tsink * SPACEVOLUME + x],
+                    inverted[tsink * SPACEVOLUME + x]);
+              }
+            }
+          }
+
+        } // dirac
+      } // LapH
+    } // time
+
+    // save to file
+    if (g_stochastical_run == 0) {
+      sprintf(perambulatorfile,
+          "stoch_perambulator.Tso%03d.Dso%01d.Vso%03d.Tsi%03d.Dsi%01d.Csi%01d.Xsi%03d.%04d",
+          t_end, d_end, l_end, T, 4, 3, xblock, conf);
+    } else {
+      sprintf(perambulatorfile,
+          "stoch_perambulator.dil%02d.%s.Tso%03d.Dso%01d.Vso%03d.Tsi%03d.Dsi%01d.Csi%01d.Xsi%03d.%04d",
+          dilution, (dilution_list[dilution].quark == D_UP) ? "u" : "d", t_end,
+          d_end, l_end, T, 4, 3, xblock, conf);
+    }
+#if DEBUG
+    printf("writing file %s\n", perambulatorfile);
+#endif
+    if ((file = fopen(perambulatorfile, "wb")) == NULL ) {
+      fprintf(stderr, "could not open propagator file %s.\nAborting...\n",
+          perambulatorfile);
+      exit(-1);
+    }
+    count = fwrite(perambulator, sizeof(_Complex double),
+        pwidth * T * 4 * no_eigenvalues, file);
+    if (count != (pwidth * T * 4 * no_eigenvalues)) {
+      fprintf(stderr, "could not write all data to file %s.\n",
+          perambulatorfile);
+    }
+    fflush(file);
+    fclose(file);
+  }
+
+  free(even);
+  free(odd);
+  free(inverted);
+  free(randomvectors);
+  free(perambulator);
+
   return;
 }

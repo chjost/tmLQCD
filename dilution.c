@@ -47,10 +47,10 @@
 #include "ranlxd.h"
 
 #define DEBUG 1
-#define EIGENSYSTEMPATH "./"
-#define SELFINVERSION 1
+#define EIGENSYSTEMPATH "../"
+#define SELFINVERSION 0
 int g_stochastical_run = 1;
-int g_gpu_flag = 0;
+int g_gpu_flag = 1;
 int no_dilution = 0;
 dilution dilution_list[max_no_dilution];
 
