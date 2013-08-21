@@ -1226,16 +1226,10 @@ void create_stochastic_perambulators(int const conf, int const dilution) {
     } // time
 
     // save to file
-    if (g_stochastical_run == 0) {
-      sprintf(perambulatorfile,
-          "stoch_perambulator.Tso%03d.Dso%01d.Vso%03d.Tsi%03d.Dsi%01d.Csi%01d.Xsi%03d.%04d",
-          t_end, d_end, l_end, T, 4, 3, xblock, conf);
-    } else {
-      sprintf(perambulatorfile,
-          "stoch_perambulator.dil%02d.%s.Tso%03d.Dso%01d.Vso%03d.Tsi%03d.Dsi%01d.Csi%01d.Xsi%03d.%04d",
-          dilution, (dilution_list[dilution].quark == D_UP) ? "u" : "d", t_end,
-          d_end, l_end, T, 4, 3, xblock, conf);
-    }
+    sprintf(perambulatorfile,
+        "stoch_perambulator.dil%02d.%s.Tso%03d.Dso%01d.Vso%03d.Tsi%03d.Dsi%01d.Csi%01d.Xsi%03d.%04d",
+        dilution, (dilution_list[dilution].quark == D_UP) ? "u" : "d", t_end,
+        d_end, l_end, T, 4, 3, xblock, conf);
 #if DEBUG
     printf("writing file %s\n", perambulatorfile);
 #endif
@@ -1244,9 +1238,28 @@ void create_stochastic_perambulators(int const conf, int const dilution) {
           perambulatorfile);
       exit(-1);
     }
-    count = fwrite(perambulator, sizeof(_Complex double),
-        pwidth * T * 4 * no_eigenvalues, file);
-    if (count != (pwidth * T * 4 * no_eigenvalues)) {
+    count = fwrite(perambulator, sizeof(spinor),
+        no_eigenvalues * T * 4 * xblock * T, file);
+    if (count != (no_eigenvalues * T * 4 * xblock * T)) {
+      fprintf(stderr, "could not write all data to file %s.\n",
+          perambulatorfile);
+    }
+    fflush(file);
+    fclose(file);
+
+    sprintf(perambulatorfile, "stoch_randomvector.dil%02d.%s.Xsi%03d.%04d",
+        dilution, (dilution_list[dilution].quark == D_UP) ? "u" : "d", xblock,
+        conf);
+#if DEBUG
+    printf("writing file %s\n", perambulatorfile);
+#endif
+    if ((file = fopen(perambulatorfile, "wb")) == NULL ) {
+      fprintf(stderr, "could not open propagator file %s.\nAborting...\n",
+          perambulatorfile);
+      exit(-1);
+    }
+    count = fwrite(randomvectors, sizeof(spinor), VOLUMEPLUSRAND, file);
+    if (count != (VOLUMEPLUSRAND)) {
       fprintf(stderr, "could not write all data to file %s.\n",
           perambulatorfile);
     }
