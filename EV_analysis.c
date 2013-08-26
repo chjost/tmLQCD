@@ -104,18 +104,33 @@ inline static void vectorcjg_times_spinor(_Complex double *result,
 
 inline static void spinor_times_spinor(spinor result, spinor const factor1,
     spinor const factor2) {
-  result.s0.c0 += factor1.s0.c0 * factor2.s0.c0;
-  result.s0.c1 += factor1.s0.c1 * factor2.s0.c1;
-  result.s0.c2 += factor1.s0.c2 * factor2.s0.c2;
-  result.s1.c0 += factor1.s1.c0 * factor2.s1.c0;
-  result.s1.c1 += factor1.s1.c1 * factor2.s1.c1;
-  result.s1.c2 += factor1.s1.c2 * factor2.s1.c2;
-  result.s2.c0 += factor1.s2.c0 * factor2.s2.c0;
-  result.s2.c1 += factor1.s2.c1 * factor2.s2.c1;
-  result.s2.c2 += factor1.s2.c2 * factor2.s2.c2;
-  result.s3.c0 += factor1.s3.c0 * factor2.s3.c0;
-  result.s3.c1 += factor1.s3.c1 * factor2.s3.c1;
-  result.s3.c2 += factor1.s3.c2 * factor2.s3.c2;
+  result.s0.c0 += conj(factor1.s0.c0) * factor2.s0.c0;
+  result.s0.c1 += conj(factor1.s0.c1) * factor2.s0.c1;
+  result.s0.c2 += conj(factor1.s0.c2) * factor2.s0.c2;
+  result.s1.c0 += conj(factor1.s1.c0) * factor2.s1.c0;
+  result.s1.c1 += conj(factor1.s1.c1) * factor2.s1.c1;
+  result.s1.c2 += conj(factor1.s1.c2) * factor2.s1.c2;
+  result.s2.c0 += conj(factor1.s2.c0) * factor2.s2.c0;
+  result.s2.c1 += conj(factor1.s2.c1) * factor2.s2.c1;
+  result.s2.c2 += conj(factor1.s2.c2) * factor2.s2.c2;
+  result.s3.c0 += conj(factor1.s3.c0) * factor2.s3.c0;
+  result.s3.c1 += conj(factor1.s3.c1) * factor2.s3.c1;
+  result.s3.c2 += conj(factor1.s3.c2) * factor2.s3.c2;
+}
+
+static void rnd_z2_vector(_Complex double *v, const int N) {
+  ranlxd((double*) v, 2 * N);
+  for (int i = 0; i < N; ++i) {
+    if (creal(v[i]) < 0.5 && cimag(v[i]) < 0.5)
+      v[i] = 1 / sqrt(2) + I * 1 / sqrt(2);
+    else if (creal(v[i]) >= 0.5 && cimag(v[i]) < 0.5)
+      v[i] = -1 / sqrt(2) + I * 1 / sqrt(2);
+    else if (creal(v[i]) < 0.5 && cimag(v[i]) >= 0.5)
+      v[i] = 1 / sqrt(2) - I * 1 / sqrt(2);
+    else
+      v[i] = -1 / sqrt(2) - I * 1 / sqrt(2);
+  }
+  return;
 }
 
 int generate_eigensystem(int const conf);
@@ -222,6 +237,12 @@ int main(int argc, char* argv[]) {
 //  add_dilution(D_INTER, D_FULL, D_INTER, 16, 0, 8, 1227, D_UP, D_STOCH);
 //  add_dilution(D_INTER, D_FULL, D_INTER, 16, 0, 8, 1337, D_UP, D_STOCH);
 
+// up quarks, stochastische sink
+//  add_dilution(D_FULL, D_FULL, D_INTER, 0, 0, 8, 4561, D_UP, D_STOCH);
+//  add_dilution(D_FULL, D_FULL, D_INTER, 0, 0, 8, 186512, D_UP, D_STOCH);
+//  add_dilution(D_INTER, D_FULL, D_INTER, 16, 0, 8, 1865, D_UP, D_STOCH);
+//  add_dilution(D_INTER, D_FULL, D_INTER, 16, 0, 8, 486541, D_UP, D_STOCH);
+
 // charm quarks
 //  add_dilution(D_FULL, D_FULL, D_INTER, 0, 0, 8, 2536, D_UP, D_STOCH);
 //  add_dilution(D_FULL, D_FULL, D_INTER, 0, 0, 8, 456354, D_UP, D_STOCH);
@@ -248,18 +269,18 @@ int main(int argc, char* argv[]) {
 
   // main loop
   for (conf = nstore; conf < nstore + Nmeas; conf += Nsave) {
-//    printf("2KappaMu = %e", g_mu);
-//    printf("\n# Generating eigensystem for conf %d\n", conf);
-//    fflush(stdout);
-//    generate_eigensystem(conf);
+    printf("2KappaMu = %e", g_mu);
+    printf("\n# Generating eigensystem for conf %d\n", conf);
+    fflush(stdout);
+    generate_eigensystem(conf);
 
     if (g_stochastical_run != 0) {
       for (j = 0; j < no_dilution; j++) {
         //generate the sources
-        printf("\n# generating sources (%d of %d)\n", j + 1, no_dilution);
-        fflush(stdout);
-        start_ranlux(1, dilution_list[j].seed ^ conf);
-        create_invert_sources(conf, j);
+//        printf("\n# generating sources (%d of %d)\n", j + 1, no_dilution);
+//        fflush(stdout);
+//        start_ranlux(1, dilution_list[j].seed ^ conf);
+//        create_invert_sources(conf, j);
 
 // construct the perambulators
 //        printf("\n# constructing perambulators (%d of %d)\n", j + 1,
@@ -268,10 +289,11 @@ int main(int argc, char* argv[]) {
 //        create_perambulators(conf, j);
 
 // construct stochastic perambulators
-        printf("\n# constructing stochastic perambulators (%d of %d)\n", j + 1,
-            no_dilution);
-        fflush(stdout);
-        create_stochastic_perambulators(conf, j);
+//        printf("\n# constructing stochastic perambulators (%d of %d)\n", j + 1,
+//            no_dilution);
+//        fflush(stdout);
+//        create_stochastic_perambulators(conf, j);
+
 // construct the propagators
 //        printf("\n# constructing propagators (%d of %d)\n", j + 1, no_dilution);
 //        fflush(stdout);
@@ -1120,7 +1142,7 @@ void create_stochastic_perambulators(int const conf, int const dilution) {
   int xhelp = 0, yhelp = 0;
 
   // allocate the needed memory for spinors
-  tmp = (spinor*) calloc(no_eigenvalues * T * 4 * xblockmax * T + 1,
+  tmp = (spinor*) calloc(l_end * t_end * d_end * xblockmax * T + 1,
       sizeof(spinor));
   if (tmp == NULL ) {
     fprintf(stderr,
@@ -1190,7 +1212,11 @@ void create_stochastic_perambulators(int const conf, int const dilution) {
 #endif
 
   for (xblock = xblockmax; xblock >= 8; xblock /= 2) {
-    ranlxd((double*) randomvectors, 24 * VOLUMEPLUSRAND); // spinor has 24 doubles
+    // TODO size of perambulator!
+    memset(perambulator, 0,
+        l_end * t_end * d_end * xblockmax * T * sizeof(spinor));
+    rnd_z2_vector((_Complex double*) randomvectors, 12 * VOLUMEPLUSRAND); // spinor has 12 complex entries
+
     for (tsource = 0; tsource < t_end; tsource++) {
       // iterate over the LapH space
       for (lsource = 0; lsource < l_end; lsource++) {
@@ -1204,16 +1230,17 @@ void create_stochastic_perambulators(int const conf, int const dilution) {
 #endif
           read_spinor(even, odd, invertedfile, 0);
           convert_eo_to_lexic(inverted, even, odd);
+          // helper variables
+          xhelp = tsource * d_end * l_end + lsource * d_end + dsource;
 
           // multiply propagator with randomvectors
           for (tsink = 0; tsink < T; tsink++) {
             for (xsink = 0; xsink < xblock; xsink++) {
-              // helper variables
-              xhelp = tsource * d_end * l_end + lsource * d_end + dsource;
               yhelp = tsink * xblock + xsink;
 
-//            for (x = xsink; x < SPACEVOLUME; x += xblock) { // interlace structure
-              for (x = xsink * xblock; x < (xsink + 1) * xblock; x++) { // block structure
+//              for (x = xsink; x < SPACEVOLUME; x += xblock) { // interlace structure
+              for (x = xsink * (LX * LY * LZ / xblock);
+                  x < (xsink + 1) * (LX * LY * LZ / xblock); x++) { // block structure
                 spinor_times_spinor(perambulator[xhelp + pwidth * yhelp],
                     randomvectors[tsink * SPACEVOLUME + x],
                     inverted[tsink * SPACEVOLUME + x]);
@@ -1239,8 +1266,8 @@ void create_stochastic_perambulators(int const conf, int const dilution) {
       exit(-1);
     }
     count = fwrite(perambulator, sizeof(spinor),
-        no_eigenvalues * T * 4 * xblock * T, file);
-    if (count != (no_eigenvalues * T * 4 * xblock * T)) {
+        l_end * t_end * d_end * xblock * T, file);
+    if (count != (l_end * t_end * d_end * xblock * T)) {
       fprintf(stderr, "could not write all data to file %s.\n",
           perambulatorfile);
     }
