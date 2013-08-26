@@ -238,10 +238,16 @@ int main(int argc, char* argv[]) {
 //  add_dilution(D_INTER, D_FULL, D_INTER, 16, 0, 8, 1337, D_UP, D_STOCH);
 
 // up quarks, stochastische sink
+// source
 //  add_dilution(D_FULL, D_FULL, D_INTER, 0, 0, 8, 4561, D_UP, D_STOCH);
 //  add_dilution(D_FULL, D_FULL, D_INTER, 0, 0, 8, 186512, D_UP, D_STOCH);
 //  add_dilution(D_INTER, D_FULL, D_INTER, 16, 0, 8, 1865, D_UP, D_STOCH);
 //  add_dilution(D_INTER, D_FULL, D_INTER, 16, 0, 8, 486541, D_UP, D_STOCH);
+// sink
+//  add_dilution(D_FULL, D_FULL, D_INTER, 0, 0, 8, 4715, D_UP, D_STOCH);
+//  add_dilution(D_FULL, D_FULL, D_INTER, 0, 0, 8, 883345, D_UP, D_STOCH);
+//  add_dilution(D_INTER, D_FULL, D_INTER, 16, 0, 8, 9152, D_UP, D_STOCH);
+//  add_dilution(D_INTER, D_FULL, D_INTER, 16, 0, 8, 743583, D_UP, D_STOCH);
 
 // charm quarks
 //  add_dilution(D_FULL, D_FULL, D_INTER, 0, 0, 8, 2536, D_UP, D_STOCH);
