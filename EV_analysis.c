@@ -249,12 +249,31 @@ int main(int argc, char* argv[]) {
 //  add_dilution(D_INTER, D_FULL, D_INTER, 16, 0, 8, 9152, D_UP, D_STOCH);
 //  add_dilution(D_INTER, D_FULL, D_INTER, 16, 0, 8, 743583, D_UP, D_STOCH);
 
-// charm quarks
+// down quarks, stochastische sink
+//source
+//  add_dilution(D_FULL, D_FULL, D_INTER, 0, 0, 8, 1584, D_UP, D_STOCH);
+//  add_dilution(D_FULL, D_FULL, D_INTER, 0, 0, 8, 684345, D_UP, D_STOCH);
+//  add_dilution(D_INTER, D_FULL, D_INTER, 16, 0, 8, 3724, D_UP, D_STOCH);
+//  add_dilution(D_INTER, D_FULL, D_INTER, 16, 0, 8, 842357, D_UP, D_STOCH);
+//  sink
+//  add_dilution(D_FULL, D_FULL, D_INTER, 0, 0, 8, 1857, D_UP, D_STOCH);
+//  add_dilution(D_FULL, D_FULL, D_INTER, 0, 0, 8, 284884, D_UP, D_STOCH);
+//  add_dilution(D_INTER, D_FULL, D_INTER, 16, 0, 8, 3589, D_UP, D_STOCH);
+//  add_dilution(D_INTER, D_FULL, D_INTER, 16, 0, 8, 278625, D_UP, D_STOCH);
+
+// strange quarks
 //  add_dilution(D_FULL, D_FULL, D_INTER, 0, 0, 8, 2536, D_UP, D_STOCH);
 //  add_dilution(D_FULL, D_FULL, D_INTER, 0, 0, 8, 456354, D_UP, D_STOCH);
 //  add_dilution(D_INTER, D_FULL, D_INTER, 16, 0, 8, 9762, D_UP, D_STOCH);
 //  add_dilution(D_INTER, D_FULL, D_INTER, 16, 0, 8, 812934, D_UP, D_STOCH);
 
+//  charm quarks
+//  add_dilution(D_FULL, D_FULL, D_INTER, 0, 0, 8, 1256, D_UP, D_STOCH);
+//  add_dilution(D_FULL, D_FULL, D_INTER, 0, 0, 8, 348786, D_UP, D_STOCH);
+//  add_dilution(D_INTER, D_FULL, D_INTER, 16, 0, 8, 497649, D_UP, D_STOCH);
+//    add_dilution(D_INTER, D_FULL, D_INTER, 16, 0, 8, 272574, D_UP, D_STOCH);
+
+// down quarks
 //  add_dilution(D_FULL, D_FULL, D_INTER, 0, 0, 8, 2134, D_DOWN, D_STOCH);
 //  add_dilution(D_FULL, D_FULL, D_INTER, 0, 0, 8, 595959, D_DOWN, D_STOCH);
 //  add_dilution(D_INTER, D_FULL, D_INTER, 16, 0, 8, 11227, D_DOWN, D_STOCH);
@@ -275,18 +294,18 @@ int main(int argc, char* argv[]) {
 
   // main loop
   for (conf = nstore; conf < nstore + Nmeas; conf += Nsave) {
-    printf("2KappaMu = %e", g_mu);
-    printf("\n# Generating eigensystem for conf %d\n", conf);
-    fflush(stdout);
-    generate_eigensystem(conf);
+//    printf("2KappaMu = %e", g_mu);
+//    printf("\n# Generating eigensystem for conf %d\n", conf);
+//    fflush(stdout);
+//    generate_eigensystem(conf);
 
     if (g_stochastical_run != 0) {
       for (j = 0; j < no_dilution; j++) {
         //generate the sources
-//        printf("\n# generating sources (%d of %d)\n", j + 1, no_dilution);
-//        fflush(stdout);
-//        start_ranlux(1, dilution_list[j].seed ^ conf);
-//        create_invert_sources(conf, j);
+        printf("\n# generating sources (%d of %d)\n", j + 1, no_dilution);
+        fflush(stdout);
+        start_ranlux(1, dilution_list[j].seed ^ conf);
+        create_invert_sources(conf, j);
 
 // construct the perambulators
 //        printf("\n# constructing perambulators (%d of %d)\n", j + 1,
