@@ -1237,7 +1237,7 @@ void create_stochastic_perambulators(int const conf, int const dilution) {
 #endif
 
   for (xblock = xblockmax; xblock >= 8; xblock /= 2) {
-    // TODO size of perambulator!
+    // block structure
     memset(perambulator, 0,
         l_end * t_end * d_end * xblockmax * T * sizeof(spinor));
     rnd_z2_vector((_Complex double*) randomvectors, 12 * VOLUMEPLUSRAND); // spinor has 12 complex entries
@@ -1263,7 +1263,6 @@ void create_stochastic_perambulators(int const conf, int const dilution) {
             for (xsink = 0; xsink < xblock; xsink++) {
               yhelp = tsink * xblock + xsink;
 
-//              for (x = xsink; x < SPACEVOLUME; x += xblock) { // interlace structure
               for (x = xsink * (LX * LY * LZ / xblock);
                   x < (xsink + 1) * (LX * LY * LZ / xblock); x++) { // block structure
                 spinor_times_spinor(perambulator[xhelp + pwidth * yhelp],
@@ -1279,7 +1278,7 @@ void create_stochastic_perambulators(int const conf, int const dilution) {
 
     // save to file
     sprintf(perambulatorfile,
-        "stoch_perambulator.dil%02d.%s.Tso%03d.Dso%01d.Vso%03d.Tsi%03d.Dsi%01d.Csi%01d.Xsi%03d.%04d",
+        "stoch_perambulator_block.dil%02d.%s.Tso%03d.Dso%01d.Vso%03d.Tsi%03d.Dsi%01d.Csi%01d.Xsi%03d.%04d",
         dilution, (dilution_list[dilution].quark == D_UP) ? "u" : "d", t_end,
         d_end, l_end, T, 4, 3, xblock, conf);
 #if DEBUG
@@ -1299,9 +1298,88 @@ void create_stochastic_perambulators(int const conf, int const dilution) {
     fflush(file);
     fclose(file);
 
-    sprintf(perambulatorfile, "stoch_randomvector.dil%02d.%s.Xsi%03d.%04d",
-        dilution, (dilution_list[dilution].quark == D_UP) ? "u" : "d", xblock,
-        conf);
+    sprintf(perambulatorfile,
+        "stoch_randomvector_block.dil%02d.%s.Xsi%03d.%04d", dilution,
+        (dilution_list[dilution].quark == D_UP) ? "u" : "d", xblock, conf);
+#if DEBUG
+    printf("writing file %s\n", perambulatorfile);
+#endif
+    if ((file = fopen(perambulatorfile, "wb")) == NULL ) {
+      fprintf(stderr, "could not open propagator file %s.\nAborting...\n",
+          perambulatorfile);
+      exit(-1);
+    }
+    count = fwrite(randomvectors, sizeof(spinor), VOLUMEPLUSRAND, file);
+    if (count != (VOLUMEPLUSRAND)) {
+      fprintf(stderr, "could not write all data to file %s.\n",
+          perambulatorfile);
+    }
+    fflush(file);
+    fclose(file);
+
+    // interlace structure
+    memset(perambulator, 0,
+        l_end * t_end * d_end * xblockmax * T * sizeof(spinor));
+    rnd_z2_vector((_Complex double*) randomvectors, 12 * VOLUMEPLUSRAND); // spinor has 12 complex entries
+
+    for (tsource = 0; tsource < t_end; tsource++) {
+      // iterate over the LapH space
+      for (lsource = 0; lsource < l_end; lsource++) {
+        // iterate over the dirac space
+        for (dsource = 0; dsource < d_end; dsource++) {
+          // read in inverted source
+          sprintf(invertedfile, "source%d.%04d.%02d.%02d.inverted", dsource,
+              conf, tsource, lsource);
+#if DEBUG
+          printf("reading file %s\n", invertedfile);
+#endif
+          read_spinor(even, odd, invertedfile, 0);
+          convert_eo_to_lexic(inverted, even, odd);
+          // helper variables
+          xhelp = tsource * d_end * l_end + lsource * d_end + dsource;
+
+          // multiply propagator with randomvectors
+          for (tsink = 0; tsink < T; tsink++) {
+            for (xsink = 0; xsink < xblock; xsink++) {
+              yhelp = tsink * xblock + xsink;
+
+              for (x = xsink; x < SPACEVOLUME; x += xblock) { // interlace structure
+                spinor_times_spinor(perambulator[xhelp + pwidth * yhelp],
+                    randomvectors[tsink * SPACEVOLUME + x],
+                    inverted[tsink * SPACEVOLUME + x]);
+              }
+            }
+          }
+
+        } // dirac
+      } // LapH
+    } // time
+
+    // save to file
+    sprintf(perambulatorfile,
+        "stoch_perambulator_inter.dil%02d.%s.Tso%03d.Dso%01d.Vso%03d.Tsi%03d.Dsi%01d.Csi%01d.Xsi%03d.%04d",
+        dilution, (dilution_list[dilution].quark == D_UP) ? "u" : "d", t_end,
+        d_end, l_end, T, 4, 3, xblock, conf);
+#if DEBUG
+    printf("writing file %s\n", perambulatorfile);
+#endif
+    if ((file = fopen(perambulatorfile, "wb")) == NULL ) {
+      fprintf(stderr, "could not open propagator file %s.\nAborting...\n",
+          perambulatorfile);
+      exit(-1);
+    }
+    count = fwrite(perambulator, sizeof(spinor),
+        l_end * t_end * d_end * xblock * T, file);
+    if (count != (l_end * t_end * d_end * xblock * T)) {
+      fprintf(stderr, "could not write all data to file %s.\n",
+          perambulatorfile);
+    }
+    fflush(file);
+    fclose(file);
+
+    sprintf(perambulatorfile,
+        "stoch_randomvector_inter.dil%02d.%s.Xsi%03d.%04d", dilution,
+        (dilution_list[dilution].quark == D_UP) ? "u" : "d", xblock, conf);
 #if DEBUG
     printf("writing file %s\n", perambulatorfile);
 #endif
