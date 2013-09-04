@@ -35,6 +35,8 @@
 
 #define D_UP 0
 #define D_DOWN 1
+#define D_STRANGE 2
+#define D_CHARM 3
 
 #define D_STOCH 0
 #define D_LOCAL 1
@@ -42,6 +44,7 @@
 typedef struct {
   // type of the dilution: none, full, block or interlace
   int type[3];
+  char typestring[5];
 
   // size in time, spin and eigenvector space
   int size[3];
@@ -51,6 +54,7 @@ typedef struct {
 
   // quark type
   int quark;
+  char quarktype[5];
 
   // smearing
   int smearing;

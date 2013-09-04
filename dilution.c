@@ -47,10 +47,10 @@
 #include "ranlxd.h"
 
 #define DEBUG 1
-#define EIGENSYSTEMPATH "../"
-#define SELFINVERSION 0
+#define EIGENSYSTEMPATH "./"
+#define SELFINVERSION 1
 int g_stochastical_run = 1;
-int g_gpu_flag = 1;
+int g_gpu_flag = 0;
 int no_dilution = 0;
 dilution dilution_list[max_no_dilution];
 
@@ -228,8 +228,9 @@ void create_source_ti_df_li(const int nr_conf, const int nr_dilution,
     exit(-1);
   }
   rnd_z2_vector(rnd_vector, rnd_vec_size);
-  sprintf(filename, "randomvector.%03d.%s.Ti.%04d", nr_dilution,
-      (dilution_list[nr_dilution].quark == D_UP) ? "u" : "d", nr_conf);
+  sprintf(filename, "randomvector.%03d.%s.T%s.%04d", nr_dilution,
+      dilution_list[nr_dilution].quarktype,
+      dilution_list[nr_dilution].typestring, nr_conf);
 #if DEBUG
   printf("\nwriting random vector to file %s\n", filename);
 #endif
@@ -464,8 +465,9 @@ void create_source_ti_df_lb(const int nr_conf, const int nr_dilution,
     exit(-1);
   }
   rnd_z2_vector(rnd_vector, rnd_vec_size);
-  sprintf(filename, "randomvector.%03d.%s.Ti.%04d", nr_dilution,
-      (dilution_list[nr_dilution].quark == D_UP) ? "u" : "d", nr_conf);
+  sprintf(filename, "randomvector.%03d.%s.T%s.%04d", nr_dilution,
+      dilution_list[nr_dilution].quarktype,
+      dilution_list[nr_dilution].typestring, nr_conf);
 #if DEBUG
   printf("\nwriting random vector to file %s\n", filename);
 #endif
@@ -698,8 +700,9 @@ void create_source_tb_df_li(const int nr_conf, const int nr_dilution,
     exit(-1);
   }
   rnd_z2_vector(rnd_vector, rnd_vec_size);
-  sprintf(filename, "randomvector.%03d.%s.Tb.%04d", nr_dilution,
-      (dilution_list[nr_dilution].quark == D_UP) ? "u" : "d", nr_conf);
+  sprintf(filename, "randomvector.%03d.%s.T%s.%04d", nr_dilution,
+      dilution_list[nr_dilution].quarktype,
+      dilution_list[nr_dilution].typestring, nr_conf);
 #if DEBUG
   printf("\nwriting random vector to file %s\n", filename);
 #endif
@@ -931,8 +934,9 @@ void create_source_tb_df_lb(const int nr_conf, const int nr_dilution,
     exit(-1);
   }
   rnd_z2_vector(rnd_vector, rnd_vec_size);
-  sprintf(filename, "randomvector.%03d.%s.Tb.%04d", nr_dilution,
-      (dilution_list[nr_dilution].quark == D_UP) ? "u" : "d", nr_conf);
+  sprintf(filename, "randomvector.%03d.%s.T%s.%04d", nr_dilution,
+      dilution_list[nr_dilution].quarktype,
+      dilution_list[nr_dilution].typestring, nr_conf);
 #if DEBUG
   printf("\nwriting random vector to file %s\n", filename);
 #endif
@@ -1160,8 +1164,9 @@ void create_source_ti_dn_li(const int nr_conf, const int nr_dilution,
     exit(-1);
   }
   rnd_z2_vector(rnd_vector, rnd_vec_size);
-  sprintf(filename, "randomvector.%03d.%s.Ti.%04d", nr_dilution,
-      (dilution_list[nr_dilution].quark == D_UP) ? "u" : "d", nr_conf);
+  sprintf(filename, "randomvector.%03d.%s.T%s.%04d", nr_dilution,
+      dilution_list[nr_dilution].quarktype,
+      dilution_list[nr_dilution].typestring, nr_conf);
 #if DEBUG
   printf("\nwriting random vector to file %s\n", filename);
 #endif
@@ -1306,8 +1311,9 @@ void create_source_ti_dn_lb(const int nr_conf, const int nr_dilution,
     exit(-1);
   }
   rnd_z2_vector(rnd_vector, rnd_vec_size);
-  sprintf(filename, "randomvector.%03d.%s.Ti.%04d", nr_dilution,
-      (dilution_list[nr_dilution].quark == D_UP) ? "u" : "d", nr_conf);
+  sprintf(filename, "randomvector.%03d.%s.T%s.%04d", nr_dilution,
+      dilution_list[nr_dilution].quarktype,
+      dilution_list[nr_dilution].typestring, nr_conf);
 #if DEBUG
   printf("\nwriting random vector to file %s\n", filename);
 #endif
@@ -1451,8 +1457,9 @@ void create_source_tb_dn_li(const int nr_conf, const int nr_dilution,
     exit(-1);
   }
   rnd_z2_vector(rnd_vector, rnd_vec_size);
-  sprintf(filename, "randomvector.%03d.%s.Tb.%04d", nr_dilution,
-      (dilution_list[nr_dilution].quark == D_UP) ? "u" : "d", nr_conf);
+  sprintf(filename, "randomvector.%03d.%s.T%s.%04d", nr_dilution,
+      dilution_list[nr_dilution].quarktype,
+      dilution_list[nr_dilution].typestring, nr_conf);
 #if DEBUG
   printf("\nwriting random vector to file %s\n", filename);
 #endif
@@ -1596,8 +1603,9 @@ void create_source_tb_dn_lb(const int nr_conf, const int nr_dilution,
     exit(-1);
   }
   rnd_z2_vector(rnd_vector, rnd_vec_size);
-  sprintf(filename, "randomvector.%03d.%s.Tb.%04d", nr_dilution,
-      (dilution_list[nr_dilution].quark == D_UP) ? "u" : "d", nr_conf);
+  sprintf(filename, "randomvector.%03d.%s.T%s.%04d", nr_dilution,
+      dilution_list[nr_dilution].quarktype,
+      dilution_list[nr_dilution].typestring, nr_conf);
 #if DEBUG
   printf("\nwriting random vector to file %s\n", filename);
 #endif
@@ -1744,10 +1752,13 @@ void add_dilution(const int d_type_t, const int d_type_d, const int d_type_l,
       }
       dptr->size[0] = d_t;
     }
+    sprintf(dptr->typestring, "%s", (dptr->type[0] == D_INTER) ? "i" : "b");
   } else if (dptr->type[0] == D_FULL) {
     dptr->size[0] = T;
+    sprintf(dptr->typestring, "f");
   } else if (dptr->type[0] == D_NONE) {
     dptr->size[0] = 1;
+    sprintf(dptr->typestring, "n");
   } else {
     fprintf(stderr, "Dilution scheme for time not recognized!\nAborting...\n");
     exit(-2);
@@ -1790,11 +1801,17 @@ void add_dilution(const int d_type_t, const int d_type_d, const int d_type_l,
   }
 
 // quark type
-  if (quark_type != D_UP && quark_type != D_DOWN) {
+  if (quark_type == D_UP) {
+    sprintf(dptr->quarktype, "u");
+  } else if (quark_type == D_DOWN) {
+    sprintf(dptr->quarktype, "d");
+  } else if (quark_type == D_STRANGE) {
+    sprintf(dptr->quarktype, "s");
+  } else if (quark_type == D_CHARM) {
+    sprintf(dptr->quarktype, "c");
+  } else {
     fprintf(stderr, "Quark type not recognized!\nAborting...\n");
     exit(-2);
-  } else {
-    dptr->quark = quark_type;
   }
 
 // sink

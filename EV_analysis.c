@@ -152,8 +152,8 @@ int main(int argc, char* argv[]) {
   while ((c = getopt(argc, argv, "h?vVf:")) != -1) {
     switch (c) {
     case 'f':
-      input_filename = calloc(200, sizeof(char));
-      strncpy(input_filename, optarg, 199);
+      input_filename = calloc(100, sizeof(char));
+      strncpy(input_filename, optarg, 99);
       break;
     case 'v':
       verbose = 1;
@@ -171,7 +171,8 @@ int main(int argc, char* argv[]) {
   }
 
   if (input_filename == NULL ) {
-    input_filename = "EV_analysis.input";
+    input_filename = calloc(100, sizeof(char));
+    strncpy(input_filename, "EV_analysis.input", 99);
   }
 
   /* Read the input file */
@@ -262,16 +263,16 @@ int main(int argc, char* argv[]) {
 //  add_dilution(D_INTER, D_FULL, D_INTER, 16, 0, 8, 278625, D_UP, D_STOCH);
 
 // strange quarks
-//  add_dilution(D_FULL, D_FULL, D_INTER, 0, 0, 8, 2536, D_UP, D_STOCH);
-//  add_dilution(D_FULL, D_FULL, D_INTER, 0, 0, 8, 456354, D_UP, D_STOCH);
-//  add_dilution(D_INTER, D_FULL, D_INTER, 16, 0, 8, 9762, D_UP, D_STOCH);
-//  add_dilution(D_INTER, D_FULL, D_INTER, 16, 0, 8, 812934, D_UP, D_STOCH);
+//  add_dilution(D_FULL, D_FULL, D_INTER, 0, 0, 8, 2536, D_STRANGE, D_STOCH);
+//  add_dilution(D_FULL, D_FULL, D_INTER, 0, 0, 8, 456354, D_STRANGE, D_STOCH);
+//  add_dilution(D_INTER, D_FULL, D_INTER, 16, 0, 8, 9762, D_STRANGE, D_STOCH);
+//  add_dilution(D_INTER, D_FULL, D_INTER, 16, 0, 8, 812934, D_STRANGE, D_STOCH);
 
 //  charm quarks
-//  add_dilution(D_FULL, D_FULL, D_INTER, 0, 0, 8, 1256, D_UP, D_STOCH);
-//  add_dilution(D_FULL, D_FULL, D_INTER, 0, 0, 8, 348786, D_UP, D_STOCH);
-//  add_dilution(D_INTER, D_FULL, D_INTER, 16, 0, 8, 497649, D_UP, D_STOCH);
-//    add_dilution(D_INTER, D_FULL, D_INTER, 16, 0, 8, 272574, D_UP, D_STOCH);
+//  add_dilution(D_FULL, D_FULL, D_INTER, 0, 0, 8, 1256, D_CHARM, D_STOCH);
+//  add_dilution(D_FULL, D_FULL, D_INTER, 0, 0, 8, 348786, D_CHARM, D_STOCH);
+//  add_dilution(D_INTER, D_FULL, D_INTER, 16, 0, 8, 497649, D_CHARM, D_STOCH);
+//  add_dilution(D_INTER, D_FULL, D_INTER, 16, 0, 8, 272574, D_CHARM, D_STOCH);
 
 // down quarks
 //  add_dilution(D_FULL, D_FULL, D_INTER, 0, 0, 8, 2134, D_DOWN, D_STOCH);
@@ -294,10 +295,10 @@ int main(int argc, char* argv[]) {
 
   // main loop
   for (conf = nstore; conf < nstore + Nmeas; conf += Nsave) {
-//    printf("2KappaMu = %e", g_mu);
-//    printf("\n# Generating eigensystem for conf %d\n", conf);
-//    fflush(stdout);
-//    generate_eigensystem(conf);
+    printf("2KappaMu = %e", g_mu);
+    printf("\n# Generating eigensystem for conf %d\n", conf);
+    fflush(stdout);
+    generate_eigensystem(conf);
 
     if (g_stochastical_run != 0) {
       for (j = 0; j < no_dilution; j++) {
@@ -314,10 +315,10 @@ int main(int argc, char* argv[]) {
 //        create_perambulators(conf, j);
 
 // construct stochastic perambulators
-//        printf("\n# constructing stochastic perambulators (%d of %d)\n", j + 1,
-//            no_dilution);
-//        fflush(stdout);
-//        create_stochastic_perambulators(conf, j);
+        printf("\n# constructing stochastic perambulators (%d of %d)\n", j + 1,
+            no_dilution);
+        fflush(stdout);
+        create_stochastic_perambulators(conf, j);
 
 // construct the propagators
 //        printf("\n# constructing propagators (%d of %d)\n", j + 1, no_dilution);
@@ -1079,8 +1080,8 @@ void create_perambulators(int const conf, int const dilution) {
     } else {
       sprintf(perambulatorfile,
           "perambulator.dil%02d.%s.Tso%03d.Dso%01d.Vso%03d.Tsi%03d.Dsi%01d.Vsi%03d.%04d",
-          dilution, (dilution_list[dilution].quark == D_UP) ? "u" : "d", t_end,
-          d_end, l_end, T, 4, no_eigenvalues, conf);
+          dilution, dilution_list[dilution].quarktype, t_end, d_end, l_end, T,
+          4, no_eigenvalues, conf);
     }
 #if DEBUG
 #ifdef OMP
@@ -1279,8 +1280,8 @@ void create_stochastic_perambulators(int const conf, int const dilution) {
     // save to file
     sprintf(perambulatorfile,
         "stoch_perambulator_block.dil%02d.%s.Tso%03d.Dso%01d.Vso%03d.Tsi%03d.Dsi%01d.Csi%01d.Xsi%03d.%04d",
-        dilution, (dilution_list[dilution].quark == D_UP) ? "u" : "d", t_end,
-        d_end, l_end, T, 4, 3, xblock, conf);
+        dilution, dilution_list[dilution].quarktype, t_end, d_end, l_end, T, 4,
+        3, xblock, conf);
 #if DEBUG
     printf("writing file %s\n", perambulatorfile);
 #endif
@@ -1300,7 +1301,7 @@ void create_stochastic_perambulators(int const conf, int const dilution) {
 
     sprintf(perambulatorfile,
         "stoch_randomvector_block.dil%02d.%s.Xsi%03d.%04d", dilution,
-        (dilution_list[dilution].quark == D_UP) ? "u" : "d", xblock, conf);
+        dilution_list[dilution].quarktype, xblock, conf);
 #if DEBUG
     printf("writing file %s\n", perambulatorfile);
 #endif
@@ -1358,8 +1359,8 @@ void create_stochastic_perambulators(int const conf, int const dilution) {
     // save to file
     sprintf(perambulatorfile,
         "stoch_perambulator_inter.dil%02d.%s.Tso%03d.Dso%01d.Vso%03d.Tsi%03d.Dsi%01d.Csi%01d.Xsi%03d.%04d",
-        dilution, (dilution_list[dilution].quark == D_UP) ? "u" : "d", t_end,
-        d_end, l_end, T, 4, 3, xblock, conf);
+        dilution, dilution_list[dilution].quarktype, t_end, d_end, l_end, T, 4,
+        3, xblock, conf);
 #if DEBUG
     printf("writing file %s\n", perambulatorfile);
 #endif
@@ -1379,7 +1380,7 @@ void create_stochastic_perambulators(int const conf, int const dilution) {
 
     sprintf(perambulatorfile,
         "stoch_randomvector_inter.dil%02d.%s.Xsi%03d.%04d", dilution,
-        (dilution_list[dilution].quark == D_UP) ? "u" : "d", xblock, conf);
+        dilution_list[dilution].quarktype, xblock, conf);
 #if DEBUG
     printf("writing file %s\n", perambulatorfile);
 #endif
