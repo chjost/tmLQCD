@@ -58,13 +58,13 @@
 #include "buffers/utils.h"
 
 #define DEBUG 1
-#define SMEARING 1
+#define SMEARING 0
 #define SMEAR_ITER 2
 #define SMEAR_COEFF1 0.76f // should be smaller than 1
 #define SMEAR_COEFF2 0.95f // should be smaller than 1
 #define INVERTER "./invert"
 #define EIGENSYSTEMPATH "../"
-#define REMOVESOURCES 1 // remove all output except for the perambulators
+#define REMOVESOURCES 0 // remove all output except for the perambulators
 #define _vector_one(r) \
   (r).c0 = 1. + 0.*I;\
   (r).c1 = 1. + 0.*I;\
@@ -175,6 +175,11 @@ int main(int argc, char* argv[]) {
     strncpy(input_filename, "EV_analysis.input", 99);
   }
 
+  if (access(input_filename, F_OK) == -1) {
+    fprintf(stderr,
+        "No input file specified and fallback file EV_analysis.input does not exist!\nAborting...\n");
+  }
+
   /* Read the input file */
   read_input(input_filename);
   tmlqcd_mpi_init(argc, argv);
@@ -237,6 +242,8 @@ int main(int argc, char* argv[]) {
 //  add_dilution(D_FULL, D_FULL, D_INTER, 0, 0, 8, 989898, D_UP, D_STOCH);
 //  add_dilution(D_INTER, D_FULL, D_INTER, 16, 0, 8, 1227, D_UP, D_STOCH);
 //  add_dilution(D_INTER, D_FULL, D_INTER, 16, 0, 8, 1337, D_UP, D_STOCH);
+//  add_dilution(D_INTER, D_FULL, D_INTER, 16, 0, 4, 38432, D_UP, D_STOCH);
+//  add_dilution(D_INTER, D_FULL, D_INTER, 16, 0, 4, 834234, D_UP, D_STOCH);
 
 // up quarks, stochastische sink
 // source
@@ -298,7 +305,7 @@ int main(int argc, char* argv[]) {
     printf("2KappaMu = %e", g_mu);
     printf("\n# Generating eigensystem for conf %d\n", conf);
     fflush(stdout);
-    generate_eigensystem(conf);
+//    generate_eigensystem(conf);
 
     if (g_stochastical_run != 0) {
       for (j = 0; j < no_dilution; j++) {
@@ -315,10 +322,10 @@ int main(int argc, char* argv[]) {
 //        create_perambulators(conf, j);
 
 // construct stochastic perambulators
-        printf("\n# constructing stochastic perambulators (%d of %d)\n", j + 1,
-            no_dilution);
-        fflush(stdout);
-        create_stochastic_perambulators(conf, j);
+//        printf("\n# constructing stochastic perambulators (%d of %d)\n", j + 1,
+//            no_dilution);
+//        fflush(stdout);
+//        create_stochastic_perambulators(conf, j);
 
 // construct the propagators
 //        printf("\n# constructing propagators (%d of %d)\n", j + 1, no_dilution);
@@ -426,7 +433,7 @@ int generate_eigensystem(int const conf) {
   copy_gauge_field(&(_AS_GAUGE_FIELD_T(g_gauge_field) ), mysmearing->result);
 #if DEBUG
   if (mysmearing->smearing_performed)
-    printf("smearing performed\n");
+  printf("smearing performed\n");
   fflush(stdout);
 #endif
 #endif
