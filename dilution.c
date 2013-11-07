@@ -46,13 +46,33 @@
 #include "linalg/convert_eo_to_lexic.h"
 #include "ranlxd.h"
 
+// only needed for read_binary_eigenvector
+#include <stdio.h>
+
+#define BINARYINPUT 0
+// end for read_binary_eigenvector
+
 #define DEBUG 1
 #define EIGENSYSTEMPATH "../"
 #define SELFINVERSION 0
+
 int g_stochastical_run = 1;
 int g_gpu_flag = 1;
 int no_dilution = 0;
 dilution dilution_list[max_no_dilution];
+
+int read_binary_eigenvector(su3_vector * const s, char * filename, int time) {
+  FILE *infile = fopen(filename, "rb");
+  if (infile == NULL ) {
+    fprintf(stderr, "Unable to find file %s.\nReturning...\n", filename);
+    return -1;
+  }
+
+  fseek(infile, LX * LY * LZ * time, SEEK_SET);
+  fread((double*) s, sizeof(double), LX * LY * LZ * 6, infile);
+
+  return 0;
+}
 
 static void rnd_z2_vector(_Complex double *v, const int N) {
   ranlxd((double*) v, 2 * N);
@@ -360,7 +380,11 @@ void create_source_ti_df_li(const int nr_conf, const int nr_dilution,
 #if DEBUG
           printf("reading file %s\n", filename);
 #endif
+#if BINARYINPUT
+          read_binary_eigenvector(eigenvector, filename, t);
+#else
           read_su3_vector(eigenvector, filename, 0, t, 1);
+#endif
           index = t * no_eigenvalues * 4 + v * 4;
           for (point = 0; point < block; point++) {
             _vector_add_mul( dirac0[block*t + point].s0, rnd_vector[index+0],
@@ -595,7 +619,11 @@ void create_source_ti_df_lb(const int nr_conf, const int nr_dilution,
 #if DEBUG
           printf("reading file %s\n", filename);
 #endif
+#if BINARYINPUT
+          read_binary_eigenvector(eigenvector, filename, t);
+#else
           read_su3_vector(eigenvector, filename, 0, t, 1);
+#endif
           index = t * no_eigenvalues * 4 + v * 4;
           for (point = 0; point < block; point++) {
             _vector_add_mul( dirac0[block*t + point].s0, rnd_vector[index+0],
@@ -720,7 +748,7 @@ void create_source_tb_df_li(const int nr_conf, const int nr_dilution,
     exit(-1);
   }
   fclose(file);
-  //  allocate spinors and eigenvectors
+//  allocate spinors and eigenvectors
   eigenvector = (su3_vector*) calloc(block, sizeof(su3_vector));
   if (eigenvector == NULL ) {
     free(rnd_vector);
@@ -830,7 +858,11 @@ void create_source_tb_df_li(const int nr_conf, const int nr_dilution,
 #if DEBUG
           printf("reading file %s\n", filename);
 #endif
+#if BINARYINPUT
+          read_binary_eigenvector(eigenvector, filename, t);
+#else
           read_su3_vector(eigenvector, filename, 0, t, 1);
+#endif
           index = t * no_eigenvalues * 4 + vec * 4;
           for (point = 0; point < block; point++) {
             _vector_add_mul( dirac0[block*t + point].s0, rnd_vector[index+0],
@@ -954,7 +986,7 @@ void create_source_tb_df_lb(const int nr_conf, const int nr_dilution,
     exit(-1);
   }
   fclose(file);
-  //  allocate spinors and eigenvectors
+//  allocate spinors and eigenvectors
   eigenvector = (su3_vector*) calloc(block, sizeof(su3_vector));
   if (eigenvector == NULL ) {
     free(rnd_vector);
@@ -1064,7 +1096,11 @@ void create_source_tb_df_lb(const int nr_conf, const int nr_dilution,
 #if DEBUG
           printf("reading file %s\n", filename);
 #endif
+#if BINARYINPUT
+          read_binary_eigenvector(eigenvector, filename, t);
+#else
           read_su3_vector(eigenvector, filename, 0, t, 1);
+#endif
           index = t * no_eigenvalues * 4 + vec * 4;
           for (point = 0; point < block; point++) {
             _vector_add_mul( dirac0[block*t + point].s0, rnd_vector[index+0],
@@ -1244,7 +1280,11 @@ void create_source_ti_dn_li(const int nr_conf, const int nr_dilution,
 #if DEBUG
           printf("reading file %s\n", filename);
 #endif
+#if BINARYINPUT
+          read_binary_eigenvector(eigenvector, filename, t);
+#else
           read_su3_vector(eigenvector, filename, 0, t, 1);
+#endif
           index = t * no_eigenvalues * 4 + v * 4;
           for (point = 0; point < block; point++) {
             _vector_add_mul( dirac0[block*t + point].s0, rnd_vector[index+0],
@@ -1390,7 +1430,11 @@ void create_source_ti_dn_lb(const int nr_conf, const int nr_dilution,
 #if DEBUG
           printf("reading file %s\n", filename);
 #endif
+#if BINARYINPUT
+          read_binary_eigenvector(eigenvector, filename, t);
+#else
           read_su3_vector(eigenvector, filename, 0, t, 1);
+#endif
           index = t * no_eigenvalues * 4 + v * 4;
           for (point = 0; point < block; point++) {
             _vector_add_mul( dirac0[block*t + point].s0, rnd_vector[index+0],
@@ -1477,7 +1521,7 @@ void create_source_tb_dn_li(const int nr_conf, const int nr_dilution,
     exit(-1);
   }
   fclose(file);
-  //  allocate spinors and eigenvectors
+//  allocate spinors and eigenvectors
   eigenvector = (su3_vector*) calloc(block, sizeof(su3_vector));
   if (eigenvector == NULL ) {
     free(rnd_vector);
@@ -1536,7 +1580,11 @@ void create_source_tb_dn_li(const int nr_conf, const int nr_dilution,
 #if DEBUG
           printf("reading file %s\n", filename);
 #endif
+#if BINARYINPUT
+          read_binary_eigenvector(eigenvector, filename, t);
+#else
           read_su3_vector(eigenvector, filename, 0, t, 1);
+#endif
           index = t * no_eigenvalues * 4 + vec * 4;
           for (point = 0; point < block; point++) {
             _vector_add_mul( dirac0[block*t + point].s0, rnd_vector[index+0],
@@ -1623,7 +1671,7 @@ void create_source_tb_dn_lb(const int nr_conf, const int nr_dilution,
     exit(-1);
   }
   fclose(file);
-  //  allocate spinors and eigenvectors
+//  allocate spinors and eigenvectors
   eigenvector = (su3_vector*) calloc(block, sizeof(su3_vector));
   if (eigenvector == NULL ) {
     free(rnd_vector);
@@ -1682,7 +1730,11 @@ void create_source_tb_dn_lb(const int nr_conf, const int nr_dilution,
 #if DEBUG
           printf("reading file %s\n", filename);
 #endif
+#if BINARYINPUT
+          read_binary_eigenvector(eigenvector, filename, t);
+#else
           read_su3_vector(eigenvector, filename, 0, t, 1);
+#endif
           index = t * no_eigenvalues * 4 + vec * 4;
           for (point = 0; point < block; point++) {
             _vector_add_mul( dirac0[block*t + point].s0, rnd_vector[index+0],
