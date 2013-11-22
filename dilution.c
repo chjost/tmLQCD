@@ -61,7 +61,8 @@ int g_gpu_flag = 1;
 int no_dilution = 0;
 dilution dilution_list[max_no_dilution];
 
-int read_binary_eigenvector(su3_vector * const s, char * filename, int time) {
+static int read_binary_eigenvector(su3_vector * const s, char * filename,
+    int time) {
   FILE *infile = fopen(filename, "rb");
   if (infile == NULL ) {
     fprintf(stderr, "Unable to find file %s.\nReturning...\n", filename);
@@ -375,8 +376,12 @@ void create_source_ti_df_li(const int nr_conf, const int nr_dilution,
           dilution_list[nr_dilution].size[2]) {
         for (t = tslice; t < T; t += dilution_list[nr_dilution].size[0]) {
           // read in eigenvector and distribute it to the sources
+#if BINARYINPUT
+          sprintf(filename, "%seigenvectors.%04d.%03d", EIGENSYSTEMPATH, nr_conf, t);
+#else
           sprintf(filename, "%seigenvector.%03d.%03d.%04d", EIGENSYSTEMPATH, v,
               t, nr_conf);
+#endif
 #if DEBUG
           printf("reading file %s\n", filename);
 #endif
@@ -615,7 +620,12 @@ void create_source_ti_df_lb(const int nr_conf, const int nr_dilution,
       for (v = vec * vs; v < (vec + 1) * vs; v++) {
         for (t = tslice; t < T; t += dilution_list[nr_dilution].size[0]) {
           // read in eigenvector and distribute it to the sources
-          sprintf(filename, "./eigenvector.%03d.%03d.%04d", v, t, nr_conf);
+#if BINARYINPUT
+          sprintf(filename, "%seigenvectors.%04d.%03d", EIGENSYSTEMPATH, nr_conf, t);
+#else
+          sprintf(filename, "%seigenvector.%03d.%03d.%04d", EIGENSYSTEMPATH, v,
+              t, nr_conf);
+#endif
 #if DEBUG
           printf("reading file %s\n", filename);
 #endif
@@ -855,6 +865,12 @@ void create_source_tb_df_li(const int nr_conf, const int nr_dilution,
         for (v = vec; v < no_eigenvalues; v += vs) {
           // read in eigenvector and distribute it to the sources
           sprintf(filename, "./eigenvector.%03d.%03d.%04d", vec, t, nr_conf);
+#if BINARYINPUT
+          sprintf(filename, "%seigenvectors.%04d.%03d", EIGENSYSTEMPATH, nr_conf, t);
+#else
+          sprintf(filename, "%seigenvector.%03d.%03d.%04d", EIGENSYSTEMPATH, v,
+              t, nr_conf);
+#endif
 #if DEBUG
           printf("reading file %s\n", filename);
 #endif
@@ -1093,6 +1109,12 @@ void create_source_tb_df_lb(const int nr_conf, const int nr_dilution,
         for (v = vec * vs; v < (vec + 1) * vs; v++) {
           // read in eigenvector and distribute it to the sources
           sprintf(filename, "./eigenvector.%03d.%03d.%04d", vec, t, nr_conf);
+#if BINARYINPUT
+          sprintf(filename, "%seigenvectors.%04d.%03d", EIGENSYSTEMPATH, nr_conf, t);
+#else
+          sprintf(filename, "%seigenvector.%03d.%03d.%04d", EIGENSYSTEMPATH, v,
+              t, nr_conf);
+#endif
 #if DEBUG
           printf("reading file %s\n", filename);
 #endif
@@ -1277,6 +1299,12 @@ void create_source_ti_dn_li(const int nr_conf, const int nr_dilution,
         for (t = tslice; t < T; t += dilution_list[nr_dilution].size[0]) {
           // read in eigenvector and distribute it to the sources
           sprintf(filename, "./eigenvector.%03d.%03d.%04d", v, t, nr_conf);
+#if BINARYINPUT
+          sprintf(filename, "%seigenvectors.%04d.%03d", EIGENSYSTEMPATH, nr_conf, t);
+#else
+          sprintf(filename, "%seigenvector.%03d.%03d.%04d", EIGENSYSTEMPATH, v,
+              t, nr_conf);
+#endif
 #if DEBUG
           printf("reading file %s\n", filename);
 #endif
@@ -1427,6 +1455,12 @@ void create_source_ti_dn_lb(const int nr_conf, const int nr_dilution,
         for (t = tslice; t < T; t += dilution_list[nr_dilution].size[0]) {
           // read in eigenvector and distribute it to the sources
           sprintf(filename, "./eigenvector.%03d.%03d.%04d", v, t, nr_conf);
+#if BINARYINPUT
+          sprintf(filename, "%seigenvectors.%04d.%03d", EIGENSYSTEMPATH, nr_conf, t);
+#else
+          sprintf(filename, "%seigenvector.%03d.%03d.%04d", EIGENSYSTEMPATH, v,
+              t, nr_conf);
+#endif
 #if DEBUG
           printf("reading file %s\n", filename);
 #endif
@@ -1577,6 +1611,12 @@ void create_source_tb_dn_li(const int nr_conf, const int nr_dilution,
         for (v = vec; v < no_eigenvalues; v += vs) {
           // read in eigenvector and distribute it to the sources
           sprintf(filename, "./eigenvector.%03d.%03d.%04d", vec, t, nr_conf);
+#if BINARYINPUT
+          sprintf(filename, "%seigenvectors.%04d.%03d", EIGENSYSTEMPATH, nr_conf, t);
+#else
+          sprintf(filename, "%seigenvector.%03d.%03d.%04d", EIGENSYSTEMPATH, v,
+              t, nr_conf);
+#endif
 #if DEBUG
           printf("reading file %s\n", filename);
 #endif
@@ -1727,6 +1767,12 @@ void create_source_tb_dn_lb(const int nr_conf, const int nr_dilution,
         for (v = vec * vs; v < (vec + 1) * vs; v++) {
           // read in eigenvector and distribute it to the sources
           sprintf(filename, "./eigenvector.%03d.%03d.%04d", vec, t, nr_conf);
+#if BINARYINPUT
+          sprintf(filename, "%seigenvectors.%04d.%03d", EIGENSYSTEMPATH, nr_conf, t);
+#else
+          sprintf(filename, "%seigenvector.%03d.%03d.%04d", EIGENSYSTEMPATH, v,
+              t, nr_conf);
+#endif
 #if DEBUG
           printf("reading file %s\n", filename);
 #endif

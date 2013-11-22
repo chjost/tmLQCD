@@ -57,6 +57,7 @@
 #include "smearing/utils.h"
 #include "buffers/utils.h"
 
+#define BINARYINPUT 0
 #define DEBUG 1
 #define SMEARING 0
 #define SMEAR_ITER 2
@@ -88,6 +89,20 @@ void usage() {
   fprintf(stdout, "         [-h|-?] this help\n");
   fprintf(stdout, "         [-V] print version information and exit\n");
   exit(0);
+}
+
+static int read_binary_eigenvector(su3_vector * const s, char * filename) {
+  FILE *infile = fopen(filename, "rb");
+  if (infile == NULL ) {
+    fprintf(stderr, "Unable to find file %s.\nReturning...\n", filename);
+    return -1;
+  }
+
+  fread((double*) s, sizeof(double), LX * LY * LZ * no_eigenvalues * 6, infile);
+
+  fclose(infile);
+
+  return 0;
 }
 
 inline static void vectorcjg_times_spinor(_Complex double *result,
@@ -238,7 +253,7 @@ int main(int argc, char* argv[]) {
   g_stochastical_run = 1;
 
 // up quarks
-//  add_dilution(D_FULL, D_FULL, D_INTER, 0, 0, 8, 3771, D_UP, D_STOCH);
+  add_dilution(D_FULL, D_FULL, D_INTER, 0, 0, 8, 3771, D_UP, D_STOCH);
 //  add_dilution(D_FULL, D_FULL, D_INTER, 0, 0, 8, 989898, D_UP, D_STOCH);
 //  add_dilution(D_INTER, D_FULL, D_INTER, 16, 0, 8, 1227, D_UP, D_STOCH);
 //  add_dilution(D_INTER, D_FULL, D_INTER, 16, 0, 8, 1337, D_UP, D_STOCH);
@@ -288,7 +303,7 @@ int main(int argc, char* argv[]) {
 //  add_dilution(D_INTER, D_FULL, D_INTER, 16, 0, 8, 11337, D_DOWN, D_STOCH);
 
 //getestet (time, dirac, laph, int, int, int, seed, up/down, stoch/local)
-  add_dilution(D_FULL, D_FULL, D_FULL, 0, 0, 0, 111111, D_UP, D_STOCH);
+//  add_dilution(D_FULL, D_FULL, D_FULL, 0, 0, 0, 111111, D_UP, D_STOCH);
 
   /* define the boundary conditions for the fermion fields */
   boundary(g_kappa);
@@ -956,6 +971,17 @@ void create_perambulators(int const conf, int const dilution) {
     exit(-1);
   }
 
+#if BINARYINPUT
+  for (int t = 0; t < T; t++) {
+    sprintf(eigenvectorfile, "%seigenvector.%04d.%03d", EIGENSYSTEMPATH, conf,
+        t);
+#if DEBUG
+    printf("reading file %s\n", eigenvectorfile);
+#endif
+    read_binary_eigenvector(&(eigenvectors[t * no_eigenvalues]),
+        eigenvectorfile);
+  }
+#else
   for (int t = 0; t < T; t++) {
     for (int v = 0; v < no_eigenvalues; v++) {
       sprintf(eigenvectorfile, "%seigenvector.%03d.%03d.%04d", EIGENSYSTEMPATH,
@@ -967,6 +993,7 @@ void create_perambulators(int const conf, int const dilution) {
           eigenvectorfile, 0, t, 1);
     }
   }
+#endif
 
 #ifdef OMP
 #pragma omp parallel \
@@ -1127,7 +1154,7 @@ void create_perambulators(int const conf, int const dilution) {
  * create the perambulators with stochastic sink
  */
 void create_stochastic_perambulators(int const conf, int const dilution) {
-  // set the correct parameters for the loops
+// set the correct parameters for the loops
   int t_end = -1, l_end = -1, d_end = 4, pwidth = 0;
   if (g_stochastical_run == 0) {
     t_end = T;
@@ -1174,7 +1201,7 @@ void create_stochastic_perambulators(int const conf, int const dilution) {
   int xblockmax = 32, xblock = 0;
   int xhelp = 0, yhelp = 0;
 
-  // allocate the needed memory for spinors
+// allocate the needed memory for spinors
   tmp = (spinor*) calloc(l_end * t_end * d_end * xblockmax * T + 1,
       sizeof(spinor));
   if (tmp == NULL ) {
