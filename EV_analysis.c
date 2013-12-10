@@ -254,7 +254,9 @@ int main(int argc, char* argv[]) {
   g_stochastical_run = 1;
 
 // up quarks
-  add_dilution(D_FULL, D_FULL, D_INTER, 0, 0, 8, 3771, D_UP, D_STOCH);
+  add_dilution(D_FULL, D_FULL, D_FULL, 0, 0, 8, 3771, D_UP, D_STOCH);
+//  add_dilution(D_FULL, D_FULL, D_FULL, 0, 0, 8, 989898, D_UP, D_STOCH);
+//  add_dilution(D_FULL, D_FULL, D_INTER, 0, 0, 8, 3771, D_UP, D_STOCH);
 //  add_dilution(D_FULL, D_FULL, D_INTER, 0, 0, 8, 989898, D_UP, D_STOCH);
 //  add_dilution(D_INTER, D_FULL, D_INTER, 16, 0, 8, 1227, D_UP, D_STOCH);
 //  add_dilution(D_INTER, D_FULL, D_INTER, 16, 0, 8, 1337, D_UP, D_STOCH);
@@ -603,7 +605,7 @@ int create_invert_sources(int const conf, int const dilution) {
         // full LapH dilution
         if (dilution_list[dilution].type[2] == D_FULL) {
 #if ONESLICE
-          create_source_t1_df_lf();
+          create_source_t1_df_lf(conf, dilution, INVERTER);
 #else
           create_source_ti_df_li(conf, dilution, INVERTER);
 #endif
@@ -960,6 +962,9 @@ void create_perambulators(int const conf, int const dilution) {
       l_end = 1;
     }
   }
+#if ONESLICE
+  t_end = 1;
+#endif
   pwidth = t_end * l_end * d_end;
 #if DEBUG
   printf("\nparameters for perambulator: t %d, d %d, l %d\n", t_end, d_end,
@@ -976,6 +981,14 @@ void create_perambulators(int const conf, int const dilution) {
   }
 
 #if BINARYINPUT
+#if ONESLICE
+  sprintf(eigenvectorfile, "%seigenvector.%04d.%03d", EIGENSYSTEMPATH, conf, 0);
+#if DEBUG
+  printf("reading file %s\n", eigenvectorfile);
+#endif
+  read_binary_eigenvector(&(eigenvectors[0]), eigenvectorfile);
+
+#else
   for (int t = 0; t < T; t++) {
     sprintf(eigenvectorfile, "%seigenvector.%04d.%03d", EIGENSYSTEMPATH, conf,
         t);
@@ -985,6 +998,7 @@ void create_perambulators(int const conf, int const dilution) {
     read_binary_eigenvector(&(eigenvectors[t * no_eigenvalues]),
         eigenvectorfile);
   }
+#endif
 #else
   for (int t = 0; t < T; t++) {
     for (int v = 0; v < no_eigenvalues; v++) {
