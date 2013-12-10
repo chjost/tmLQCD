@@ -57,7 +57,8 @@
 #include "smearing/utils.h"
 #include "buffers/utils.h"
 
-#define BINARYINPUT 0
+#define BINARYINPUT 1
+#define ONESLICE 1
 #define DEBUG 1
 #define SMEARING 0
 #define SMEAR_ITER 2
@@ -317,9 +318,9 @@ int main(int argc, char* argv[]) {
 
   // main loop
   for (conf = nstore; conf < nstore + Nmeas; conf += Nsave) {
-    printf("2KappaMu = %e", g_mu);
-    printf("\n# Generating eigensystem for conf %d\n", conf);
-    fflush(stdout);
+//    printf("2KappaMu = %e", g_mu);
+//    printf("\n# Generating eigensystem for conf %d\n", conf);
+//    fflush(stdout);
 //    generate_eigensystem(conf);
 
     if (g_stochastical_run != 0) {
@@ -601,8 +602,11 @@ int create_invert_sources(int const conf, int const dilution) {
       if (dilution_list[dilution].type[0] == D_FULL) {
         // full LapH dilution
         if (dilution_list[dilution].type[2] == D_FULL) {
+#if ONESLICE
+          create_source_t1_df_lf();
+#else
           create_source_ti_df_li(conf, dilution, INVERTER);
-
+#endif
           // no LapH dilution
         } else if (dilution_list[dilution].type[2] == D_NONE) {
           create_source_ti_df_li(conf, dilution, INVERTER);
