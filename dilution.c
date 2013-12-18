@@ -62,15 +62,14 @@ int no_dilution = 0;
 dilution dilution_list[max_no_dilution];
 
 static int read_binary_eigenvector(su3_vector * const s, char * filename,
-    int time) {
+    int nr_eigenvector) {
   FILE *infile = fopen(filename, "rb");
   if (infile == NULL ) {
     fprintf(stderr, "Unable to find file %s.\nReturning...\n", filename);
     return -1;
   }
-
-  fseek(infile, LX * LY * LZ * time, SEEK_SET);
-  fread((double*) s, sizeof(double), LX * LY * LZ * 6, infile);
+  fseek(infile, SPACEVOLUME * nr_eigenvector * sizeof(su3_vector), SEEK_SET);
+  fread(s, sizeof(su3_vector), SPACEVOLUME, infile);
 
   fclose(infile);
   return 0;
@@ -633,7 +632,7 @@ void create_source_ti_df_lb(const int nr_conf, const int nr_dilution,
           printf("reading file %s\n", filename);
 #endif
 #if BINARYINPUT
-          read_binary_eigenvector(eigenvector, filename, t);
+          read_binary_eigenvector(eigenvector, filename, v);
 #else
           read_su3_vector(eigenvector, filename, 0, t, 1);
 #endif

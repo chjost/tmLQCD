@@ -57,8 +57,8 @@
 #include "smearing/utils.h"
 #include "buffers/utils.h"
 
-#define BINARYINPUT 1
-#define ONESLICE 1
+#define BINARYINPUT 0
+#define ONESLICE 0
 #define DEBUG 1
 #define SMEARING 0
 #define SMEAR_ITER 2
@@ -98,9 +98,7 @@ static int read_binary_eigenvector(su3_vector * const s, char * filename) {
     fprintf(stderr, "Unable to find file %s.\nReturning...\n", filename);
     return -1;
   }
-
-  fread((double*) s, sizeof(double), LX * LY * LZ * no_eigenvalues * 6, infile);
-
+  fread(s, sizeof(su3_vector), SPACEVOLUME * no_eigenvalues, infile);
   fclose(infile);
 
   return 0;
