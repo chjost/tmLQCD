@@ -1343,14 +1343,19 @@ void create_source_ti_dn_li(const int nr_conf, const int nr_dilution,
       destruct_writer(writer);
     }
 
-    create_input_files(1, tslice, nr_conf, nr_dilution, 0);
-    sprintf(call, "%s -f dirac0.%d-cg.input 1> /dev/null", inverterpath, 0);
+#if SELFINVERSION
+    create_input_files(4, tslice, nr_conf, nr_dilution, 0);
+    for (j = 0; j < 4; j++) {
+      sprintf(call, "%s -f dirac%d.%d-cg.input 1> /dev/null", inverterpath, j,
+          0);
 #if DEBUG
-    printf("\n\ntrying: %s for conf %d, t %d (full)\n", call, nr_conf, tslice);
+      printf("\n\ntrying: %s for conf %d, t %d (full)\n", call, nr_conf,
+          tslice);
 #endif
-    fflush(stdout);
-    system(call);
-
+      fflush(stdout);
+      system(call);
+    }
+#endif
   }
   free(eigenvector);
   free(dirac0);
@@ -1500,13 +1505,19 @@ void create_source_ti_dn_lb(const int nr_conf, const int nr_dilution,
       destruct_writer(writer);
     }
 
-    create_input_files(1, tslice, nr_conf, nr_dilution, 0);
-    sprintf(call, "%s -f dirac0.%d-cg.input 1> /dev/null", inverterpath, 0);
+#if SELFINVERSION
+    create_input_files(4, tslice, nr_conf, nr_dilution, 0);
+    for (j = 0; j < 4; j++) {
+      sprintf(call, "%s -f dirac%d.%d-cg.input 1> /dev/null", inverterpath, j,
+          0);
 #if DEBUG
-    printf("\n\ntrying: %s for conf %d, t %d (full)\n", call, nr_conf, tslice);
+      printf("\n\ntrying: %s for conf %d, t %d (full)\n", call, nr_conf,
+          tslice);
 #endif
-    fflush(stdout);
-    system(call);
+      fflush(stdout);
+      system(call);
+    }
+#endif
 
   }
   free(eigenvector);
@@ -1657,14 +1668,19 @@ void create_source_tb_dn_li(const int nr_conf, const int nr_dilution,
       destruct_writer(writer);
     }
 
-    create_input_files(1, tslice, nr_conf, nr_dilution, 0);
-    sprintf(call, "%s -f dirac0.%d-cg.input 1> /dev/null", inverterpath, 0);
+#if SELFINVERSION
+    create_input_files(4, tslice, nr_conf, nr_dilution, 0);
+    for (j = 0; j < 4; j++) {
+      sprintf(call, "%s -f dirac%d.%d-cg.input 1> /dev/null", inverterpath, j,
+          0);
 #if DEBUG
-    printf("\n\ntrying: %s for conf %d, t %d (full)\n", call, nr_conf, tslice);
+      printf("\n\ntrying: %s for conf %d, t %d (full)\n", call, nr_conf,
+          tslice);
 #endif
-    fflush(stdout);
-    system(call);
-
+      fflush(stdout);
+      system(call);
+    }
+#endif
   }
   free(eigenvector);
   free(dirac0);
@@ -1814,13 +1830,19 @@ void create_source_tb_dn_lb(const int nr_conf, const int nr_dilution,
       destruct_writer(writer);
     }
 
-    create_input_files(1, tslice, nr_conf, nr_dilution, 0);
-    sprintf(call, "%s -f dirac0.%d-cg.input 1> /dev/null", inverterpath, 0);
+#if SELFINVERSION
+    create_input_files(4, tslice, nr_conf, nr_dilution, 0);
+    for (j = 0; j < 4; j++) {
+      sprintf(call, "%s -f dirac%d.%d-cg.input 1> /dev/null", inverterpath, j,
+          0);
 #if DEBUG
-    printf("\n\ntrying: %s for conf %d, t %d (full)\n", call, nr_conf, tslice);
+      printf("\n\ntrying: %s for conf %d, t %d (full)\n", call, nr_conf,
+          tslice);
 #endif
-    fflush(stdout);
-    system(call);
+      fflush(stdout);
+      system(call);
+    }
+#endif
 
   }
   free(eigenvector);

@@ -981,7 +981,7 @@ void create_perambulators(int const conf, int const dilution) {
 
 #if BINARYINPUT
 #if ONESLICE
-  sprintf(eigenvectorfile, "%seigenvector.%04d.%03d", EIGENSYSTEMPATH, conf, 0);
+  sprintf(eigenvectorfile, "%seigenvectors.%04d.%03d", EIGENSYSTEMPATH, conf, 0);
 #if DEBUG
   printf("reading file %s\n", eigenvectorfile);
 #endif
@@ -989,7 +989,7 @@ void create_perambulators(int const conf, int const dilution) {
 
 #else
   for (int t = 0; t < T; t++) {
-    sprintf(eigenvectorfile, "%seigenvector.%04d.%03d", EIGENSYSTEMPATH, conf,
+    sprintf(eigenvectorfile, "%seigenvectors.%04d.%03d", EIGENSYSTEMPATH, conf,
         t);
 #if DEBUG
     printf("reading file %s\n", eigenvectorfile);
