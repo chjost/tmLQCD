@@ -252,7 +252,8 @@ int main(int argc, char* argv[]) {
   g_stochastical_run = 1;
 
 // up quarks
-  add_dilution(D_FULL, D_FULL, D_FULL, 0, 0, 8, 3771, D_UP, D_STOCH);
+  add_dilution(D_NONE, D_NONE, D_NONE, 0, 0, 8, 3771, D_UP, D_STOCH);
+//  add_dilution(D_FULL, D_FULL, D_FULL, 0, 0, 8, 3771, D_UP, D_STOCH);
 //  add_dilution(D_FULL, D_FULL, D_FULL, 0, 0, 8, 989898, D_UP, D_STOCH);
 //  add_dilution(D_FULL, D_FULL, D_INTER, 0, 0, 8, 3771, D_UP, D_STOCH);
 //  add_dilution(D_FULL, D_FULL, D_INTER, 0, 0, 8, 989898, D_UP, D_STOCH);

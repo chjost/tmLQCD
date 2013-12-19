@@ -387,7 +387,7 @@ void create_source_ti_df_li(const int nr_conf, const int nr_dilution,
           printf("reading file %s\n", filename);
 #endif
 #if BINARYINPUT
-          read_binary_eigenvector(eigenvector, filename, t);
+          read_binary_eigenvector(eigenvector, filename, v);
 #else
           read_su3_vector(eigenvector, filename, 0, t, 1);
 #endif
@@ -878,7 +878,7 @@ void create_source_tb_df_li(const int nr_conf, const int nr_dilution,
           printf("reading file %s\n", filename);
 #endif
 #if BINARYINPUT
-          read_binary_eigenvector(eigenvector, filename, t);
+          read_binary_eigenvector(eigenvector, filename, v);
 #else
           read_su3_vector(eigenvector, filename, 0, t, 1);
 #endif
@@ -1123,7 +1123,7 @@ void create_source_tb_df_lb(const int nr_conf, const int nr_dilution,
           printf("reading file %s\n", filename);
 #endif
 #if BINARYINPUT
-          read_binary_eigenvector(eigenvector, filename, t);
+          read_binary_eigenvector(eigenvector, filename, v);
 #else
           read_su3_vector(eigenvector, filename, 0, t, 1);
 #endif
@@ -1314,7 +1314,7 @@ void create_source_ti_dn_li(const int nr_conf, const int nr_dilution,
           printf("reading file %s\n", filename);
 #endif
 #if BINARYINPUT
-          read_binary_eigenvector(eigenvector, filename, t);
+          read_binary_eigenvector(eigenvector, filename, v);
 #else
           read_su3_vector(eigenvector, filename, 0, t, 1);
 #endif
@@ -1471,7 +1471,7 @@ void create_source_ti_dn_lb(const int nr_conf, const int nr_dilution,
           printf("reading file %s\n", filename);
 #endif
 #if BINARYINPUT
-          read_binary_eigenvector(eigenvector, filename, t);
+          read_binary_eigenvector(eigenvector, filename, v);
 #else
           read_su3_vector(eigenvector, filename, 0, t, 1);
 #endif
@@ -1628,7 +1628,7 @@ void create_source_tb_dn_li(const int nr_conf, const int nr_dilution,
           printf("reading file %s\n", filename);
 #endif
 #if BINARYINPUT
-          read_binary_eigenvector(eigenvector, filename, t);
+          read_binary_eigenvector(eigenvector, filename, v);
 #else
           read_su3_vector(eigenvector, filename, 0, t, 1);
 #endif
@@ -1785,7 +1785,7 @@ void create_source_tb_dn_lb(const int nr_conf, const int nr_dilution,
           printf("reading file %s\n", filename);
 #endif
 #if BINARYINPUT
-          read_binary_eigenvector(eigenvector, filename, t);
+          read_binary_eigenvector(eigenvector, filename, v);
 #else
           read_su3_vector(eigenvector, filename, 0, t, 1);
 #endif
