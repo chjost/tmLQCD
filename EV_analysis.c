@@ -994,7 +994,7 @@ void create_perambulators(int const conf, int const dilution) {
 #if DEBUG
     printf("reading file %s\n", eigenvectorfile);
 #endif
-    read_binary_eigenvector(&(eigenvectors[t * no_eigenvalues]),
+    read_binary_eigenvector(&(eigenvectors[t * no_eigenvalues * SPACEVOLUME]),
         eigenvectorfile);
   }
 #endif
