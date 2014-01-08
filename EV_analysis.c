@@ -57,7 +57,7 @@
 #include "smearing/utils.h"
 #include "buffers/utils.h"
 
-#define BINARYINPUT 0
+#define BINARYINPUT 1
 #define ONESLICE 0
 #define DEBUG 1
 #define SMEARING 0
@@ -252,15 +252,23 @@ int main(int argc, char* argv[]) {
   g_stochastical_run = 1;
 
 // up quarks
-  add_dilution(D_NONE, D_NONE, D_NONE, 0, 0, 8, 3771, D_UP, D_STOCH);
-//  add_dilution(D_FULL, D_FULL, D_FULL, 0, 0, 8, 3771, D_UP, D_STOCH);
-//  add_dilution(D_FULL, D_FULL, D_FULL, 0, 0, 8, 989898, D_UP, D_STOCH);
 //  add_dilution(D_FULL, D_FULL, D_INTER, 0, 0, 8, 3771, D_UP, D_STOCH);
 //  add_dilution(D_FULL, D_FULL, D_INTER, 0, 0, 8, 989898, D_UP, D_STOCH);
 //  add_dilution(D_INTER, D_FULL, D_INTER, 16, 0, 8, 1227, D_UP, D_STOCH);
 //  add_dilution(D_INTER, D_FULL, D_INTER, 16, 0, 8, 1337, D_UP, D_STOCH);
 //  add_dilution(D_INTER, D_FULL, D_INTER, 16, 0, 4, 38432, D_UP, D_STOCH);
 //  add_dilution(D_INTER, D_FULL, D_INTER, 16, 0, 4, 834234, D_UP, D_STOCH);
+
+// up quarks, interblock in time
+  add_dilution(D_INTERBLOCK, D_FULL, D_INTER, 0, 0, 8, 622331, D_UP, D_STOCH);
+//  add_dilution(D_INTERBLOCK, D_FULL, D_INTER, 0, 0, 8, 276960, D_UP, D_STOCH);
+//  add_dilution(D_INTERBLOCK, D_FULL, D_INTER, 0, 0, 8, 852000, D_UP, D_STOCH);
+//  add_dilution(D_INTERBLOCK, D_FULL, D_INTER, 0, 0, 8, 862587, D_UP, D_STOCH);
+//  add_dilution(D_INTERBLOCK, D_FULL, D_INTER, 0, 0, 8, 32377, D_UP, D_STOCH);
+
+// up quarks, one timeslice only
+//  add_dilution(D_FULL, D_FULL, D_FULL, 0, 0, 8, 1534, D_UP, D_STOCH);
+//  add_dilution(D_FULL, D_FULL, D_FULL, 0, 0, 8, 7648956, D_UP, D_STOCH);
 
 // up quarks, stochastische sink
 // source
@@ -304,8 +312,9 @@ int main(int argc, char* argv[]) {
 //  add_dilution(D_INTER, D_FULL, D_INTER, 16, 0, 8, 11227, D_DOWN, D_STOCH);
 //  add_dilution(D_INTER, D_FULL, D_INTER, 16, 0, 8, 11337, D_DOWN, D_STOCH);
 
-//getestet (time, dirac, laph, int, int, int, seed, up/down, stoch/local)
+// test cases (time, dirac, laph, int, int, int, seed, up/down, stoch/local)
 //  add_dilution(D_FULL, D_FULL, D_FULL, 0, 0, 0, 111111, D_UP, D_STOCH);
+//  add_dilution(D_NONE, D_NONE, D_NONE, 0, 0, 8, 3771, D_UP, D_STOCH);
 
   /* define the boundary conditions for the fermion fields */
   boundary(g_kappa);
@@ -681,6 +690,9 @@ int create_invert_sources(int const conf, int const dilution) {
           create_source_tb_df_lb(conf, dilution, INVERTER);
 
         } // LapH dilution
+      } else if (dilution_list[dilution].type[0] == D_INTERBLOCK) {
+        printf("entering correct loop\n");
+        create_source_tbi2_df_li(conf, dilution, INVERTER);
       } // time dilution
 
       // no spin dilution

@@ -32,6 +32,7 @@
 #define D_FULL 1
 #define D_BLOCK 2
 #define D_INTER 3
+#define D_INTERBLOCK 4
 
 #define D_UP 0
 #define D_DOWN 1
@@ -93,6 +94,9 @@ void create_source_tb_dn_lb(const int nr_conf, const int nr_dilution,
     char* inverterpath);
 
 void create_source_t1_df_lf(const int nr_conf, const int nr_dilution,
+    char* inverterpath);
+
+void create_source_tbi2_df_li(const int nr_conf, const int nr_dilution,
     char* inverterpath);
 
 #endif /* DILUTION_H_ */
