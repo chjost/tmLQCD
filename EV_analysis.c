@@ -992,14 +992,6 @@ void create_perambulators(int const conf, int const dilution) {
   }
 
 #if BINARYINPUT
-#if ONESLICE
-  sprintf(eigenvectorfile, "%seigenvectors.%04d.%03d", EIGENSYSTEMPATH, conf, 0);
-#if DEBUG
-  printf("reading file %s\n", eigenvectorfile);
-#endif
-  read_binary_eigenvector(&(eigenvectors[0]), eigenvectorfile);
-
-#else
   for (int t = 0; t < T; t++) {
     sprintf(eigenvectorfile, "%seigenvectors.%04d.%03d", EIGENSYSTEMPATH, conf,
         t);
@@ -1009,7 +1001,6 @@ void create_perambulators(int const conf, int const dilution) {
     read_binary_eigenvector(&(eigenvectors[t * no_eigenvalues * SPACEVOLUME]),
         eigenvectorfile);
   }
-#endif
 #else
   for (int t = 0; t < T; t++) {
     for (int v = 0; v < no_eigenvalues; v++) {
