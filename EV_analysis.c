@@ -260,14 +260,14 @@ int main(int argc, char* argv[]) {
 //  add_dilution(D_INTER, D_FULL, D_INTER, 16, 0, 4, 834234, D_UP, D_STOCH);
 
 // up quarks, interblock in time
-  add_dilution(D_INTERBLOCK, D_FULL, D_INTER, 0, 0, 8, 622331, D_UP, D_STOCH);
+//  add_dilution(D_INTERBLOCK, D_FULL, D_INTER, 0, 0, 8, 622331, D_UP, D_STOCH);
 //  add_dilution(D_INTERBLOCK, D_FULL, D_INTER, 0, 0, 8, 276960, D_UP, D_STOCH);
 //  add_dilution(D_INTERBLOCK, D_FULL, D_INTER, 0, 0, 8, 852000, D_UP, D_STOCH);
 //  add_dilution(D_INTERBLOCK, D_FULL, D_INTER, 0, 0, 8, 862587, D_UP, D_STOCH);
 //  add_dilution(D_INTERBLOCK, D_FULL, D_INTER, 0, 0, 8, 32377, D_UP, D_STOCH);
 
 // up quarks, one timeslice only
-//  add_dilution(D_FULL, D_FULL, D_FULL, 0, 0, 8, 1534, D_UP, D_STOCH);
+  add_dilution(D_FULL, D_FULL, D_FULL, 0, 0, 8, 1534, D_UP, D_STOCH);
 //  add_dilution(D_FULL, D_FULL, D_FULL, 0, 0, 8, 7648956, D_UP, D_STOCH);
 
 // up quarks, stochastische sink
@@ -328,10 +328,10 @@ int main(int argc, char* argv[]) {
 
   // main loop
   for (conf = nstore; conf < nstore + Nmeas; conf += Nsave) {
-//    printf("2KappaMu = %e", g_mu);
-//    printf("\n# Generating eigensystem for conf %d\n", conf);
-//    fflush(stdout);
-//    generate_eigensystem(conf);
+    printf("2KappaMu = %e", g_mu);
+    printf("\n# Generating eigensystem for conf %d\n", conf);
+    fflush(stdout);
+    generate_eigensystem(conf);
 
     if (g_stochastical_run != 0) {
       for (j = 0; j < no_dilution; j++) {
@@ -956,6 +956,8 @@ void create_perambulators(int const conf, int const dilution) {
       t_end = dilution_list[dilution].size[0];
     } else if (dilution_list[dilution].type[0] == D_NONE) {
       t_end = 1;
+    } else if (dilution_list[dilution].type[0] == D_INTERBLOCK) {
+      t_end = T / 4;
     }
 
     if (dilution_list[dilution].type[1] == D_FULL) {
