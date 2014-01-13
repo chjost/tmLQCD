@@ -1906,7 +1906,7 @@ void create_source_t1_df_lf(const int nr_conf, const int nr_dilution,
   fclose(file);
 
 //  allocate spinors and eigenvectors
-  eigenvector = (su3_vector*) calloc(block, sizeof(su3_vector));
+  eigenvector = (su3_vector*) calloc(SPACEVOLUME, sizeof(su3_vector));
   if (eigenvector == NULL ) {
     free(rnd_vector);
     fprintf(stderr, "Could not allocate eigenvector!\nAborting...\n");
@@ -2000,9 +2000,9 @@ void create_source_t1_df_lf(const int nr_conf, const int nr_dilution,
 //      _vector_mul( dirac2[point].s2, rnd_vector[index+2], eigenvector[point]);
 //      _vector_mul( dirac3[point].s3, rnd_vector[index+3], eigenvector[point]);
       // for testing purposes
-      dirac1.s1 = dirac0.s0;
-      dirac2.s2 = dirac0.s0;
-      dirac3.s3 = dirac0.s0;
+      dirac1[point].s1 = dirac0[point].s0;
+      dirac2[point].s2 = dirac0[point].s0;
+      dirac3[point].s3 = dirac0[point].s0;
     }
 
     // write spinor field dirac component 0
