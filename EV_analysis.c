@@ -58,7 +58,7 @@
 #include "buffers/utils.h"
 
 #define BINARYINPUT 1
-#define ONESLICE 0
+#define ONESLICE 1
 #define DEBUG 1
 #define SMEARING 0
 #define SMEAR_ITER 2
