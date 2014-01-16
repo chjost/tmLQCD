@@ -57,15 +57,15 @@
 #include "smearing/utils.h"
 #include "buffers/utils.h"
 
-#define BINARYINPUT 1
-#define ONESLICE 1
+#define BINARYINPUT 0
+#define ONESLICE 0
 #define DEBUG 1
 #define SMEARING 0
 #define SMEAR_ITER 2
 #define SMEAR_COEFF1 0.76f // should be smaller than 1
 #define SMEAR_COEFF2 0.95f // should be smaller than 1
 #define INVERTER "./invert"
-#define EIGENSYSTEMPATH "../"
+#define EIGENSYSTEMPATH "./"
 #define REMOVESOURCES 0 // remove all output except for the perambulators
 #define _vector_one(r) \
   (r).c0 = 1. + 0.*I;\
@@ -260,14 +260,14 @@ int main(int argc, char* argv[]) {
 //  add_dilution(D_INTER, D_FULL, D_INTER, 16, 0, 4, 834234, D_UP, D_STOCH);
 
 // up quarks, interblock in time
-//  add_dilution(D_INTERBLOCK, D_FULL, D_INTER, 0, 0, 8, 622331, D_UP, D_STOCH);
+  add_dilution(D_INTERBLOCK, D_FULL, D_INTER, 0, 0, 8, 622331, D_UP, D_STOCH);
 //  add_dilution(D_INTERBLOCK, D_FULL, D_INTER, 0, 0, 8, 276960, D_UP, D_STOCH);
 //  add_dilution(D_INTERBLOCK, D_FULL, D_INTER, 0, 0, 8, 852000, D_UP, D_STOCH);
 //  add_dilution(D_INTERBLOCK, D_FULL, D_INTER, 0, 0, 8, 862587, D_UP, D_STOCH);
 //  add_dilution(D_INTERBLOCK, D_FULL, D_INTER, 0, 0, 8, 32377, D_UP, D_STOCH);
 
 // up quarks, one timeslice only
-  add_dilution(D_FULL, D_FULL, D_FULL, 0, 0, 8, 1534, D_UP, D_STOCH);
+//  add_dilution(D_FULL, D_FULL, D_FULL, 0, 0, 8, 1534, D_UP, D_STOCH);
 //  add_dilution(D_FULL, D_FULL, D_FULL, 0, 0, 8, 7648956, D_UP, D_STOCH);
 
 // up quarks, stochastische sink
@@ -693,6 +693,7 @@ int create_invert_sources(int const conf, int const dilution) {
       } else if (dilution_list[dilution].type[0] == D_INTERBLOCK) {
         printf("entering correct loop\n");
         create_source_tbi2_df_li(conf, dilution, INVERTER);
+        //create_source_tbi3_df_li(conf, dilution, INVERTER);
       } // time dilution
 
       // no spin dilution

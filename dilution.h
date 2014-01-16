@@ -98,5 +98,7 @@ void create_source_t1_df_lf(const int nr_conf, const int nr_dilution,
 
 void create_source_tbi2_df_li(const int nr_conf, const int nr_dilution,
     char* inverterpath);
+void create_source_tbi3_df_li(const int nr_conf, const int nr_dilution,
+    char* inverterpath);
 
 #endif /* DILUTION_H_ */
