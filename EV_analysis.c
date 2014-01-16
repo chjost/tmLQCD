@@ -328,10 +328,10 @@ int main(int argc, char* argv[]) {
 
   // main loop
   for (conf = nstore; conf < nstore + Nmeas; conf += Nsave) {
-    printf("2KappaMu = %e", g_mu);
-    printf("\n# Generating eigensystem for conf %d\n", conf);
-    fflush(stdout);
-    generate_eigensystem(conf);
+//    printf("2KappaMu = %e", g_mu);
+//    printf("\n# Generating eigensystem for conf %d\n", conf);
+//    fflush(stdout);
+//    generate_eigensystem(conf);
 
     if (g_stochastical_run != 0) {
       for (j = 0; j < no_dilution; j++) {
