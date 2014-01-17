@@ -57,7 +57,7 @@
 #include "smearing/utils.h"
 #include "buffers/utils.h"
 
-#define BINARYINPUT 0
+#define BINARYINPUT 1
 #define ONESLICE 0
 #define DEBUG 1
 #define SMEARING 0
@@ -65,7 +65,7 @@
 #define SMEAR_COEFF1 0.76f // should be smaller than 1
 #define SMEAR_COEFF2 0.95f // should be smaller than 1
 #define INVERTER "./invert"
-#define EIGENSYSTEMPATH "./"
+#define EIGENSYSTEMPATH "../"
 #define REMOVESOURCES 0 // remove all output except for the perambulators
 #define _vector_one(r) \
   (r).c0 = 1. + 0.*I;\
@@ -258,9 +258,11 @@ int main(int argc, char* argv[]) {
 //  add_dilution(D_INTER, D_FULL, D_INTER, 16, 0, 8, 1337, D_UP, D_STOCH);
 //  add_dilution(D_INTER, D_FULL, D_INTER, 16, 0, 4, 38432, D_UP, D_STOCH);
 //  add_dilution(D_INTER, D_FULL, D_INTER, 16, 0, 4, 834234, D_UP, D_STOCH);
+//  add_dilution(D_BLOCK, D_FULL, D_INTER, 6, 0, 8, 48186, D_UP, D_STOCH);
+  add_dilution(D_BLOCK, D_FULL, D_INTER, 6, 0, 8, 23071, D_UP, D_STOCH);
 
 // up quarks, interblock in time
-  add_dilution(D_INTERBLOCK, D_FULL, D_INTER, 0, 0, 8, 622331, D_UP, D_STOCH);
+//  add_dilution(D_INTERBLOCK, D_FULL, D_INTER, 0, 0, 8, 622331, D_UP, D_STOCH);
 //  add_dilution(D_INTERBLOCK, D_FULL, D_INTER, 0, 0, 8, 276960, D_UP, D_STOCH);
 //  add_dilution(D_INTERBLOCK, D_FULL, D_INTER, 0, 0, 8, 852000, D_UP, D_STOCH);
 //  add_dilution(D_INTERBLOCK, D_FULL, D_INTER, 0, 0, 8, 862587, D_UP, D_STOCH);
@@ -313,8 +315,14 @@ int main(int argc, char* argv[]) {
 //  add_dilution(D_INTER, D_FULL, D_INTER, 16, 0, 8, 11337, D_DOWN, D_STOCH);
 
 // test cases (time, dirac, laph, int, int, int, seed, up/down, stoch/local)
-//  add_dilution(D_FULL, D_FULL, D_FULL, 0, 0, 0, 111111, D_UP, D_STOCH);
-//  add_dilution(D_NONE, D_NONE, D_NONE, 0, 0, 8, 3771, D_UP, D_STOCH);
+//  add_dilution(D_FULL, D_FULL, D_FULL, 0, 0, 0, 3771, D_UP, D_STOCH);
+//  add_dilution(D_FULL, D_FULL, D_BLOCK, 0, 0, 2, 3771, D_UP, D_STOCH);
+//  add_dilution(D_BLOCK, D_FULL, D_FULL, 2, 0, 0, 3771, D_UP, D_STOCH);
+//  add_dilution(D_BLOCK, D_FULL, D_BLOCK, 2, 0, 2, 3771, D_UP, D_STOCH);
+//  add_dilution(D_FULL, D_NONE, D_FULL, 0, 0, 0, 3771, D_UP, D_STOCH);
+//  add_dilution(D_FULL, D_NONE, D_BLOCK, 0, 0, 2, 3771, D_UP, D_STOCH);
+//  add_dilution(D_BLOCK, D_NONE, D_FULL, 2, 0, 0, 3771, D_UP, D_STOCH);
+//  add_dilution(D_BLOCK, D_NONE, D_BLOCK, 2, 0, 2, 3771, D_UP, D_STOCH);
 
   /* define the boundary conditions for the fermion fields */
   boundary(g_kappa);
