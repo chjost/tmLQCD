@@ -262,13 +262,18 @@ int main(int argc, char* argv[]) {
 //  add_dilution(D_BLOCK, D_FULL, D_INTER, 6, 0, 8, 23071, D_UP, D_STOCH);
 
 // up quarks, interblock in time
+// !!! CHANGE FUNCTION IN CREATE_SOURCES !!!
 //  add_dilution(D_INTERBLOCK, D_FULL, D_INTER, 1, 0, 8, 622331, D_UP, D_STOCH);
 //  add_dilution(D_INTERBLOCK, D_FULL, D_INTER, 1, 0, 8, 276960, D_UP, D_STOCH);
-  add_dilution(D_INTERBLOCK, D_FULL, D_INTER, 2, 0, 8, 852000, D_UP, D_STOCH);
-//  add_dilution(D_INTERBLOCK, D_FULL, D_INTER, 2, 0, 8, 862587, D_UP, D_STOCH);
-//  add_dilution(D_INTERBLOCK, D_FULL, D_INTER, 2, 0, 8, 32377, D_UP, D_STOCH);
-//  add_dilution(D_INTERBLOCK, D_FULL, D_INTER, 2, 0, 8, 53580, D_UP, D_STOCH);
-//  add_dilution(D_INTERBLOCK, D_FULL, D_INTER, 2, 0, 8, 60055, D_UP, D_STOCH);
+//  add_dilution(D_INTERBLOCK, D_FULL, D_INTER, 1, 0, 8, 852000, D_UP, D_STOCH);
+//  add_dilution(D_INTERBLOCK, D_FULL, D_INTER, 1, 0, 8, 862587, D_UP, D_STOCH);
+//  add_dilution(D_INTERBLOCK, D_FULL, D_INTER, 1, 0, 8, 32377, D_UP, D_STOCH);
+  add_dilution(D_INTERBLOCK, D_FULL, D_INTER, 2, 0, 8, 93454, D_UP, D_STOCH);
+//  add_dilution(D_INTERBLOCK, D_FULL, D_INTER, 2, 0, 8, 11162, D_UP, D_STOCH);
+//  add_dilution(D_INTERBLOCK, D_FULL, D_INTER, 2, 0, 8, 53355, D_UP, D_STOCH);
+//  add_dilution(D_INTERBLOCK, D_FULL, D_INTER, 2, 0, 8, 75747, D_UP, D_STOCH);
+//  add_dilution(D_INTERBLOCK, D_FULL, D_INTER, 2, 0, 8, 58181, D_UP, D_STOCH);
+//  add_dilution(D_INTERBLOCK, D_FULL, D_INTER, 2, 0, 8, 49966, D_UP, D_STOCH);
 
 // up quarks, one timeslice only
 //  add_dilution(D_FULL, D_FULL, D_FULL, 0, 0, 8, 1534, D_UP, D_STOCH);
@@ -704,12 +709,10 @@ int create_invert_sources(int const conf, int const dilution) {
         if (dilution_list[dilution].type[2] == D_BLOCK) {
           fprintf(stderr,
               "Inter-block in time and block in LapH not implemented.\nAborting...\n");
-        } else if (dilution_list[dilution].size[0] == 1) {
-          create_source_tbi2_df_li(conf, dilution, INVERTER);
-        } else if (dilution_list[dilution].size[0] == 2) {
+        } else {
+//          create_source_tbi2_df_li(conf, dilution, INVERTER);
           create_source_tbi3_df_li(conf, dilution, INVERTER);
-        } else if (dilution_list[dilution].size[0] == 3) {
-          create_source_tb2i16_df_li(conf, dilution, INVERTER);
+//          create_source_tb2i16_df_li(conf, dilution, INVERTER);
         }
       } // time dilution
 

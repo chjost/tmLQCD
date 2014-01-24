@@ -1991,13 +1991,13 @@ void create_source_tbi3_df_li(const int nr_conf, const int nr_dilution,
             // loop over position space
             index = t * no_eigenvalues * 4 + v * 4;
             for (point = 0; point < SPACEVOLUME; point++) {
-              _vector_add_mul( dirac0[SPACEVOLUME*(ti+tb) + point].s0,
+              _vector_add_mul( dirac0[SPACEVOLUME*t + point].s0,
                   rnd_vector[index+0], eigenvector[point]);
-              _vector_add_mul( dirac1[SPACEVOLUME*(ti+tb) + point].s1,
+              _vector_add_mul( dirac1[SPACEVOLUME*t + point].s1,
                   rnd_vector[index+1], eigenvector[point]);
-              _vector_add_mul( dirac2[SPACEVOLUME*(ti+tb) + point].s2,
+              _vector_add_mul( dirac2[SPACEVOLUME*t + point].s2,
                   rnd_vector[index+2], eigenvector[point]);
-              _vector_add_mul( dirac3[SPACEVOLUME*(ti+tb) + point].s3,
+              _vector_add_mul( dirac3[SPACEVOLUME*t + point].s3,
                   rnd_vector[index+3], eigenvector[point]);
             }
           }
@@ -2195,13 +2195,13 @@ void create_source_tb2i16_df_li(const int nr_conf, const int nr_dilution,
             // loop over position space
             index = t * no_eigenvalues * 4 + v * 4;
             for (point = 0; point < SPACEVOLUME; point++) {
-              _vector_add_mul( dirac0[SPACEVOLUME*(ti+tb) + point].s0,
+              _vector_add_mul( dirac0[SPACEVOLUME*t + point].s0,
                   rnd_vector[index+0], eigenvector[point]);
-              _vector_add_mul( dirac1[SPACEVOLUME*(ti+tb) + point].s1,
+              _vector_add_mul( dirac1[SPACEVOLUME*t + point].s1,
                   rnd_vector[index+1], eigenvector[point]);
-              _vector_add_mul( dirac2[SPACEVOLUME*(ti+tb) + point].s2,
+              _vector_add_mul( dirac2[SPACEVOLUME*t + point].s2,
                   rnd_vector[index+2], eigenvector[point]);
-              _vector_add_mul( dirac3[SPACEVOLUME*(ti+tb) + point].s3,
+              _vector_add_mul( dirac3[SPACEVOLUME*t + point].s3,
                   rnd_vector[index+3], eigenvector[point]);
             }
           }
