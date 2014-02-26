@@ -523,7 +523,7 @@ void create_source_ti_df_lb(const int nr_conf, const int nr_dilution,
 #endif
 
   for (tslice = 0; tslice < dilution_list[nr_dilution].size[0]; tslice++) {
-    for (vec = 0; vec < vs; vec++) {
+    for (vec = 0; vec < (no_eigenvalues / vs); vec++) {
       zero_spinor_field(dirac0, VOLUMEPLUSRAND);
       zero_spinor_field(dirac1, VOLUMEPLUSRAND);
       zero_spinor_field(dirac2, VOLUMEPLUSRAND);
@@ -711,7 +711,7 @@ void create_source_tb_df_li(const int nr_conf, const int nr_dilution,
   dirac3 = tmp;
 #endif
 
-  for (tslice = 0; tslice < ts; tslice++) {
+  for (tslice = 0; tslice < (T / ts); tslice++) {
     for (vec = 0; vec < vs; vec++) {
       zero_spinor_field(dirac0, VOLUMEPLUSRAND);
       zero_spinor_field(dirac1, VOLUMEPLUSRAND);
@@ -901,8 +901,8 @@ void create_source_tb_df_lb(const int nr_conf, const int nr_dilution,
   dirac3 = tmp;
 #endif
 
-  for (tslice = 0; tslice < ts; tslice++) {
-    for (vec = 0; vec < vs; vec++) {
+  for (tslice = 0; tslice < (T / ts); tslice++) {
+    for (vec = 0; vec < (no_eigenvalues / vs); vec++) {
       zero_spinor_field(dirac0, VOLUMEPLUSRAND);
       zero_spinor_field(dirac1, VOLUMEPLUSRAND);
       zero_spinor_field(dirac2, VOLUMEPLUSRAND);
@@ -2272,7 +2272,8 @@ void add_dilution(const int d_type_t, const int d_type_d, const int d_type_l,
 // time dilution
   if (dptr->type[0] == D_INTER || dptr->type[0] == D_BLOCK) {
     if (d_t > T || d_t <= 0) {
-      dptr->size[0] = T;
+      fprintf(stderr, "Dilution number in time is <=0 or >T\n Aborting...\n");
+      exit(-1);
     } else {
       if (T % d_t != 0) {
         fprintf(stderr,
@@ -2344,7 +2345,9 @@ void add_dilution(const int d_type_t, const int d_type_d, const int d_type_l,
 // LapH dilution
   if (dptr->type[2] == D_INTER || dptr->type[2] == D_BLOCK) {
     if (d_l > no_eigenvalues || d_l <= 0) {
-      dptr->size[2] = no_eigenvalues;
+      fprintf(stderr,
+          "Dilution number in LapH space is <=0 or >#eigenvalues\n Aborting...\n");
+      exit(-1);
     } else {
       if (no_eigenvalues % d_l != 0) {
         fprintf(stderr,

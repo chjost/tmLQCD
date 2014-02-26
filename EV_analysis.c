@@ -260,6 +260,15 @@ int main(int argc, char* argv[]) {
 //  add_dilution(D_INTER, D_FULL, D_INTER, 16, 0, 4, 834234, D_UP, D_STOCH);
 //  add_dilution(D_BLOCK, D_FULL, D_INTER, 6, 0, 8, 48186, D_UP, D_STOCH);
 //  add_dilution(D_BLOCK, D_FULL, D_INTER, 6, 0, 8, 23071, D_UP, D_STOCH);
+  add_dilution(D_BLOCK, D_FULL, D_INTER, 2, 0, 4, 27573, D_UP, D_STOCH);
+//  add_dilution(D_BLOCK, D_FULL, D_INTER, 2, 0, 4, 19812, D_UP, D_STOCH);
+//  add_dilution(D_BLOCK, D_FULL, D_INTER, 2, 0, 4, 12776, D_UP, D_STOCH);
+//  add_dilution(D_BLOCK, D_FULL, D_INTER, 3, 0, 4, 20801, D_UP, D_STOCH);
+//  add_dilution(D_BLOCK, D_FULL, D_INTER, 3, 0, 4, 25454, D_UP, D_STOCH);
+//  add_dilution(D_BLOCK, D_FULL, D_INTER, 3, 0, 4, 24324, D_UP, D_STOCH);
+//  add_dilution(D_BLOCK, D_FULL, D_INTER, 4, 0, 4, 14396, D_UP, D_STOCH);
+//  add_dilution(D_BLOCK, D_FULL, D_INTER, 4, 0, 4, 14858, D_UP, D_STOCH);
+//  add_dilution(D_BLOCK, D_FULL, D_INTER, 4, 0, 4, 27215, D_UP, D_STOCH);
 
 // up quarks, interblock in time
 // !!! CHANGE FUNCTION IN CREATE_SOURCES !!!
@@ -268,7 +277,7 @@ int main(int argc, char* argv[]) {
 //  add_dilution(D_INTERBLOCK, D_FULL, D_INTER, 1, 0, 8, 852000, D_UP, D_STOCH);
 //  add_dilution(D_INTERBLOCK, D_FULL, D_INTER, 1, 0, 8, 862587, D_UP, D_STOCH);
 //  add_dilution(D_INTERBLOCK, D_FULL, D_INTER, 1, 0, 8, 32377, D_UP, D_STOCH);
-  add_dilution(D_INTERBLOCK, D_FULL, D_INTER, 2, 0, 8, 93454, D_UP, D_STOCH);
+//  add_dilution(D_INTERBLOCK, D_FULL, D_INTER, 2, 0, 8, 93454, D_UP, D_STOCH);
 //  add_dilution(D_INTERBLOCK, D_FULL, D_INTER, 2, 0, 8, 11162, D_UP, D_STOCH);
 //  add_dilution(D_INTERBLOCK, D_FULL, D_INTER, 2, 0, 8, 53355, D_UP, D_STOCH);
 //  add_dilution(D_INTERBLOCK, D_FULL, D_INTER, 2, 0, 8, 75747, D_UP, D_STOCH);
@@ -308,6 +317,11 @@ int main(int argc, char* argv[]) {
 //  add_dilution(D_FULL, D_FULL, D_INTER, 0, 0, 8, 456354, D_STRANGE, D_STOCH);
 //  add_dilution(D_INTER, D_FULL, D_INTER, 16, 0, 8, 9762, D_STRANGE, D_STOCH);
 //  add_dilution(D_INTER, D_FULL, D_INTER, 16, 0, 8, 812934, D_STRANGE, D_STOCH);
+//  add_dilution(D_INTERBLOCK, D_FULL, D_INTER, 2, 0, 8, 94633, D_STRANGE, D_STOCH);
+//  add_dilution(D_INTERBLOCK, D_FULL, D_INTER, 2, 0, 8, 71924, D_STRANGE, D_STOCH);
+//  add_dilution(D_INTERBLOCK, D_FULL, D_INTER, 2, 0, 8, 56933, D_STRANGE, D_STOCH);
+//  add_dilution(D_INTERBLOCK, D_FULL, D_INTER, 2, 0, 8, 65644, D_STRANGE, D_STOCH);
+//  add_dilution(D_INTERBLOCK, D_FULL, D_INTER, 2, 0, 8, 74078, D_STRANGE, D_STOCH);
 
 //  charm quarks
 //  add_dilution(D_FULL, D_FULL, D_INTER, 0, 0, 8, 1256, D_CHARM, D_STOCH);
