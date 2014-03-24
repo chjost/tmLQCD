@@ -1162,7 +1162,7 @@ void create_source_ti_dn_lb(const int nr_conf, const int nr_dilution,
 #endif
 
   for (tslice = 0; tslice < dilution_list[nr_dilution].size[0]; tslice++) {
-    for (vec = 0; vec < vs; vec++) {
+    for (vec = 0; vec < (no_eigenvalues / vs); vec++) {
       zero_spinor_field(dirac0, VOLUMEPLUSRAND);
 
       for (v = vec * vs; v < (vec + 1) * vs; v++) {

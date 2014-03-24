@@ -357,18 +357,18 @@ int main(int argc, char* argv[]) {
 
   // main loop
   for (conf = nstore; conf < nstore + Nmeas; conf += Nsave) {
-//    printf("2KappaMu = %e", g_mu);
-//    printf("\n# Generating eigensystem for conf %d\n", conf);
-//    fflush(stdout);
-//    generate_eigensystem(conf);
+    printf("2KappaMu = %e", g_mu);
+    printf("\n# Generating eigensystem for conf %d\n", conf);
+    fflush(stdout);
+    generate_eigensystem(conf);
 
     if (g_stochastical_run != 0) {
       for (j = 0; j < no_dilution; j++) {
         //generate the sources
-        printf("\n# generating sources (%d of %d)\n", j + 1, no_dilution);
-        fflush(stdout);
-        start_ranlux(1, dilution_list[j].seed ^ conf);
-        create_invert_sources(conf, j);
+//        printf("\n# generating sources (%d of %d)\n", j + 1, no_dilution);
+//        fflush(stdout);
+//        start_ranlux(1, dilution_list[j].seed ^ conf);
+//        create_invert_sources(conf, j);
 
 // construct the perambulators
 //        printf("\n# constructing perambulators (%d of %d)\n", j + 1,
@@ -831,9 +831,10 @@ void create_propagators(int const conf, int const dilution) {
   } else { // dilution in spin space not implemented!
     if (dilution_list[dilution].type[0] == D_FULL) {
       t_end = T;
-    } else if (dilution_list[dilution].type[0] == D_INTER
-        || dilution_list[dilution].type[0] == D_BLOCK) {
+    } else if (dilution_list[dilution].type[0] == D_INTER) {
       t_end = dilution_list[dilution].size[0];
+    } else if (dilution_list[dilution].type[0] == D_BLOCK) {
+      t_end = T / dilution_list[dilution].size[0];
     } else if (dilution_list[dilution].type[0] == D_NONE) {
       t_end = 1;
     }
@@ -846,9 +847,10 @@ void create_propagators(int const conf, int const dilution) {
 
     if (dilution_list[dilution].type[2] == D_FULL) {
       l_end = no_eigenvalues;
-    } else if (dilution_list[dilution].type[2] == D_INTER
-        || dilution_list[dilution].type[2] == D_BLOCK) {
+    } else if (dilution_list[dilution].type[2] == D_INTER) {
       l_end = dilution_list[dilution].size[2];
+    } else if (dilution_list[dilution].type[2] == D_BLOCK) {
+      l_end = no_eigenvalues / dilution_list[dilution].size[2];
     } else if (dilution_list[dilution].type[2] == D_NONE) {
       l_end = 1;
     }
@@ -986,9 +988,10 @@ void create_perambulators(int const conf, int const dilution) {
   } else { // dilution in spin space not implemented!
     if (dilution_list[dilution].type[0] == D_FULL) {
       t_end = T;
-    } else if (dilution_list[dilution].type[0] == D_INTER
-        || dilution_list[dilution].type[0] == D_BLOCK) {
+    } else if (dilution_list[dilution].type[0] == D_INTER) {
       t_end = dilution_list[dilution].size[0];
+    } else if (dilution_list[dilution].type[0] == D_BLOCK) {
+      t_end = T / dilution_list[dilution].size[0];
     } else if (dilution_list[dilution].type[0] == D_NONE) {
       t_end = 1;
     } else if (dilution_list[dilution].type[0] == D_INTERBLOCK) {
@@ -1003,9 +1006,10 @@ void create_perambulators(int const conf, int const dilution) {
 
     if (dilution_list[dilution].type[2] == D_FULL) {
       l_end = no_eigenvalues;
-    } else if (dilution_list[dilution].type[2] == D_INTER
-        || dilution_list[dilution].type[2] == D_BLOCK) {
+    } else if (dilution_list[dilution].type[2] == D_INTER) {
       l_end = dilution_list[dilution].size[2];
+    } else if (dilution_list[dilution].type[2] == D_BLOCK) {
+      l_end = no_eigenvalues / dilution_list[dilution].size[2];
     } else if (dilution_list[dilution].type[2] == D_NONE) {
       l_end = 1;
     }
@@ -1220,9 +1224,10 @@ void create_stochastic_perambulators(int const conf, int const dilution) {
   } else { // dilution in spin space not implemented!
     if (dilution_list[dilution].type[0] == D_FULL) {
       t_end = T;
-    } else if (dilution_list[dilution].type[0] == D_INTER
-        || dilution_list[dilution].type[0] == D_BLOCK) {
+    } else if (dilution_list[dilution].type[0] == D_INTER) {
       t_end = dilution_list[dilution].size[0];
+    } else if (dilution_list[dilution].type[0] == D_BLOCK) {
+      t_end = T / dilution_list[dilution].size[0];
     } else if (dilution_list[dilution].type[0] == D_NONE) {
       t_end = 1;
     }
@@ -1235,9 +1240,10 @@ void create_stochastic_perambulators(int const conf, int const dilution) {
 
     if (dilution_list[dilution].type[2] == D_FULL) {
       l_end = no_eigenvalues;
-    } else if (dilution_list[dilution].type[2] == D_INTER
-        || dilution_list[dilution].type[2] == D_BLOCK) {
+    } else if (dilution_list[dilution].type[2] == D_INTER) {
       l_end = dilution_list[dilution].size[2];
+    } else if (dilution_list[dilution].type[2] == D_BLOCK) {
+      l_end = no_eigenvalues / dilution_list[dilution].size[2];
     } else if (dilution_list[dilution].type[2] == D_NONE) {
       l_end = 1;
     }
