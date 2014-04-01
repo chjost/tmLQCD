@@ -378,17 +378,17 @@ void create_source_ti_df_li(const int nr_conf, const int nr_dilution,
       status = write_spinor(writer, &dirac0, NULL, 1, 64);
       destruct_writer(writer);
 
-#if DEBUG
-      // write spinor field with entries at dirac 0
-      sprintf(filename, "%s.%04d.%02d.%02d", "source0_ascii", nr_conf, tslice,
-          vec);
-      printf("writing file %s\n", filename);
-      file = fopen(filename, "wb");
-      fwrite(dirac0, VOLUME, sizeof(spinor), file);
-      fclose(file);
-#endif
+//#if DEBUG
+//      // write spinor field with entries at dirac 0
+//      sprintf(filename, "%s.%04d.%02d.%02d", "source0_ascii", nr_conf, tslice,
+//          vec);
+//      printf("writing file %s\n", filename);
+//      file = fopen(filename, "wb");
+//      fwrite(dirac0, VOLUME, sizeof(spinor), file);
+//      fclose(file);
+//#endif
 
-      // write spinor field with entries at dirac 1
+// write spinor field with entries at dirac 1
       sprintf(filename, "%s.%04d.%02d.%02d", "source1", nr_conf, tslice, vec);
 #if DEBUG
       printf("writing file %s\n", filename);
@@ -397,17 +397,17 @@ void create_source_ti_df_li(const int nr_conf, const int nr_dilution,
       status = write_spinor(writer, &dirac1, NULL, 1, 64);
       destruct_writer(writer);
 
-#if DEBUG
-      // write spinor field with entries at dirac 0
-      sprintf(filename, "%s.%04d.%02d.%02d", "source1_ascii", nr_conf, tslice,
-          vec);
-      printf("writing file %s\n", filename);
-      file = fopen(filename, "wb");
-      fwrite(dirac1, VOLUME, sizeof(spinor), file);
-      fclose(file);
-#endif
+//#if DEBUG
+//      // write spinor field with entries at dirac 0
+//      sprintf(filename, "%s.%04d.%02d.%02d", "source1_ascii", nr_conf, tslice,
+//          vec);
+//      printf("writing file %s\n", filename);
+//      file = fopen(filename, "wb");
+//      fwrite(dirac1, VOLUME, sizeof(spinor), file);
+//      fclose(file);
+//#endif
 
-      // write spinor field with entries at dirac 2
+// write spinor field with entries at dirac 2
       sprintf(filename, "%s.%04d.%02d.%02d", "source2", nr_conf, tslice, vec);
 #if DEBUG
       printf("writing file %s\n", filename);
@@ -416,17 +416,17 @@ void create_source_ti_df_li(const int nr_conf, const int nr_dilution,
       status = write_spinor(writer, &dirac2, NULL, 1, 64);
       destruct_writer(writer);
 
-#if DEBUG
-      // write spinor field with entries at dirac 0
-      sprintf(filename, "%s.%04d.%02d.%02d", "source2_ascii", nr_conf, tslice,
-          vec);
-      printf("writing file %s\n", filename);
-      file = fopen(filename, "wb");
-      fwrite(dirac2, VOLUME, sizeof(spinor), file);
-      fclose(file);
-#endif
+//#if DEBUG
+//      // write spinor field with entries at dirac 0
+//      sprintf(filename, "%s.%04d.%02d.%02d", "source2_ascii", nr_conf, tslice,
+//          vec);
+//      printf("writing file %s\n", filename);
+//      file = fopen(filename, "wb");
+//      fwrite(dirac2, VOLUME, sizeof(spinor), file);
+//      fclose(file);
+//#endif
 
-      // write spinor field with entries at dirac 3
+// write spinor field with entries at dirac 3
       sprintf(filename, "%s.%04d.%02d.%02d", "source3", nr_conf, tslice, vec);
 #if DEBUG
       printf("writing file %s\n", filename);
@@ -435,15 +435,15 @@ void create_source_ti_df_li(const int nr_conf, const int nr_dilution,
       status = write_spinor(writer, &dirac3, NULL, 1, 64);
       destruct_writer(writer);
 
-#if DEBUG
-      // write spinor field with entries at dirac 0
-      sprintf(filename, "%s.%04d.%02d.%02d", "source3_ascii", nr_conf, tslice,
-          vec);
-      printf("writing file %s\n", filename);
-      file = fopen(filename, "wb");
-      fwrite(dirac3, VOLUME, sizeof(spinor), file);
-      fclose(file);
-#endif
+//#if DEBUG
+//      // write spinor field with entries at dirac 0
+//      sprintf(filename, "%s.%04d.%02d.%02d", "source3_ascii", nr_conf, tslice,
+//          vec);
+//      printf("writing file %s\n", filename);
+//      file = fopen(filename, "wb");
+//      fwrite(dirac3, VOLUME, sizeof(spinor), file);
+//      fclose(file);
+//#endif
     }
   }
   free(eigenvector);
@@ -777,7 +777,7 @@ void create_source_tb_df_li(const int nr_conf, const int nr_dilution,
 #else
           read_su3_vector(eigenvector, filename, 0, t, 1);
 #endif
-          index = t * no_eigenvalues * 4 + vec * 4;
+          index = t * no_eigenvalues * 4 + v * 4;
           for (point = 0; point < SPACEVOLUME; point++) {
             _vector_add_mul( dirac0[SPACEVOLUME*t + point].s0,
                 rnd_vector[index+0], eigenvector[point]);
@@ -800,17 +800,17 @@ void create_source_tb_df_li(const int nr_conf, const int nr_dilution,
       status = write_spinor(writer, &dirac0, NULL, 1, 64);
       destruct_writer(writer);
 
-#if DEBUG
-      // write spinor field with entries at dirac 0
-      sprintf(filename, "%s.%04d.%02d.%02d", "source0_ascii", nr_conf, tslice,
-          vec);
-      printf("writing file %s\n", filename);
-      file = fopen(filename, "wb");
-      fwrite(dirac0, VOLUME, sizeof(spinor), file);
-      fclose(file);
-#endif
+//#if DEBUG
+//      // write spinor field with entries at dirac 0
+//      sprintf(filename, "%s.%04d.%02d.%02d", "source0_ascii", nr_conf, tslice,
+//          vec);
+//      printf("writing file %s\n", filename);
+//      file = fopen(filename, "wb");
+//      fwrite(dirac0, VOLUME, sizeof(spinor), file);
+//      fclose(file);
+//#endif
 
-      // write spinor field with entries at dirac 1
+// write spinor field with entries at dirac 1
       sprintf(filename, "%s.%04d.%02d.%02d", "source1", nr_conf, tslice, vec);
 #if DEBUG
       printf("writing file %s\n", filename);
@@ -819,17 +819,17 @@ void create_source_tb_df_li(const int nr_conf, const int nr_dilution,
       status = write_spinor(writer, &dirac1, NULL, 1, 64);
       destruct_writer(writer);
 
-#if DEBUG
-      // write spinor field with entries at dirac 0
-      sprintf(filename, "%s.%04d.%02d.%02d", "source1_ascii", nr_conf, tslice,
-          vec);
-      printf("writing file %s\n", filename);
-      file = fopen(filename, "wb");
-      fwrite(dirac1, VOLUME, sizeof(spinor), file);
-      fclose(file);
-#endif
+//#if DEBUG
+//      // write spinor field with entries at dirac 0
+//      sprintf(filename, "%s.%04d.%02d.%02d", "source1_ascii", nr_conf, tslice,
+//          vec);
+//      printf("writing file %s\n", filename);
+//      file = fopen(filename, "wb");
+//      fwrite(dirac1, VOLUME, sizeof(spinor), file);
+//      fclose(file);
+//#endif
 
-      // write spinor field with entries at dirac 2
+// write spinor field with entries at dirac 2
       sprintf(filename, "%s.%04d.%02d.%02d", "source2", nr_conf, tslice, vec);
 #if DEBUG
       printf("writing file %s\n", filename);
@@ -838,17 +838,17 @@ void create_source_tb_df_li(const int nr_conf, const int nr_dilution,
       status = write_spinor(writer, &dirac2, NULL, 1, 64);
       destruct_writer(writer);
 
-#if DEBUG
-      // write spinor field with entries at dirac 0
-      sprintf(filename, "%s.%04d.%02d.%02d", "source2_ascii", nr_conf, tslice,
-          vec);
-      printf("writing file %s\n", filename);
-      file = fopen(filename, "wb");
-      fwrite(dirac2, VOLUME, sizeof(spinor), file);
-      fclose(file);
-#endif
+//#if DEBUG
+//      // write spinor field with entries at dirac 0
+//      sprintf(filename, "%s.%04d.%02d.%02d", "source2_ascii", nr_conf, tslice,
+//          vec);
+//      printf("writing file %s\n", filename);
+//      file = fopen(filename, "wb");
+//      fwrite(dirac2, VOLUME, sizeof(spinor), file);
+//      fclose(file);
+//#endif
 
-      // write spinor field with entries at dirac 3
+// write spinor field with entries at dirac 3
       sprintf(filename, "%s.%04d.%02d.%02d", "source3", nr_conf, tslice, vec);
 #if DEBUG
       printf("writing file %s\n", filename);
@@ -857,15 +857,15 @@ void create_source_tb_df_li(const int nr_conf, const int nr_dilution,
       status = write_spinor(writer, &dirac3, NULL, 1, 64);
       destruct_writer(writer);
 
-#if DEBUG
-      // write spinor field with entries at dirac 0
-      sprintf(filename, "%s.%04d.%02d.%02d", "source3_ascii", nr_conf, tslice,
-          vec);
-      printf("writing file %s\n", filename);
-      file = fopen(filename, "wb");
-      fwrite(dirac3, VOLUME, sizeof(spinor), file);
-      fclose(file);
-#endif
+//#if DEBUG
+//      // write spinor field with entries at dirac 0
+//      sprintf(filename, "%s.%04d.%02d.%02d", "source3_ascii", nr_conf, tslice,
+//          vec);
+//      printf("writing file %s\n", filename);
+//      file = fopen(filename, "wb");
+//      fwrite(dirac3, VOLUME, sizeof(spinor), file);
+//      fclose(file);
+//#endif
     }
   }
   free(eigenvector);
@@ -1010,7 +1010,7 @@ void create_source_tb_df_lb(const int nr_conf, const int nr_dilution,
 #else
           read_su3_vector(eigenvector, filename, 0, t, 1);
 #endif
-          index = t * no_eigenvalues * 4 + vec * 4;
+          index = t * no_eigenvalues * 4 + v * 4;
           for (point = 0; point < SPACEVOLUME; point++) {
             _vector_add_mul( dirac0[SPACEVOLUME*t + point].s0,
                 rnd_vector[index+0], eigenvector[point]);
@@ -1174,15 +1174,15 @@ void create_source_ti_dn_li(const int nr_conf, const int nr_dilution,
       construct_writer(&writer, filename, 0);
       status = write_spinor(writer, &dirac0, NULL, 1, 64);
       destruct_writer(writer);
-#if DEBUG
-      // write spinor field with entries at dirac 0
-      sprintf(filename, "%s.%04d.%02d.%02d", "source0_ascii", nr_conf, tslice,
-          vec);
-      printf("writing file %s\n", filename);
-      file = fopen(filename, "wb");
-      fwrite(dirac0, VOLUME, sizeof(spinor), file);
-      fclose(file);
-#endif
+//#if DEBUG
+//      // write spinor field with entries at dirac 0
+//      sprintf(filename, "%s.%04d.%02d.%02d", "source0_ascii", nr_conf, tslice,
+//          vec);
+//      printf("writing file %s\n", filename);
+//      file = fopen(filename, "wb");
+//      fwrite(dirac0, VOLUME, sizeof(spinor), file);
+//      fclose(file);
+//#endif
     }
   }
   free(eigenvector);
@@ -1368,7 +1368,7 @@ void create_source_tb_dn_li(const int nr_conf, const int nr_dilution,
   dirac0 = tmp;
 #endif
 
-  for (tslice = 0; tslice < ts; tslice++) {
+  for (tslice = 0; tslice < (T / ts); tslice++) {
     for (vec = 0; vec < vs; vec++) {
       zero_spinor_field(dirac0, VOLUMEPLUSRAND);
 
@@ -1391,7 +1391,7 @@ void create_source_tb_dn_li(const int nr_conf, const int nr_dilution,
 #else
           read_su3_vector(eigenvector, filename, 0, t, 1);
 #endif
-          index = t * no_eigenvalues * 4 + vec * 4;
+          index = t * no_eigenvalues * 4 + v * 4;
           for (point = 0; point < SPACEVOLUME; point++) {
             _vector_add_mul( dirac0[SPACEVOLUME*t + point].s0,
                 rnd_vector[index+0], eigenvector[point]);
@@ -1483,8 +1483,8 @@ void create_source_tb_dn_lb(const int nr_conf, const int nr_dilution,
   dirac0 = tmp;
 #endif
 
-  for (tslice = 0; tslice < ts; tslice++) {
-    for (vec = 0; vec < vs; vec++) {
+  for (tslice = 0; tslice < (T / ts); tslice++) {
+    for (vec = 0; vec < (no_eigenvalues / vs); vec++) {
       zero_spinor_field(dirac0, VOLUMEPLUSRAND);
 
       for (t = tslice * ts; t < (tslice + 1) * ts; t++) {
@@ -1506,7 +1506,7 @@ void create_source_tb_dn_lb(const int nr_conf, const int nr_dilution,
 #else
           read_su3_vector(eigenvector, filename, 0, t, 1);
 #endif
-          index = t * no_eigenvalues * 4 + vec * 4;
+          index = t * no_eigenvalues * 4 + v * 4;
           for (point = 0; point < SPACEVOLUME; point++) {
             _vector_add_mul( dirac0[SPACEVOLUME*t + point].s0,
                 rnd_vector[index+0], eigenvector[point]);

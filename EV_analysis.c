@@ -65,7 +65,7 @@
 #define SMEAR_COEFF1 0.76f // should be smaller than 1
 #define SMEAR_COEFF2 0.95f // should be smaller than 1
 #define INVERTER "./invert"
-#define EIGENSYSTEMPATH "./"
+#define EIGENSYSTEMPATH "../"
 #define REMOVESOURCES 0 // remove all output except for the perambulators
 #define _vector_one(r) \
   (r).c0 = 1. + 0.*I;\
