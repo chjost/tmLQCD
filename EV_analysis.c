@@ -65,7 +65,7 @@
 #define SMEAR_COEFF1 0.76f // should be smaller than 1
 #define SMEAR_COEFF2 0.95f // should be smaller than 1
 #define INVERTER "./invert"
-#define EIGENSYSTEMPATH "../"
+#define EIGENSYSTEMPATH "./"
 #define REMOVESOURCES 0 // remove all output except for the perambulators
 #define _vector_one(r) \
   (r).c0 = 1. + 0.*I;\
@@ -251,6 +251,12 @@ int main(int argc, char* argv[]) {
   init_operators();
   g_stochastical_run = 1;
 
+// test case for 4^4
+//  add_dilution(D_FULL, D_FULL, D_FULL, 0, 0, 0, 1337, D_UP, D_STOCH);
+//  add_dilution(D_NONE, D_NONE, D_NONE, 0, 0, 0, 1337, D_UP, D_STOCH);
+//  add_dilution(D_FULL, D_FULL, D_INTER, 0, 0, 4, 1337, D_UP, D_STOCH);
+  add_dilution(D_BLOCK, D_FULL, D_INTER, 2, 0, 4, 1337, D_UP, D_STOCH);
+
 // up quarks
 //  add_dilution(D_FULL, D_FULL, D_INTER, 0, 0, 8, 3771, D_UP, D_STOCH);
 //  add_dilution(D_FULL, D_FULL, D_INTER, 0, 0, 8, 989898, D_UP, D_STOCH);
@@ -260,7 +266,7 @@ int main(int argc, char* argv[]) {
 //  add_dilution(D_INTER, D_FULL, D_INTER, 16, 0, 4, 834234, D_UP, D_STOCH);
 //  add_dilution(D_BLOCK, D_FULL, D_INTER, 6, 0, 8, 48186, D_UP, D_STOCH);
 //  add_dilution(D_BLOCK, D_FULL, D_INTER, 6, 0, 8, 23071, D_UP, D_STOCH);
-  add_dilution(D_BLOCK, D_FULL, D_INTER, 2, 0, 4, 27573, D_UP, D_STOCH);
+//  add_dilution(D_BLOCK, D_FULL, D_INTER, 2, 0, 4, 27573, D_UP, D_STOCH);
 //  add_dilution(D_BLOCK, D_FULL, D_INTER, 2, 0, 4, 19812, D_UP, D_STOCH);
 //  add_dilution(D_BLOCK, D_FULL, D_INTER, 2, 0, 4, 12776, D_UP, D_STOCH);
 //  add_dilution(D_BLOCK, D_FULL, D_INTER, 3, 0, 4, 20801, D_UP, D_STOCH);
@@ -357,18 +363,18 @@ int main(int argc, char* argv[]) {
 
   // main loop
   for (conf = nstore; conf < nstore + Nmeas; conf += Nsave) {
-    printf("2KappaMu = %e", g_mu);
-    printf("\n# Generating eigensystem for conf %d\n", conf);
-    fflush(stdout);
-    generate_eigensystem(conf);
+//    printf("2KappaMu = %e", g_mu);
+//    printf("\n# Generating eigensystem for conf %d\n", conf);
+//    fflush(stdout);
+//    generate_eigensystem(conf);
 
     if (g_stochastical_run != 0) {
       for (j = 0; j < no_dilution; j++) {
         //generate the sources
-//        printf("\n# generating sources (%d of %d)\n", j + 1, no_dilution);
-//        fflush(stdout);
-//        start_ranlux(1, dilution_list[j].seed ^ conf);
-//        create_invert_sources(conf, j);
+        printf("\n# generating sources (%d of %d)\n", j + 1, no_dilution);
+        fflush(stdout);
+        start_ranlux(1, dilution_list[j].seed ^ conf);
+        create_invert_sources(conf, j);
 
 // construct the perambulators
 //        printf("\n# constructing perambulators (%d of %d)\n", j + 1,
@@ -1146,11 +1152,17 @@ void create_perambulators(int const conf, int const dilution) {
           read_spinor(even, odd, invertedfile, 0);
           convert_eo_to_lexic(inverted, even, odd);
 
+          sprintf(invertedfile, "source%d_ascii.%04d.%02d.%02d.inverted",
+              dsource, conf, tsource, lsource);
+          file = fopen(invertedfile, "wb");
+          fwrite(inverted, VOLUME, sizeof(spinor), file);
+          fclose(file);
+
+          // helper variables
+          int xhelp = tsource * d_end * l_end + lsource * d_end + dsource;
           // multiply propagator with eigenvectors
           for (tsink = 0; tsink < T; tsink++) {
             for (lsink = 0; lsink < no_eigenvalues; lsink++) {
-              // helper variables
-              int xhelp = tsource * d_end * l_end + lsource * d_end + dsource;
               // no explicit dirac index in y diraction,
               // that is done implicit in the multiplication
               int yhelp = tsink * 4 * no_eigenvalues + lsink * 4;
